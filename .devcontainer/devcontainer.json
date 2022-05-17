@@ -1,14 +1,10 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
 // https://github.com/microsoft/vscode-dev-containers/tree/v0.183.0/containers/r
 {
-	"name": "eval-germany-sp-nowcasting",
-	"image": "ghcr.io/epiforecasts/eval-germany-sp-nowcasting:main",
-	"workspaceFolder": "/eval-germany-sp-nowcasting",
+	"name": "simplified-forecaster-evaluation",
+	"image": "ghcr.io/epiforecasts/simplified-forecaster-evaluation:main",
+	"workspaceFolder": "/simplified-forecaster-evaluation",
 	"shutdownAction": "none",
-	// To use a volume, use the following syntax (then clone your code):
-	//"workspaceMount": "source=eval-germany-sp-nowcasting,target=/eval-germany-sp-nowcasting,type=volume"
-	// To bind mount a volume, use the following syntax:
-	 "workspaceMount": "source=/home/epiforecasts/eval-germany-sp-nowcasting,target=/eval-germany-sp-nowcasting,type=bind,consistency=cached",
 	// Set *default* container specific settings.json values on container create.
 	"settings": {
 		"r.rterm.linux": "/usr/local/bin/radian",
@@ -32,9 +28,6 @@
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
-
-	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "Rscript -e 'cmdstanr::set_cmdstan_path(); precommit::use_precommit()'",
 
 	// Uncomment to use Docker from inside the container. See https://aka.ms/vscode-remote/samples/docker-from-docker.
 	// "mounts": [ "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind" ],
