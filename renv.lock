@@ -1,6 +1,6 @@
 {
   "R": {
-    "Version": "4.1.2",
+    "Version": "4.2.0",
     "Repositories": [
       {
         "Name": "CRAN",
@@ -189,13 +189,6 @@
       "Repository": "CRAN",
       "Hash": "36b67b5adf57b292923f5659f5f0c853"
     },
-    "desc": {
-      "Package": "desc",
-      "Version": "1.4.1",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "eebd27ee58fcc58714eedb7aa07d8ad1"
-    },
     "digest": {
       "Package": "digest",
       "Version": "0.6.29",
@@ -256,8 +249,8 @@
       "Package": "forecast.vocs",
       "Version": "0.0.9.7000",
       "Source": "GitHub",
-      "Remotes": "stan-dev/cmdstanr",
       "RemoteType": "github",
+      "Remotes": "stan-dev/cmdstanr",
       "RemoteHost": "api.github.com",
       "RemoteRepo": "forecast.vocs",
       "RemoteUsername": "epiforecasts",
@@ -421,10 +414,10 @@
     },
     "knitr": {
       "Package": "knitr",
-      "Version": "1.38",
+      "Version": "1.39",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "10b3dc3c6acb925910edda5d0543b3a2"
+      "Hash": "029ab7c4badd3cf8af69016b2ba27493"
     },
     "labeling": {
       "Package": "labeling",
@@ -524,10 +517,10 @@
     },
     "openssl": {
       "Package": "openssl",
-      "Version": "2.0.0",
+      "Version": "2.0.1",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "cf4329aac12c2c44089974559c18e446"
+      "Hash": "edde731e84cf3d42aa9b7f04b8de5941"
     },
     "parallelly": {
       "Package": "parallelly",
@@ -648,13 +641,6 @@
       "Repository": "CRAN",
       "Hash": "61f94b51fc49feea6637bb09e7ac81f3"
     },
-    "rticles": {
-      "Package": "rticles",
-      "Version": "0.23",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "4cab3463b39137d4dd113b751cb2805d"
-    },
     "sass": {
       "Package": "sass",
       "Version": "0.4.1",
@@ -748,10 +734,10 @@
     },
     "xfun": {
       "Package": "xfun",
-      "Version": "0.30",
+      "Version": "0.31",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "e83f48136b041845e50a6658feffb197"
+      "Hash": "a318c6f752b8dcfe9fb74d897418ab2b"
     },
     "yaml": {
       "Package": "yaml",

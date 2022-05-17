@@ -1,5 +1,5 @@
 # R version: latest, ... ,4.0.1 , 4.0.0
-ARG VARIANT="latest"
+ARG VARIANT=4.2.0
 FROM rocker/r-ver:${VARIANT}
 
 # Use the [Option] comment to specify true/false arguments that should appear in VS Code UX
@@ -44,10 +44,10 @@ RUN apt-get update \
             pandoc-citeproc tmux
 
 # make workspace directory
-RUN mkdir -p /simplified-forecaster-evaluation
-RUN chmod -R ugo+rw /simplified-forecaster-evaluation
+RUN mkdir -p /workspaces/simplified-forecaster-evaluation
+RUN chmod -R ugo+rw /workspaces/simplified-forecaster-evaluation
 
 # install dependencies
-WORKDIR /simplified-forecaster-evaluation
+WORKDIR /workspaces/simplified-forecaster-evaluation
 COPY renv.lock renv.lock
 RUN R -e 'renv::restore()'
