@@ -1,0 +1,3 @@
+[submodule "ecdc-weekly-growth-forecasts"]
+	path = ecdc-weekly-growth-forecasts
+	url = https://github.com/seabbs/ecdc-weekly-growth-forecasts.git

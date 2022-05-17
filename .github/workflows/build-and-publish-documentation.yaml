@@ -32,27 +32,12 @@ jobs:
 
       - name: Render project summary
         run: |
-          rmarkdown::render("docs/summary/index.Rmd", output_dir = "docs")
-        shell: Rscript {0}
-
-      - name: Render evaluation report
-        run: |
-          rmarkdown::render("docs/real-time/index.Rmd")
-        shell: Rscript {0}
-
-      - name: Render method evaluation report
-        run: |
-          rmarkdown::render("docs/real-time-method-comparison/index.Rmd")
+          rmarkdown::render("docs/index.Rmd", output_dir = "docs")
         shell: Rscript {0}
  
       - name: Render paper
         run: |
-          rmarkdown::render("writeup/paper.Rmd", output_dir = "docs")
-        shell: Rscript {0}
-
-      - name: Render SI
-        run: |
-          rmarkdown::render("writeup/si.Rmd", output_dir = "docs")
+          rmarkdown::render("docs/paper.Rmd", output_dir = "docs")
         shell: Rscript {0}
 
       - name: Upload documentation
@@ -63,7 +48,7 @@ jobs:
           path: docs
 
   publish-documentation:
-    if: github.ref == 'refs/heads/main' && github.repository == 'epiforecasts/eval-germany-sp-nowcasting'
+    if: github.ref == 'refs/heads/main' && github.repository == 'epiforecasts/simplfied-forecaster-evaluation'
     needs: render-documentation
     runs-on: macOS-latest
     env:
