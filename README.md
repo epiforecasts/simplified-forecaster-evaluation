@@ -1,5 +1,5 @@
 
-# Evaluating Semi-Parametric Nowcasts of COVID-19 Hospital Admissions in Germany
+# Evaluating a simplified forecast model in comparison to the ECDC forecasting hub ensemble
 
 This repository contains the documentation, results, and code of a
 project evaluating … See the documentation for further details.
