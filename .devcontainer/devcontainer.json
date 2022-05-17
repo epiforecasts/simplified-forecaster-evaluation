@@ -3,7 +3,6 @@
 {
 	"name": "simplified-forecaster-evaluation",
 	"image": "ghcr.io/epiforecasts/simplified-forecaster-evaluation:main",
-	"workspaceFolder": "/simplified-forecaster-evaluation",
 	"shutdownAction": "none",
 	// Set *default* container specific settings.json values on container create.
 	"settings": {
@@ -17,13 +16,13 @@
 
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
-		"ikuyadeu.r",
 		"tomoki1207.pdf",
 		"ivan-bocharov.stan-vscode",
 		"github.vscode-pull-request-github",
 		"formulahendry.code-runner",
 		"mutantdino.resourcemonitor",
-		"searking.preview-vscode"
+		"searking.preview-vscode",
+		"REditorSupport.r"
 	],
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
