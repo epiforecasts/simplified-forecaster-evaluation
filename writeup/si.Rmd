@@ -1,0 +1,52 @@
+---
+title: "Evaluating Semi-Parametric Nowcasts of COVID-19 Hospital Admissions in Germany"
+subtitle: "Supplementary Information"
+output:
+  html_document:
+    theme: cosmo
+    toc: true
+    toc_float: true
+    toc_depth: 4
+    includes:
+      before_body: ../docs/header.html
+      after_body: ../docs/footer.html
+date: "`r format(Sys.Date(), format = '%B %d, %Y')`"
+bibliography: library.bib
+csl: https://raw.githubusercontent.com/citation-style-language/styles/master/apa-numeric-superscript-brackets.csl
+header-includes:
+   - \usepackage{float}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE, eval = TRUE,
+  fig.width = 9, fig.height = 9,
+  dpi = 320,
+  fig.path = "figures/"
+)
+```
+
+## Authors
+
+S. Abbott (1), S. Funk (1)
+
+Correspondence to: sam.abbott@lshtm.ac.uk
+
+## Affiliations
+
+1. Center for the Mathematical Modelling of Infectious Diseases, London School of Hygiene & Tropical Medicine, London WC1E 7HT, United Kingdom
+
+## Overview
+
+This analysis uses the `targets` package for reproducibility. The full analysis structure can be seen below:
+
+```{r, message = FALSE, eval = FALSE}
+library(targets)
+tar_glimpse()
+```
+
+![](../figures/targets-graph.png)
+
+## References
+
+<div id = 'refs'></div>

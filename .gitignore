@@ -1,0 +1,17 @@
+*.xlsx
+*.rds
+*.tex
+*.log
+_targets
+*.html
+.DS_Store
+data/epinowcast
+*.png
+*.pdf
+*.zip
+nohup.out
+!docs/footer.html
+!docs/header.html
+!figures/targets-graph.png
+.cache
+data/COVID-19_hospitalizations_preprocessed.csv

@@ -1,0 +1,328 @@
+---
+title: "Evaluating Semi-Parametric Nowcasts of COVID-19 Hospital Admissions in Germany"
+subtitle: "Real-time evaluation and current nowcasts"
+author: Sam Abbott 
+bibliography: ../../writeup/library.bib
+csl: https://raw.githubusercontent.com/citation-style-language/styles/master/apa-numeric-superscript-brackets.csl
+date: "`r format(Sys.Date(), format = '%B %d, %Y')`"
+output:
+  html_document:
+    theme: cosmo
+    toc: true
+    toc_float: true
+    toc_depth: 4
+    includes:
+      before_body: ../header.html
+      after_body: ../footer.html
+---
+
+```{r setup, echo = FALSE, cache = FALSE, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, dpi = 300, warning = FALSE)
+library(knitr)
+library(here)
+library(data.table)
+library(DT)
+library(janitor)
+library(purrr)
+library(ggplot2)
+
+source(here("R", "utils.R"))
+source(here("R", "plot.R"))
+```
+
+# Introduction
+
+In this real time evaluation report we provide preliminary visualisations, evaluation, and exploration of our nowcasting methodology [@epinowcast] for COVID-19 hospitalisations in Germany by date of postive test. For more details of our methodology and the specifics of the models shown in this report please see our [project summary](https://epiforecasts.io/eval-germany-sp-nowcasting/) and our accompanying [paper](https://epiforecasts.io/eval-germany-sp-nowcasting/paper.pdf) for full method details. This report is updated each day (at roughly 9:00 GMT) as new data and nowcasts become available and may evolve over time. See our [news section](https://github.com/epiforecasts/eval-germany-sp-nowcasting/blob/main/NEWS.md) for a list of dated changes.
+
+We first visualise current nowcasts across models and age groups at the national level as well as overall at the subnational level. We also plot nowcasts at the date of estimation across sequential nowcasts allowing us to summarise the performance of multiple nowcasts on a single plot, again for age groups at the national level and overall at the subnational level. 
+
+To quantify comparative performance we make use of proper scoring rules [@scoringutils] on both the natural and log scales (corresponding to absolute and relative performance) to observed data reported at least 28 days ago aggregating scores first across all targets and then stratifying in turn by age group, nowcast horizon, date of postive test, and date of report. See Bosse et al. [@scoringutils] for information on how to interpret these scores.
+
+To explore other aspects of our models performance we highlight models that have problematic fitting diagnostics and summarise the estimation time for each model. To learn more about the model fitting diagnostics we use here see [@stan] and [@cmdstanr].
+
+The code for this report can be found [here](https://github.com/epiforecasts/eval-germany-sp-nowcasting/blob/main/docs/real-time/index.Rmd) and the data that it uses can be found [here](https://github.com/epiforecasts/eval-germany-sp-nowcasting/tree/main/data).
+
+# Visualisation
+
+In the following sections nowcasts are visualised for the latest estimation date and then by estimation date for all models considered. Visualising a nowcast from a single estimation date corresponds to plotting a real-time nowcast whilst plotting across estimation dates for that date is useful for understanding the performance of nowcasting models across a number of nowcasts in a concise way. 
+
+## Nowcasts
+
+Nowcasts based on the latest available data by age group on the national level and overall on the subnational level.
+
+```{r load-nowcasts}
+daily_nowcasts <- load_nowcasts(here("data", "nowcasts", "daily"))
+daily_nowcasts[, mean := NA][, median := NA]
+
+seven_day_nowcasts <- load_nowcasts(here("data", "nowcasts", "seven_day"))
+
+latest_hosp <- load_obs(here("data", "observations", "daily.csv"))
+latest_seven_day_hosp <- load_obs(here("data", "observations", "seven_day.csv"))
+```
+
+### National
+
+```{r latest-national-nowcast, fig.width = 32, fig.height = 16}
+plot_nowcast(
+  daily_nowcasts[location == "DE"][
+                 nowcast_date == max(nowcast_date)][,
+                 confirm := NA],
+  latest_hosp[location == "DE"],
+  max_delay = 28
+) +
+  facet_grid(vars(age_group), vars(model), scales = "free_y")
+```
+
+### Sub-national
+
+```{r latest-subnational-nowcast, fig.width = 16, fig.height = 16}
+plot_nowcast(
+  daily_nowcasts[!(location == "DE")][
+                 nowcast_date == max(nowcast_date)][,
+                 confirm := NA],
+  latest_hosp[!(location == "DE")][age_group == "00+"],
+  max_delay = 28
+) +
+  facet_wrap(vars(location), scales = "free_y")
+```
+
+## Nowcasts at estimation date
+
+Nowcast estimates at the date of estimation for sequential nowcasts by age group at the national level and overall at the subnational level.
+
+### National
+
+```{r horizon-national-nowcast, fig.width = 30, fig.height = 16}
+plot_nowcast(
+  daily_nowcasts[location == "DE"][
+                 horizon == 0][,
+                 confirm := NA],
+  latest_hosp[location == "DE"]
+) +
+  facet_grid(vars(age_group), vars(model), scales = "free_y")
+```
+
+### Subnational
+
+```{r horizon-subnational-nowcast, fig.width = 16, fig.height = 16}
+plot_nowcast(
+  daily_nowcasts[!(location == "DE")][
+                 horizon == 0][,
+                 confirm := NA],
+  latest_hosp[!(location == "DE")][age_group == "00+"]
+) +
+  facet_wrap(vars(location), scales = "free_y")
+```
+
+# Evaluation
+
+In this section we evaluate and compare the performance of each nowcasting model using proper scoring rules [@scoringutils] on both the natural and the log scale to observed data reported at least 28 days ago. This corresponds to evaluating absolute and relative error. Only nowcasts from the national level are considered as sub-national nowcasts are not available for all models. For evaluation we consider only forecast targets for which the data is minimally informative which we defined as the 7 days prior to the date of the nowcast. We explore overall scores as well as scores stratified by age group, by nowcast horizon, and by date of postive test, and by report date.
+
+## Overall nowcast model scores
+
+```{r load-overall-scores}
+scores <- load_diagnostics(here("data/scores/overall.csv"))
+```
+
+```{r plot-overall-scores, fig.height = 4, fig.width = 8}
+plot_scores(
+  scores, y = interval_score, x = model, col = model,
+  fill = model, group = model
+) +
+  facet_wrap(vars(scale), scales = "free_x") +
+  labs(x = "Model") +
+  theme(legend.position = "none") +
+  coord_flip()
+```
+
+### Natural scale scores (absolute)
+
+```{r overall-scores}
+fancy_datatable(scores[scale == "natural"][, scale := NULL])
+```
+
+### Log scale scores (relative)
+
+```{r relative-overall-scores}
+fancy_datatable(scores[scale == "log"][, scale := NULL])
+```
+
+## Nowcast model scores by horizon
+
+```{r load-horizon-scores}
+horizon_scores <- load_diagnostics(here("data/scores/horizon.csv"))
+```
+
+```{r plot-horizon, fig.height = 4, fig.width = 8}
+plot_scores(
+  horizon_scores, y = interval_score, x = horizon, col = model, fill = model,
+  group = model
+) +
+  facet_wrap(vars(scale), scales = "free_y") +
+  labs(x = "Nowcast horizon (with 0 being the date of nowcast)")
+```
+
+### Natural scale scores (absolute)
+
+```{r horizon-scores}
+fancy_datatable(horizon_scores[scale == "natural"][, scale := NULL])
+```
+
+### Log scale scores (relative)
+
+```{r relative-horizon-scores}
+fancy_datatable(horizon_scores[scale == "log"][, scale := NULL])
+```
+
+## Nowcast model scores by age group
+
+```{r load-age-group-scores}
+age_group_scores <- load_diagnostics(here("data/scores/age_group.csv"))
+```
+
+```{r plot-age-group, fig.height = 4, fig.width = 8}
+plot_scores(
+  age_group_scores, y = interval_score, x = age_group, col = model,
+  fill = model, group = model
+) +
+  facet_wrap(vars(scale), scales = "free_y") +
+  labs(x = "Age group")
+```
+
+### Natural scale scores (absolute)
+
+```{r age-group-scores}
+fancy_datatable(age_group_scores[scale == "natural"][, scale := NULL])
+```
+
+### Log scale scores (relative)
+
+```{r relative-age-group-scores}
+fancy_datatable(age_group_scores[scale == "log"][, scale := NULL])
+```
+
+## Nowcast model scores by date of positive test
+
+```{r load-ref-date-scores}
+reference_date_scores <- load_diagnostics(
+  here("data/scores/reference_date.csv")
+)
+```
+
+```{r plot-ref-date, fig.height = 8, fig.width = 8}
+plot_scores(
+  reference_date_scores, y = interval_score, x = reference_date, col = model,
+  fill = model, group = model
+) +
+  facet_wrap(vars(scale), scales = "free_y") +
+  labs(x = "Reference date")
+```
+
+### Natural scale scores (absolute)
+
+```{r ref-date-scores}
+fancy_datatable(reference_date_scores[scale == "natural"][, scale := NULL])
+```
+
+### Log scale scores (relative)
+
+```{r relative-ref-date-scores}
+fancy_datatable(reference_date_scores[scale == "log"][, scale := NULL])
+```
+
+## Nowcast model scores by report date
+
+```{r load-rep-date-scores}
+report_date_scores <- load_diagnostics(here("data/scores/nowcast_date.csv"))
+```
+
+
+```{r plot-rep-date, fig.height = 8, fig.width = 8}
+plot_scores(
+  report_date_scores, y = interval_score, x = nowcast_date, col = model,
+  fill = model, group = model
+) +
+  facet_wrap(vars(scale), scales = "free_y") +
+  labs(x = "Report date")
+```
+
+
+### Natural scale scores (absolute)
+
+```{r rep-date-scores}
+fancy_datatable(report_date_scores[scale == "natural"][, scale := NULL])
+```
+
+### Log scale scores (relative)
+
+```{r relative-rep-date-scores}
+fancy_datatable(report_date_scores[scale == "log"][, scale := NULL])
+```
+
+
+# Diagnostics
+
+This section summarises model fitting diagnostics. Whilst most model fits successfully a small subset have issues for as yet unidentified reasons. These issues can be split into issues with convergence and issues with exploring the posterior distribution (often leading to unreliable posterior samples). Resolving these issues is an area of [active research](https://github.com/epiforecasts/epinowcast/issues/22). In a smaller subset of cases model fitting may faily entirely. In this instance a nowcast using the default model from `epinowcast` (a fixed lognormal delay) is used and a flag is raised indicating this has happened. These instances are also summarised below. Finally, model run-time is also summarised for national level nowcasts.
+
+## Convergence issues
+
+```{r rhat}
+rhat <- load_diagnostics(here("data/diagnostics/high-rhat.csv"))
+fancy_datatable(rhat)
+```
+
+## Divergent transitions
+
+```{r dts}
+dts <- load_diagnostics(here("data/diagnostics/high-divergent-transitions.csv"))
+fancy_datatable(dts)
+```
+
+## Fitting failures
+
+```{r failures}
+failures <- load_diagnostics(here("data/diagnostics/fitting-failed.csv"))
+fancy_datatable(failures)
+```
+
+## Run time
+
+In this section, we summarise the run time of each nowcasting model using 2 cores each on a standard Azure virtual machine. These run-times are indicative only but the relative difference between models should hold across machines. To make the independent model run times comparable with other models we have combined the run time across all age groups. However, this model is naively parallel and so could in theory be run on separate compute nodes per age group (so as we have 7 age groups this would result in a 7 times speed up). As all models make use of the support in `stan` for within chain parallisation all models could also be estimated with significantly reduced run time with the allocation of increased compute resources. Run times are shown in minutes. Note that there is sometimes competition for resources on the server where these estimates are run and this can lead to extended run times for all models.
+
+```{r run-time}
+run_times <- load_diagnostics(here("data/diagnostics/run-times.csv"))
+```
+
+### Summary table
+
+```{r run-time-summary}
+summary_run_times <- run_times[,
+  .(mean = mean(run_time_mins),
+    median = median(run_time_mins),
+    sd = sd(run_time_mins),
+    max = max(run_time_mins),
+    min = min(run_time_mins)
+  ), by = c("model")
+]
+cols <- c("mean", "median", "sd", "max", "min")
+summary_run_times <- summary_run_times[,
+ (cols) := lapply(.SD, round, digits = 1), .SDcols = cols
+]
+fancy_datatable(summary_run_times)
+```
+
+### By model and nowcast date
+
+```{r}
+ggplot(run_times) +
+  aes(x = model, y = run_time_mins, col = model, fill = model) + 
+  geom_violin(alpha = 0.4) +
+  geom_jitter(alpha = 0.4) +
+  scale_y_log10() +
+  theme_bw() +
+  theme(legend.position = "none") +
+  labs(y = "Estimation time (minutes)", x = "") +
+  coord_flip()
+```
+
+# References

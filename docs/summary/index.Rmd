@@ -1,0 +1,47 @@
+---
+title: "Evaluating Semi-Parametric Nowcasts of COVID-19 Hospital Admissions in Germany"
+subtitle: "Summary"
+author: Sam Abbott, Sebastian Funk
+bibliography: ../../writeup/library.bib
+csl: https://raw.githubusercontent.com/citation-style-language/styles/master/apa-numeric-superscript-brackets.csl
+date: "`r format(Sys.Date(), format = '%B %d, %Y')`"
+output:
+  html_document:
+    theme: cosmo
+    toc: true
+    toc_float: true
+    toc_depth: 4
+    includes:
+      before_body: ../header.html
+      after_body: ../footer.html
+---
+
+```{r setup, echo = FALSE, cache = FALSE, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, dpi = 330, warning = FALSE)
+```
+
+**This project is under active development. Current results are preliminary and may change as more data is collected or as the methodology is improved.**
+
+# Background
+
+```{r, child = "../chunks/introduction.Rmd"}
+```
+
+In this work, we aim to evaluate a series of novel semi-parametric nowcasting model formulations in real-time and provide an example workflow to allow others to do similarly using German COVID-19 hospitalisations by date of positive test at the national level both overall and by age group, and at the state level. This project is part of a [wider collaboration](https://covid19nowcasthub.de) assessing a range of nowcasting methods whilst providing an ensemble nowcast of COVID-19 Hospital admissions in Germany by date of positive test. This ensemble should be used for any policy-related work rather than the nowcasts provided in this repository. See [here](https://covid19nowcasthub.de) for more on this nowcasting collaboration.
+
+# Methods
+
+We follow the approach of Höhle and Heiden[@hohle] and consider the distribution of notifications by date of positive test and reporting delay conditional on the final observed count for each target dataset. This results in an estimation process where expected hospitalisations by date of positive test are estimated jointly with the delay distribution for each date of positive test. When combined this gives the expected final hospitalisations, and once an observation model has been assumed (in our case a negative binomial model) the estimated hospitalisations by date of report can be recovered. Aggregating these estimates then gives estimated hospitalisations by date of positive test adjusted for right censoring.
+
+We explore two primary models and submit nowcasts from these models to the nowcasting hub. The first of these is fit independently to each data set by age and location. Hospitalisations are modelled using a random walk on the log scale. Reporting delays are then modelled parametrically using a lognormal distribution with the log mean and log standard deviation each modelled using a weekly random walk with a pooled standard deviation, and a random effect for the day of the week (introduced on the 6th of December 2021) with public holidays assumed to be reported like Sundays. Report date effects are again modelled using a random effect for day of the week with public holidays assumed to be reported like Sundays. The second model is fit jointly to age groups but is otherwise structured in the same way as the unpooled model except that report day of the week effects and the observation overdispersion are assumed to be joint across age groups, age groups are assumed to have a random intercept for both the log mean and the log standard deviation of the reporting delay distribution, and there is no random effect for reference day of the week. We also consider a series of pooled models which sequentially include the features of our most complex model. These are: age groups are fit jointly, day of the week reporting effects, a random intercept for each age group, and a random walk by positive test week shared across age groups.
+
+We evaluate these models first visually across a range of nowcasting dates and then quantitatively using proper scoring rules [@scoringutils] on both the natural and log scales (corresponding to absolute and relative performance) aggregating scores first across all targets and then stratifying in turn by age group, nowcast horizon, date of postive test, and date of report. We also explore other aspects of our models performance by highlighting models that have problematic fitting diagnostics and summarising the estimation time for each model. We provide a [report](https://epiforecasts.io/eval-germany-sp-nowcasting/real-time/) of this evaluation that is updated in real-time as new data and nowcasts become available.
+
+All models are implemented using the `epinowcast` R package [@epinowcast]. The nowcasting and evaluation pipeline is implemented using the `targets` R package[@targets]. All input data, interim data, and output data are available and should also be fully reproducible from the provided code. Please see the resources section for details. Further details on our methodology are included in our [paper](https://epiforecasts.io/eval-germany-sp-nowcasting/paper.pdf).
+
+# Resources
+
+```{r, child = "../chunks/documentation.Rmd"}
+```
+
+# References
