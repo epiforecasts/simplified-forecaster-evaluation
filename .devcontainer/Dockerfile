@@ -25,6 +25,7 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
         libxml2-dev \
         libxt-dev \
         pandoc \
+        libfontconfig1-dev \
     && apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/* /tmp/library-scripts \
     && python3 -m pip --no-cache-dir install radian pre-commit \
     && install2.r --error --skipinstalled --repos ${CRAN} --ncpus -1 \
@@ -51,3 +52,4 @@ RUN chmod -R ugo+rw /workspaces/simplified-forecaster-evaluation
 WORKDIR /workspaces/simplified-forecaster-evaluation
 COPY renv.lock renv.lock
 RUN R -e 'renv::restore()'
+RUN rm renv.lock
