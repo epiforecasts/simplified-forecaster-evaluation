@@ -11,7 +11,7 @@ start_using_memoise()
 # Check out available forecasts models from the ECDC forecasting hub repo
 get_hub_forecast_paths(
   "covid19-forecast-hub-europe/covid19-forecast-hub-europe"
-) |> 
+) |>
   available_forecast_models()
 
 # Select the simplified forecast model and the ECDC ensemble
@@ -29,5 +29,8 @@ hub_forecasts <- get_hub_forecasts(
   models = models
 )
 
+# Only keep forecasts for incident cases
+hub_forecasts <- hub_forecasts[grepl("inc case", target)]
+
 # Save forecasts
-fwrite(hub_forecasts, "forecasts.csv")
+fwrite(hub_forecasts, here("data", "forecasts.csv"))
