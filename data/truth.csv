@@ -1,4 +1,4 @@
-location,location_name,date,truth
+location,location_name,date,true_value
 AT,Austria,2022-01-15,91687
 AT,Austria,2022-01-22,149209
 AT,Austria,2022-01-29,213581

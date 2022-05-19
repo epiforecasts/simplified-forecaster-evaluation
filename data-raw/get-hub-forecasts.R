@@ -1,6 +1,7 @@
 # Load packages
 library(data.table)
 library(here)
+library(gh)
 
 # Load functions
 source(here("R", "get-hub-forecasts.R"))
@@ -31,6 +32,13 @@ hub_forecasts <- get_hub_forecasts(
 
 # Only keep forecasts for incident cases
 hub_forecasts <- hub_forecasts[grepl("inc case", target)]
+
+# Make horizon variable and drop target
+hub_forecasts[, horizon := as.numeric(gsub(".*?([0-9]+).*", "\\1", target))]
+set(hub_forecasts, j = "target", value = NULL)
+
+# Rename for usage elsewhere
+setnames(hub_forecasts, "value", "prediction")
 
 # Save forecasts
 fwrite(hub_forecasts, here("data", "forecasts.csv"))

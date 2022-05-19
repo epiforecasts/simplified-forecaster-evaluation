@@ -14,7 +14,9 @@ jhu[, date := as.Date(date)]
 setkey(jhu, location_name, date)
 
 # Summarise to weekly cases starting on Saturday to Sync with the forecast hubs
-truth <- copy(jhu)[, truth := frollsum(value, n = 7), by = c("location_name")]
+truth <- copy(jhu)[,
+ true_value := frollsum(value, n = 7), by = c("location_name")
+]
 
 # Filter from the 15th of January 2022 to keep only observations with forecasts
 truth <- truth[date >= as.Date("2022-01-15")]
