@@ -39,6 +39,17 @@ output:
 
 ## Data {-}
 
+- Data from JHU as used as truth data by the ECDC forecasting hub.
+  - When accessed
+  - Aggregated to epiweek as in the ECDC forecasting GitHub
+  - Countries included
+  - Dates of data included
+- Forecasts from the ECDC forecast hub
+  - Forecasts dowloaded for the model proposed here and the ECDC ensemble
+  - Forecast format
+  - Forecases from when and horizon
+  - Ensemble construction and reference
+  
 ## Model {-}
 
 ### Motivation
@@ -82,7 +93,7 @@ Where $\sigma$, and $\frac{1}{\sqrt{phi_c}}$ are truncated to be greater than 0 
 
 ### Summary statistics
 
-As well as posterior predictions and forecasts for notifcations  the model also return several epidemiological summary statistics which may be useful for drawing inferences about underlying transmission dynamics. These are the log scale growth rate ($g^{o, \delta}_t$), and the instantaneous effective reproduction number ($R^{o, \delta}_t$). These are calculated as follows:
+As well as posterior predictions and forecasts for notifcations the model also returns several epidemiological summary statistics which may be useful for drawing inferences about underlying transmission dynamics. These are the log scale growth rate ($g^{o, \delta}_t$), and the instantaneous effective reproduction number ($R^{o, \delta}_t$). These are calculated as follows:
 
 \begin{align}
   g^{o, \delta}_t &= T_s r^{o, \delta}_t \\
@@ -93,6 +104,15 @@ $T_s$ is a user set scaling parameter that defines the timespan over which the s
 
 ## Forecast evaluation {-}
 
+- Visualise forecasts across time horizons in examplar countries.
+- Weighted interval score.
+- Calibration and coverage.
+- Relative interval score.
+- Relative interval score overall, distribution of scores, by horizon both overall and distribution, by location overall and distribution.
+- Relative interval score by interval range by horizon
+- Calibration at 50 and 90 credible intervals
+- Coverage across intervals.
+
 ## Implementation {-}
 
 The model is implemented in `stan` [@stan] and `R` (`4.2.0`) [@R] as an extension of the baseline model from the `forecast.vocs` R package (`0.0.9.7000`) [@forecast.vocs]. The `cmdstanr` R package (`0.5.2`) [@cmdstanr] is used for model fitting with 2 MCMC chains each having 1000 warm-up and 1000 sampling steps each [@cmdstanr]. `cmstanr` surfaces several settings which trade-off between sampling speed and the robustness of approach. Here we take a conservative approach, as model fit is not manually inspected during real-time usage and due to the expected complexity of the posterior [@betancourt_2017], and set the adapt delta setting to 0.99, and the maximum treedepth setting to 15. For real-time usage convergance was not assessed but during model development the Rhat diagnostic was used alongside feedback from `cmdstanr` about the number of divergant transitions and exceedance of the maximum tree depth and posterior predictions visually compared to observed data [@cmdstanr].
@@ -102,13 +122,13 @@ To download and manipulate forecasts from the ECDC forecasting hub [@EuroHub] we
 To ensure reproducibility of this analysis dependencies are managed using the `renv` R package (`0.14.0`) [@renv] and a Dockerfile file along with built Docker image [@Boettiger:2015dw] (via GitHub Actions) is provided. Weekly forecasts also made use of `renv` and Docker to ensure reproducibility with GitHub actions used to produce the forecasts ensuring we meet our limited compute goal and that our implementation is independent from available compute resources democratising  access to our approach. The code for this analysis can be found here: https://github.com/epiforecasts/simplified-forecaster-evaluation
 The code for the forecating model defined above along with the infrastructure required to forecast using GitHub Actions can be found here: https://github.com/seabbs/ecdc-weekly-growth-forecasts
 
-
 # Results {-}
 
 ## Data summary {-}
 
 - Date range of forecasts
 - Forecasts per country
+- Total number of forecast models and average per location and per forecast date
 - Summarises general trends in incidence in the data
 
 ## Visualisation of forecasts by horizon {-}
