@@ -23,7 +23,7 @@ models <- c("epiforecasts-weeklygrowth", "EuroCOVIDhub-ensemble")
 up_to <- Sys.Date()
 forecast_dates <- seq(as.Date("2022-01-15"), up_to, by = "day")
 
-# Check
+# Get forecasts for models of interest
 hub_forecasts <- get_hub_forecasts(
   "covid19-forecast-hub-europe/covid19-forecast-hub-europe",
   dates = forecast_dates,

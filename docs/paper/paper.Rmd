@@ -39,13 +39,71 @@ output:
 
 ## Data {-}
 
-## Model definition {-}
+## Model {-}
+
+### Motivation
+
+The package currently supports two models both with various options. A baseline single strain model and a two strain model with flexible variable dynamics. Both share the same underlying structure with expected notifications being assumed to be a product of past expected notifications, and an exponentiated time-varying term. This term is then modelled in both instances as a differenced autoregressive process with a signal lag term. In the two strain model this process can either be modelled jointly for variants, as a correlated process, or independently. By default it is assumed to vary inline with the timestep of the data but this can be altered to speed up computation or to improve out of sample performance. Observed cases are estimated from expected cases by assuming either a negative binomial observation model. Detailed model definitions are given below. Prior values when given represent the package defaults and can, and generally should, altered by the user based on their domain specific knowledge.
+
+### Definition
+
+We model the mean ($\lambda_t$) of reported cases ($C_t$) as an order 1 autoregressive (AR(P)) process by time unit ($t$). The model is initialised by assuming that the initial reported cases are representative with a small amount of error (2.5%) for each $t \lt P$.
+
+\begin{align}
+  \lambda_t &\sim \text{LogNormal}\left(\log C_t , 0.025 \times \log C_t \right),\ t \leq P \\
+  \lambda_t &= \text{exp}\left(r_t\right) \sum_{p = 1}^{P} \alpha_p  \lambda_{t-p},\ t \gt P  
+\end{align}
+
+Where $r_t$ can be interpreted as the growth rate and the exponential of $r_t$ as the effective reproduction number ($R_t$) assuming a mean generation time equal to the scaling rate used (see the documentation for `scale_r` in `?forecast()`). $r_t$ is then itself modelled as a piecewise constant differenced AR(1) process, 
+
+\begin{align}
+  r_1 &\sim \text{Normal}\left(0, 0.25 \right) \\
+  r_t &= r_{t-1} + \epsilon_t  \\
+  \epsilon_1 &= \eta_1 \\
+  \epsilon_t &= \beta \epsilon_{t-1} + \eta_t
+\end{align}
+
+Where, 
+
+\begin{align}
+  \eta_t &\sim \text{Normal}\left(0, \sigma \right) \\
+  \sigma &\sim \text{Normal}\left(0, 0.2 \right) \\
+  \beta &\sim \text{Normal}\left(0, 0.5 \right)
+\end{align}
+
+We then assume a negative binomial observation model with overdispersion $\phi_c$ for reported cases ($C_t$),
+
+\begin{align}
+  C_{t} &\sim \text{NegBinomial}\left(\lambda_t, \phi_c\right) \\
+  \frac{1}{\sqrt{\phi_c}} &\sim \text{Normal}(0, 0.5) 
+\end{align}
+
+Where $\sigma$, and $\frac{1}{\sqrt{phi_c}}$ are truncated to be greater than 0 and $\beta$ is truncated to be between -1 and 1. Optionally a Poisson observation model may instead be used (see the documentation for `overdispersion` in `?forecast()`).
+
+### Summary statistics
+
+As well as posterior predictions and forecasts for notifcations  the model also return several epidemiological summary statistics which may be useful for drawing inferences about underlying transmission dynamics. These are the log scale growth rate ($g^{o, \delta}_t$), and the instantaneous effective reproduction number ($R^{o, \delta}_t$). These are calculated as follows:
+
+\begin{align}
+  g^{o, \delta}_t &= T_s r^{o, \delta}_t \\
+  R^{o, \delta}_t &= \text{exp}\left(T_s r^{o, \delta}_t\right) \\
+\end{align}
+
+$T_s$ is a user set scaling parameter that defines the timespan over which the summary metrics apply dependent on the time step of the data. It can be set using the `scale_r` and defaults to 1 which returns summary statistics scaled to the timestep of the data. Depending on the setup of the model used these summary measures will be more or less related to their epidemiological definitions. In particular, adding a weighting to past expected cases that is more complex than a simple lag may cause interpretation issues.
 
 ## Forecast evaluation {-}
 
 ## Implementation {-}
 
-# Resuls {-}
+The model is implemented in `stan` [@stan] and `R` (`4.2.0`) [@R] as an extension of the baseline model from the `forecast.vocs` R package (`0.0.9.7000`) [@forecast.vocs]. The `cmdstanr` R package (`0.5.2`) [@cmdstanr] is used for model fitting with 2 MCMC chains each having 1000 warm-up and 1000 sampling steps each [@cmdstanr]. `cmstanr` surfaces several settings which trade-off between sampling speed and the robustness of approach. Here we take a conservative approach, as model fit is not manually inspected during real-time usage and due to the expected complexity of the posterior [@betancourt_2017], and set the adapt delta setting to 0.99, and the maximum treedepth setting to 15. For real-time usage convergance was not assessed but during model development the Rhat diagnostic was used alongside feedback from `cmdstanr` about the number of divergant transitions and exceedance of the maximum tree depth and posterior predictions visually compared to observed data [@cmdstanr].
+
+To download and manipulate forecasts from the ECDC forecasting hub [@EuroHub] we use  the `data.table` (`1.14.2`) [@data.table] and `gh` (`1.3.0`) [@gh] R packages. We make use of further functionality from the `forecast.vocs` R package [@forecast.vocs] to prepare data for forecasting, to visualise forecasts and summary measures, and to summarise forecasts. Forecast evaluation is implemented using the `scoringutils` R package (1.0.0) [@scoringutils].
+
+To ensure reproducibility of this analysis dependencies are managed using the `renv` R package (`0.14.0`) [@renv] and a Dockerfile file along with built Docker image [@Boettiger:2015dw] (via GitHub Actions) is provided. Weekly forecasts also made use of `renv` and Docker to ensure reproducibility with GitHub actions used to produce the forecasts ensuring we meet our limited compute goal and that our implementation is independent from available compute resources democratising  access to our approach. The code for this analysis can be found here: https://github.com/epiforecasts/simplified-forecaster-evaluation
+The code for the forecating model defined above along with the infrastructure required to forecast using GitHub Actions can be found here: https://github.com/seabbs/ecdc-weekly-growth-forecasts
+
+
+# Results {-}
 
 ## Data summary {-}
 
