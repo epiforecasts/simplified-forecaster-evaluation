@@ -14,16 +14,27 @@ merge_forecasts_with_truth <- function(forecasts, truth) {
   # Remove forecasts with no truth data
   forecasts_with_truth <- forecasts_with_truth[!is.na(true_value)]
 
-  return(forecasts_with_truth)
+  return(forecasts_with_truth[])
 }
 
 rescale_to_incidence_rate <- function(forecasts, population, scale = 1e5) {
   forecasts <- data.table::copy(forecasts)
   population <- data.table::copy(population)
 
-  forecasts_with_population <- forecasts[population, on = c("location")] |>
+  forecasts_with_population <- forecasts[
+    population, on = c("location")
+  ] |>
     data.table::DT(, true_value := true_value / population * scale) |>
     data.table::DT(, prediction := prediction / population * scale)
 
-  return(forecasts_with_population)
+  return(forecasts_with_population[])
+}
+
+rename_models <- function(forecasts) {
+  forecasts <- data.table::copy(forecasts) |>
+    data.table::DT(, model := data.table::fcase(
+      model %in% "EuroCOVIDhub-ensemble", "ECDC ensemble",
+      model %in% "epiforecasts-weeklygrowth", "Surrogate"
+    ))
+  return(forecasts[])
 }
