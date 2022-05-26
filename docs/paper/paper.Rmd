@@ -89,7 +89,7 @@ population <- fread(here("data", "population.csv"))
 # Merge with truth and rescale to incidence rate per 100,000
 forecasts <- fread(here("data", "forecasts.csv")) |>
   merge_forecasts_with_truth(truth) |>
-  rescale_to_incidence_rate(population, scale = 1000)
+  rescale_to_incidence_rate(population, scale = 1e4)
 ```
 
 - Data from JHU as used as truth data by the ECDC forecasting hub.
@@ -215,18 +215,17 @@ The code for the forecating model defined above along with the infrastructure re
   - Y facet: Horizon
 
 ```{r vis-forecasts}
-locs <- c("United Kingdom", "Germany", "Slovakia", "Italy")
+locs <- c("United Kingdom", "Germany", "Slovakia", "Italy", "Poland", "Greece")
 
 forecasts[location_name %in% locs] |>
   DT(, date := target_end_date) |>
     plot_predictions(
       by = c("horizon", "location_name"), range = c(30, 60, 90)
     ) +
-    facet_rep_grid(
-      location_name ~ horizon, scales = "free_y", repeat.tick.labels = "y"
-    ) +
+    facet_grid(
+      location_name ~ horizon) +
     aes(fill = model, col = model) +
-    scale_y_continuous(labels = comma) +
+    scale_y_log10(labels = comma, oob = squish, limits = c(0.1, 1000)) +
     scale_fill_brewer(palette = "Dark2") +
     scale_color_brewer(palette = "Dark2") +
     labs(x = "Date", fill = "Model", col = "Model", ramp = "Range")
