@@ -53,3 +53,6 @@ WORKDIR /workspaces/simplified-forecaster-evaluation
 COPY renv.lock renv.lock
 RUN R -e 'renv::restore()'
 RUN rm renv.lock
+
+# install latex
+RUN Rscript -e "tinytex::install_tinytex()"

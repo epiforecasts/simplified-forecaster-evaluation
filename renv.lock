@@ -198,10 +198,10 @@
     },
     "data.table": {
       "Package": "data.table",
-      "Version": "1.14.2",
+      "Version": "1.14.3",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "36b67b5adf57b292923f5659f5f0c853"
+      "Hash": "70b8f1ae499f3d365d8b9a7d30cc8d47"
     },
     "desc": {
       "Package": "desc",
@@ -656,6 +656,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "61f94b51fc49feea6637bb09e7ac81f3"
+    },
+    "rticles": {
+      "Package": "rticles",
+      "Version": "0.23",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "4cab3463b39137d4dd113b751cb2805d"
     },
     "sass": {
       "Package": "sass",

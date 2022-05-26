@@ -3,6 +3,9 @@ library(data.table)
 library(scoringutils)
 library(here)
 
+# Load functions
+source(here("R", "utils.R"))
+
 # Load truth data
 truth <- fread(here("data", "truth.csv"))
 
@@ -10,14 +13,7 @@ truth <- fread(here("data", "truth.csv"))
 forecasts <- fread(here("data", "forecasts.csv"))
 
 # Merge forecasts and truth
-setnames(truth, "date", "target_end_date")
-forecasts_with_truth <- truth[forecasts, on = c("location", "target_end_date")]
-
-# Remove point forecasts
-forecasts_with_truth <- forecasts_with_truth[!is.na(quantile)]
-
-# Remove forecasts with no truth data
-forecasts_with_truth <- forecasts_with_truth[!is.na(true_value)]
+forecasts_with_truth <- merge_forecasts_with_truth(forecasts, truth)
 
 # Score forecasts
 scores <- score(forecasts_with_truth)

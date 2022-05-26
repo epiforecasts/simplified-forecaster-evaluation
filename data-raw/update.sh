@@ -7,5 +7,8 @@ Rscript data-raw/get-hub-forecasts.R
 # Download truth data
 Rscript data-raw/get-truth.R
 
+# Get population data
+Rscript data-raw/get-population.R
+
 # Calculate per forecast and quantile scores
 Rscript data-raw/score-forecasts.R

@@ -10,13 +10,7 @@ affiliation:
   - code: 1
     address: Cold Spring Harbor Laboratory, One Bungtown Road Cold Spring Harbor, NY 11724
 abstract: > 
-  **Background**
-
-  **Methods**
-
-  **Results**
-
-  **Conclusions**
+  We made the best model. It is both simple and amazing.
 bibliography: library.bib
 output:
   rticles::peerj_article: default
@@ -24,20 +18,79 @@ output:
     base_format: rticles::peerj_article # for using bookdown features like \@ref()
 ---
 
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = TRUE,
+  echo = FALSE,
+  message = FALSE
+)
+```
 
 # Introduction {-}
 
 - Why
+  - ECDC and CDC forecasting hubs
+  - Ensemble shown to outperform individual models in many cases
+  - Thought of as being more desirable due to reliability etc vs multiple models
+  - Many models are complex and require large amounts of compute time.
+  - As the ensemble is made up of these models it means it is extremely resource demandning to construct requiring significant compute as well as multiple teams.
+  - As the ensemble is constructed from multiple models it functions as effectively a black box. This means it may be hard for policy-makers to understand its underyling assumptions
+  - Here we seek to refine forecasting ideas from our previous work alongside our experiances forecasting COVID-19 as contributors to the ECDC and CDC forecasting hubs to develop a simplified forecasting model that has characteristics fo the ensemble forecast whilst maintianing a interpretability and low resource demands.
 
 - Extension of why
+   - Brief dicussion of implications of modelling NPIs/future changes in behaviour
+   - Brief discussion of reporting patterns in data. Daily/Weekly.
+   - Brief discussion of EpiNow2 and related models
+   - Brief dicussion of statistical modelling approaches (use MUNI-ARIMA as an example).
+   - Brief discussion of scoring of hub models
+   - Summary of observed performance of the hub ensembles
+    - Auto-correlated
+    - Typically relatively trend following though shows some ability to forecast future changes. 
 
 - What
+  - Simplified auto-regressive growth rate model assuming a non-stationary trend
+  -  Explicit modelling of the assumption that rapid growth/decay of cases will typically result in future growth tending towards zero. This seeks to capture potential implementation and relaxation of NPIs as well as individuals attitudes to risk (assuming this is based on current growth rates and not case incidence).
+  - Uses weekly vs daily data to side step issues of reporting periodicity and to replicate the observed auto-corelation of the hub ensembles.
+  - Simple extension of an already implemented model and resuse of its modular components.
+  - Implemented with a focus on reproducibility, simplicity, and low resource use. 
+  - The model runs using GitHub actions in a framework supplied by the ECDC forecast hub. We provide our own tools so that others can run the model using GitHub actions democratising our approach.
 
-- Aim: 
+- Aim: In this work we define a simplified forecasting model designed to replicate some of the observed characteristics of successful infectious disease ensemble models without sacrificing interpretability and with low resource requirements. We evaluate the performance of this model against the ECDC forecasting hub ensemble in real-tim, and discuss implications of our findings along with areas for future research.
 
 # Methods {-}
 
 ## Data {-}
+
+```{r packages}
+library(data.table)
+library(ggplot2)
+library(scales)
+library(lemon)
+library(here)
+```
+
+```{r load-functions}
+source(here("R", "utils.R"))
+```
+
+```{r data}
+# Load JHU frozen truth data. See data-raw/get-truth.R for munging
+truth <- fread(here("data", "truth.csv"))
+
+# Load population data
+population <- fread(here("data", "population.csv"))
+
+# Load ECDC forecast metadata. See data-raw/get-hub-metadata.R for munging
+#metadata <- fread(here("data", "forecast-metadata.csv"))
+
+# Load ECDC forecasts. See data-raw/get-hub-forecasts.R for munging
+# Merge with truth and rescale to incidence rate per 100,000
+forecasts <- fread(here("data", "forecasts.csv")) |>
+  merge_forecasts_with_truth(truth) |>
+  rescale_to_incidence_rate(population, scale = 1000)
+```
 
 - Data from JHU as used as truth data by the ECDC forecasting hub.
   - When accessed
@@ -54,53 +107,66 @@ output:
 
 ### Motivation
 
-The package currently supports two models both with various options. A baseline single strain model and a two strain model with flexible variable dynamics. Both share the same underlying structure with expected notifications being assumed to be a product of past expected notifications, and an exponentiated time-varying term. This term is then modelled in both instances as a differenced autoregressive process with a signal lag term. In the two strain model this process can either be modelled jointly for variants, as a correlated process, or independently. By default it is assumed to vary inline with the timestep of the data but this can be altered to speed up computation or to improve out of sample performance. Observed cases are estimated from expected cases by assuming either a negative binomial observation model. Detailed model definitions are given below. Prior values when given represent the package defaults and can, and generally should, altered by the user based on their domain specific knowledge.
+The same underlying structure with expected notifications being assumed to be a product of past expected notifications, and an exponentiated time-varying term.
+This term is then modelled in both instances as a differenced autoregressive process with a single lag term.
+By default it is assumed to vary inline with the timestep of the data but this can be altered to speed up computation or to improve out of sample performance.
+Observed cases are estimated from expected cases by assuming a negative binomial observation model.
+A detailed model definition is given below.
 
 ### Definition
 
-We model the mean ($\lambda_t$) of reported cases ($C_t$) as an order 1 autoregressive (AR(P)) process by time unit ($t$). The model is initialised by assuming that the initial reported cases are representative with a small amount of error (2.5%) for each $t \lt P$.
+We model the expectation ($\lambda_t$) of reported cases ($C_t$) as an order 1 autoregressive (AR(P)) process by epidemiological week ($t$).
+The model is initialised by assuming that the initial reported cases are representative with a small amount of error (2.5%).
+We assume a negative binomial observation model with overdispersion $\phi$ for reported cases ($C_t$).
 
-\begin{align}
-  \lambda_t &\sim \text{LogNormal}\left(\log C_t , 0.025 \times \log C_t \right),\ t \leq P \\
-  \lambda_t &= \text{exp}\left(r_t\right) \sum_{p = 1}^{P} \alpha_p  \lambda_{t-p},\ t \gt P  
-\end{align}
+\begin{align*}
+  \lambda_0 &\sim \text{LogNormal}\left(\log C_0 , 0.025 \times \log C_0 \right)\\
+  \lambda_t &= C_{t-1} e^{r_t},\ t > 0  \\
+  C_{t} \mid \lambda_{t} &\sim \text{NB}\left(\lambda_t, \phi\right)
+\end{align*}
 
-Where $r_t$ can be interpreted as the growth rate and the exponential of $r_t$ as the effective reproduction number ($R_t$) assuming a mean generation time equal to the scaling rate used (see the documentation for `scale_r` in `?forecast()`). $r_t$ is then itself modelled as a piecewise constant differenced AR(1) process, 
+Where $r_t$ can be interpreted as the growth rate. $r_t$ is then modelled as a piecewise constant differenced AR(1) process modified such that the dependence of $r_{t-1}$ is multiplied by a decay factor ($\xi_{+,-}$) that varies dynamically according to the sign of $r_{t-1}$.
+The assumptions of this modelling approach are that the growth rate is non-stationary with a trend that is independent of the current growth rate (the differenced AR(1) process), the additional decay factor encodes the belief that larger absolute growth rates will tend more quickly towards no growth and that this process may work differently for positive or negative growth rates.
+This process can be defined as follows, 
 
-\begin{align}
-  r_1 &\sim \text{Normal}\left(0, 0.25 \right) \\
-  r_t &= r_{t-1} + \epsilon_t  \\
-  \epsilon_1 &= \eta_1 \\
-  \epsilon_t &= \beta \epsilon_{t-1} + \eta_t
-\end{align}
+\begin{align*}
+  r_0 &\sim \text{Normal}\left(0, 0.25 \right) \\
+  r_t &= \left(\mathcal{H}(r_{t-1} > 0) \xi_{+} + \mathcal{H}(r_{t-1} \le 0) \xi_{-}\right)r_{t-1} + \epsilon_t  \\
+  \epsilon_t &= \mathcal{H}(t > 0) \beta \epsilon_{t-1} + \eta_t
+\end{align*}
 
-Where, 
+Where $\mathcal{H}$ is the Heaviside step function and is defined such that it attains the value of 1 if the argument is true and the value of 0 otherwise.
+The following priors are used,
 
-\begin{align}
-  \eta_t &\sim \text{Normal}\left(0, \sigma \right) \\
+\begin{align*}
+  \xi_{+} &\sim \text{Beta}\left(3, 1 \right) \\
+  \xi_{-} &\sim \text{Beta}\left(3, 1 \right) \\
+  \beta &\sim \text{Normal}\left(0, 0.25 \right) \\
+  \eta_t &\sim \text{Half-Normal}\left(0, \sigma \right) \\
   \sigma &\sim \text{Normal}\left(0, 0.2 \right) \\
-  \beta &\sim \text{Normal}\left(0, 0.5 \right)
-\end{align}
+  \frac{1}{\sqrt{\phi}} &\sim \text{Half-Normal}(0, 1) 
+\end{align*}
 
-We then assume a negative binomial observation model with overdispersion $\phi_c$ for reported cases ($C_t$),
-
-\begin{align}
-  C_{t} &\sim \text{NegBinomial}\left(\lambda_t, \phi_c\right) \\
-  \frac{1}{\sqrt{\phi_c}} &\sim \text{Normal}(0, 0.5) 
-\end{align}
-
-Where $\sigma$, and $\frac{1}{\sqrt{phi_c}}$ are truncated to be greater than 0 and $\beta$ is truncated to be between -1 and 1. Optionally a Poisson observation model may instead be used (see the documentation for `overdispersion` in `?forecast()`).
+Where $\sigma$, and $\frac{1}{\sqrt{phi}}$ are truncated to be greater than 0 and $\beta$ is truncated to be between -1 and 1.
+The Beta priors for $\xi{+,-}$ have been chosen to be weakly informative that the reduction towards 0 growth is relatively slow.
+Similarly the prior for $\beta$ has been chosen to be weakly informative that there is weak auto-correlation in differenced growth rates.
+$\sigma$ has also been made weakly informative under the assumption that the potential change in growth rates in a single timestep should be relatively small.
 
 ### Summary statistics
 
-As well as posterior predictions and forecasts for notifcations the model also returns several epidemiological summary statistics which may be useful for drawing inferences about underlying transmission dynamics. These are the log scale growth rate ($g^{o, \delta}_t$), and the instantaneous effective reproduction number ($R^{o, \delta}_t$). These are calculated as follows:
+As well as posterior predictions and forecasts for notifcations the model also returns several epidemiological summary statistics which may be useful for drawing inferences about underlying transmission dynamics.
+These are the log scale growth rate ($g^{o, \delta}_t$), and the instantaneous effective reproduction number ($R^{o, \delta}_t$).
+These are calculated as follows:
 
-\begin{align}
+\begin{align*}
   g^{o, \delta}_t &= T_s r^{o, \delta}_t \\
-  R^{o, \delta}_t &= \text{exp}\left(T_s r^{o, \delta}_t\right) \\
-\end{align}
+  R^{o, \delta}_t &= e^{\left(T_s r^{o, \delta}_t\right)} \\
+\end{align*}
 
-$T_s$ is a user set scaling parameter that defines the timespan over which the summary metrics apply dependent on the time step of the data. It can be set using the `scale_r` and defaults to 1 which returns summary statistics scaled to the timestep of the data. Depending on the setup of the model used these summary measures will be more or less related to their epidemiological definitions. In particular, adding a weighting to past expected cases that is more complex than a simple lag may cause interpretation issues.
+$T_s$ is a user set scaling parameter that defines the timespan over which the summary metrics apply dependent on the time step of the data.
+It can be set using the `scale_r` and defaults to 1 which returns summary statistics scaled to the timestep of the data.
+Depending on the setup of the model used these summary measures will be more or less related to their epidemiological definitions.
+In particular, adding a weighting to past expected cases that is more complex than a simple lag may cause interpretation issues.
 
 ## Forecast evaluation {-}
 
@@ -115,11 +181,19 @@ $T_s$ is a user set scaling parameter that defines the timespan over which the s
 
 ## Implementation {-}
 
-The model is implemented in `stan` [@stan] and `R` (`4.2.0`) [@R] as an extension of the baseline model from the `forecast.vocs` R package (`0.0.9.7000`) [@forecast.vocs]. The `cmdstanr` R package (`0.5.2`) [@cmdstanr] is used for model fitting with 2 MCMC chains each having 1000 warm-up and 1000 sampling steps each [@cmdstanr]. `cmstanr` surfaces several settings which trade-off between sampling speed and the robustness of approach. Here we take a conservative approach, as model fit is not manually inspected during real-time usage and due to the expected complexity of the posterior [@betancourt_2017], and set the adapt delta setting to 0.99, and the maximum treedepth setting to 15. For real-time usage convergance was not assessed but during model development the Rhat diagnostic was used alongside feedback from `cmdstanr` about the number of divergant transitions and exceedance of the maximum tree depth and posterior predictions visually compared to observed data [@cmdstanr].
+The model is implemented in `stan` [@stan] and `R` (`4.2.0`) [@R] as an extension of the baseline model from the `forecast.vocs` R package (`0.0.9.7000`) [@forecast.vocs].
+The `cmdstanr` R package (`0.5.2`) [@cmdstanr] is used for model fitting with 2 MCMC chains each having 1000 warm-up and 1000 sampling steps each [@cmdstanr].
+`cmstanr` surfaces several settings which trade-off between sampling speed and the robustness of approach
+Here we take a conservative approach, as model fit is not manually inspected during real-time usage and due to the expected complexity of the posterior [@betancourt_2017], and set the adapt delta setting to 0.99, and the maximum treedepth setting to 15. 
+For real-time usage convergance was not assessed but during model development the Rhat diagnostic was used alongside feedback from `cmdstanr` about the number of divergant transitions and exceedance of the maximum tree depth and posterior predictions visually compared to observed data [@cmdstanr].
 
-To download and manipulate forecasts from the ECDC forecasting hub [@EuroHub] we use  the `data.table` (`1.14.2`) [@data.table] and `gh` (`1.3.0`) [@gh] R packages. We make use of further functionality from the `forecast.vocs` R package [@forecast.vocs] to prepare data for forecasting, to visualise forecasts and summary measures, and to summarise forecasts. Forecast evaluation is implemented using the `scoringutils` R package (1.0.0) [@scoringutils].
+To download and manipulate forecasts from the ECDC forecasting hub [@EuroHub] we use  the `data.table` (`1.14.2`) [@data.table] and `gh` (`1.3.0`) [@gh] R packages.
+We make use of further functionality from the `forecast.vocs` R package [@forecast.vocs] to prepare data for forecasting, to visualise forecasts and summary measures, and to summarise forecasts.
+Forecast evaluation is implemented using the `scoringutils` R package (1.0.0) [@scoringutils].
 
-To ensure reproducibility of this analysis dependencies are managed using the `renv` R package (`0.14.0`) [@renv] and a Dockerfile file along with built Docker image [@Boettiger:2015dw] (via GitHub Actions) is provided. Weekly forecasts also made use of `renv` and Docker to ensure reproducibility with GitHub actions used to produce the forecasts ensuring we meet our limited compute goal and that our implementation is independent from available compute resources democratising  access to our approach. The code for this analysis can be found here: https://github.com/epiforecasts/simplified-forecaster-evaluation
+To ensure reproducibility of this analysis dependencies are managed using the `renv` R package (`0.14.0`) [@renv] and a Dockerfile file along with built Docker image [@Boettiger:2015dw] (via GitHub Actions) is provided.
+Weekly forecasts also made use of `renv` and Docker to ensure reproducibility with GitHub actions used to produce the forecasts ensuring we meet our limited compute goal and that our implementation is independent from available compute resources democratising  access to our approach.
+The code for this analysis can be found here: https://github.com/epiforecasts/simplified-forecaster-evaluation
 The code for the forecating model defined above along with the infrastructure required to forecast using GitHub Actions can be found here: https://github.com/seabbs/ecdc-weekly-growth-forecasts
 
 # Results {-}
@@ -140,19 +214,43 @@ The code for the forecating model defined above along with the infrastructure re
   - X facet: Country
   - Y facet: Horizon
 
+```{r vis-forecasts}
+locs <- c("United Kingdom", "Germany", "Slovakia", "Italy")
+
+forecasts[location_name %in% locs] |>
+  DT(, date := target_end_date) |>
+    plot_predictions(
+      by = c("horizon", "location_name"), range = c(30, 60, 90)
+    ) +
+    facet_rep_grid(
+      location_name ~ horizon, scales = "free_y", repeat.tick.labels = "y"
+    ) +
+    aes(fill = model, col = model) +
+    scale_y_continuous(labels = comma) +
+    scale_fill_brewer(palette = "Dark2") +
+    scale_color_brewer(palette = "Dark2") +
+    labs(x = "Date", fill = "Model", col = "Model", ramp = "Range")
+```
+
 ## Forecast evaluation {-}
 
 - Figure 2:
   Sub-figure 1:
+    - Density/histogram of overall relative scores + mean line
   Sub-figure 2:
+    - Density/histogram of relative scores + mean line by horizon
   Sub-figure 3:
+     - Density/histogram of relative scores + mean line by location
 
 ## Forecast calibration {-}
 
 - Figure 3:
   Sub-figure 1:
+    - Calibraton of forecasts by horizon and model
   Sub-figure 2:
+    - Coverage of forecasts by quantile
   Sub-figure 3:
+    - Relative interval score by quantile by horizon.
 
 # Discussion {-}
 
@@ -162,8 +260,15 @@ The code for the forecating model defined above along with the infrastructure re
 
 ## Literature context {-}
 
+  - Emulators in weather forecasting and elsewhere
+  - ECDC and CDC ensemble papers
+  - Other forecasting models contributed to the ensembles
+  - Baseline models
+
 ## Further work {-}
 
+  - Other similar model formulations. More lag terms. Reduced run-times using approximate Bayesian approaches.
+  
 ## Conclusions {-}
 
 # Acknowledgments {-}
