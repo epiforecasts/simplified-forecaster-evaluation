@@ -33,7 +33,7 @@ rescale_to_incidence_rate <- function(forecasts, population, scale = 1e5) {
 rename_models <- function(forecasts) {
   forecasts <- data.table::copy(forecasts) |>
     data.table::DT(, model := data.table::fcase(
-      model %in% "EuroCOVIDhub-ensemble", "ECDC ensemble",
+      model %in% "EuroCOVIDhub-ensemble", "Ensemble",
       model %in% "epiforecasts-weeklygrowth", "Surrogate"
     ))
   return(forecasts[])

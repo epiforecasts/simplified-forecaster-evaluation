@@ -67,7 +67,6 @@ knitr::opts_chunk$set(
 library(data.table)
 library(ggplot2)
 library(scales)
-library(lemon)
 library(here)
 ```
 
@@ -184,6 +183,12 @@ In particular, adding a weighting to past expected cases that is more complex th
 - Calibration at 50 and 90 credible intervals
 - Coverage across intervals.
 
+```{r empirical-coverage, eval = FALSE}
+empirical_coverage <- scores |>
+  DT(, horizon := as.character(horizon)) |>
+  add_coverage(ranges = c(50, 90), by = c("model", "horizon")) |>
+  summarise_scores(fun = signif, digits = 2, by = c("model", "horizon"))
+```
 ## Implementation {-}
 
 The model is implemented in `stan` [@stan] and `R` (`4.2.0`) [@R] as an extension of the baseline model from the `forecast.vocs` R package (`0.0.9.7000`) [@forecast.vocs].
@@ -212,14 +217,7 @@ The code for the forecating model defined above along with the infrastructure re
 
 ## Visualisation of forecasts by horizon {-}
 
-- Figure 1:
-  - X: date
-  - Y: incidence rate
-  - Colour: Model
-  - X facet: Country
-  - Y facet: Horizon
-
-```{r vis-forecasts}
+```{r vis-forecasts, fig.height = 9, fig.width = 9, fig.cap = "Forecasts of notified test positive cases (per 10,000 population) by epidemiological week in the United Kingdom, Germany, Slovakia, Italy, Poland, and Greece by forecast horizon (one to four weeks). Incidence rates are shown on a log scale. 30%, 60%, and 90% credible intervals are shown. The black line and points are the notified cases as of the date of data extraction rather than those available at the time."}
 locs <- c("United Kingdom", "Germany", "Slovakia", "Italy", "Poland", "Greece")
 
 forecasts[location_name %in% locs] |>
