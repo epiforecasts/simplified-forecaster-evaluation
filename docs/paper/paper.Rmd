@@ -24,7 +24,8 @@ knitr::opts_chunk$set(
   comment = "#>",
   eval = TRUE,
   echo = FALSE,
-  message = FALSE
+  message = FALSE,
+  cache = TRUE
 )
 ```
 
@@ -65,6 +66,7 @@ knitr::opts_chunk$set(
 
 ```{r packages}
 library(data.table)
+library(scoringutils)
 library(ggplot2)
 library(scales)
 library(here)
@@ -183,12 +185,36 @@ In particular, adding a weighting to past expected cases that is more complex th
 - Calibration at 50 and 90 credible intervals
 - Coverage across intervals.
 
-```{r empirical-coverage, eval = FALSE}
-empirical_coverage <- scores |>
+```{r coverage}
+ranges <- c(30, 60, 90)
+
+coverage <- scores |>
+  copy() |>
   DT(, horizon := as.character(horizon)) |>
-  add_coverage(ranges = c(50, 90), by = c("model", "horizon")) |>
-  summarise_scores(fun = signif, digits = 2, by = c("model", "horizon"))
+  DT(, coverage_deviation := NULL) |>
+  add_coverage(ranges = ranges, by = c("model", "horizon")) |>
+  summarise_scores(fun = signif, digits = 2, by = c("model", "horizon")) |>
+  melt(
+    measure.vars = patterns("coverage_"), variable.name = "range",
+    value.name = "coverage"
+  )|>
+  DT(, range := gsub("coverage_", "", range)) |>
+  DT(, range := paste0(range, "% interval"))
 ```
+
+```{r relative-interval-score}
+relative_interval_score <- scores |>
+  copy() |>
+  setorderv(c(
+    "location", "target_end_date", "horizon", "quantile", "model"
+  )) |>
+  DT(,
+    relative_interval_score := interval_score / shift(interval_score),
+    by = c("location", "target_end_date", "horizon", "quantile")
+  ) |>
+  DT(model %in% "Surrogate")
+```
+
 ## Implementation {-}
 
 The model is implemented in `stan` [@stan] and `R` (`4.2.0`) [@R] as an extension of the baseline model from the `forecast.vocs` R package (`0.0.9.7000`) [@forecast.vocs].
@@ -217,22 +243,23 @@ The code for the forecating model defined above along with the infrastructure re
 
 ## Visualisation of forecasts by horizon {-}
 
-```{r vis-forecasts, fig.height = 9, fig.width = 9, fig.cap = "Forecasts of notified test positive cases (per 10,000 population) by epidemiological week in the United Kingdom, Germany, Slovakia, Italy, Poland, and Greece by forecast horizon (one to four weeks). Incidence rates are shown on a log scale. 30%, 60%, and 90% credible intervals are shown. The black line and points are the notified cases as of the date of data extraction rather than those available at the time."}
+```{r vis-forecasts, fig.height = 9, fig.width = 9, fig.cap = "Forecasts of notified test positive cases (per 10,000 population) by epidemiological week in the Germany, Greece, Italy, Poland, Slovakia, and the United Kingdom,  by forecast horizon (one to four weeks). Incidence rates are shown on a log scale. 30%, 60%, and 90% credible intervals are shown. The black line and points are the notified cases as of the date of data extraction rather than those available at the time."}
 locs <- c("United Kingdom", "Germany", "Slovakia", "Italy", "Poland", "Greece")
 
 forecasts[location_name %in% locs] |>
   DT(, date := target_end_date) |>
-    plot_predictions(
-      by = c("horizon", "location_name"), range = c(30, 60, 90)
-    ) +
-    facet_grid(
-      location_name ~ horizon) +
-    aes(fill = model, col = model) +
-    scale_y_log10(labels = comma, oob = squish, limits = c(0.1, 1000)) +
-    scale_fill_brewer(palette = "Dark2") +
-    scale_color_brewer(palette = "Dark2") +
-    labs(x = "Date", fill = "Model", col = "Model", ramp = "Range",
-         y = "Notified test positive cases per 10,000 population")
+  plot_predictions(
+    by = c("horizon", "location_name"), range = c(30, 60, 90)
+  ) +
+  facet_grid(
+    location_name ~ horizon, scales = "free_y"
+  ) +
+  aes(fill = model, col = model) +
+  scale_y_log10(labels = comma, oob = squish, limits = c(NA, NA)) +
+  scale_fill_brewer(palette = "Dark2") +
+  scale_color_brewer(palette = "Dark2") +
+  labs(x = "Date", fill = "Model", col = "Model", ramp = "Range",
+        y = "Notified test positive cases per 10,000 population")
 ```
 
 ## Forecast evaluation {-}
@@ -255,6 +282,42 @@ forecasts[location_name %in% locs] |>
   Sub-figure 3:
     - Relative interval score by quantile by horizon.
 
+
+```{r plot-coverage}
+hlines <- data.table(
+  range = paste0(ranges, "% interval"), nominal = ranges / 100
+)
+
+plot_cov_levels <- ggplot(coverage) +
+  aes(
+    x = horizon, y = coverage, colour = model, group = interaction(range, model)
+  ) +
+  geom_line() +
+  geom_point() +
+  geom_hline(
+    data = hlines, aes(yintercept = nominal, x = NULL), linetype = "dashed"
+  ) +
+  scale_colour_brewer(palette = "Dark2") +
+  scale_y_continuous(labels = percent) +
+  facet_wrap(vars(range), ncol = 1) +
+  theme_scoringutils() +
+  labs(
+     y = "Proportion of data within forecast interval",
+     x = "Forecast horizon (weeks)",
+     col = "Model"
+  )
+
+plot_cov_quantile <- scores |>
+  summarise_scores(by = c("model", "quantile", "horizon")) |>
+  plot_quantile_coverage(scores) +
+  aes(col = model) +
+  scale_colour_brewer(palette = "Dark2") +
+  facet_wrap(vars(horizon)) +
+  labs(col = "Model")
+
+plot_interval_score <- relative_interval_score |>
+  geom
+```
 # Discussion {-}
 
 ## Summary {-}

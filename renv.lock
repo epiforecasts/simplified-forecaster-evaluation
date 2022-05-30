@@ -693,9 +693,9 @@
       "RemoteHost": "api.github.com",
       "RemoteRepo": "scoringutils",
       "RemoteUsername": "epiforecasts",
-      "RemoteRef": "HEAD",
-      "RemoteSha": "b0cee59a8af6529adaad8408dfd20a56ec04b30b",
-      "Hash": "c7c369f9939d3ae6f092e6766ab99699"
+      "RemoteRef": "bug-223-data.table-dev",
+      "RemoteSha": "4952d7e95f4ff48c753c4c42b5fb4aa686b82488",
+      "Hash": "bf483efd0f83dca8f4674224f60f8baf"
     },
     "stringi": {
       "Package": "stringi",
