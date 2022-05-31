@@ -71,6 +71,7 @@ knitr::opts_chunk$set(
 library(data.table)
 library(scoringutils)
 library(ggplot2)
+library(patchwork)
 library(scales)
 library(here)
 ```
@@ -280,7 +281,7 @@ plot_forecasts(forecasts, locs, ranges)
   (
     (
       plot_coverage_range(coverage, ranges) /
-        plot_rel_score_by_quantile(relative_interval_score)
+      plot_rel_score_by_quantile(relative_interval_score)
     )  +
     plot_layout(heights = c(3, 1), guides = "collect")
   ) |
