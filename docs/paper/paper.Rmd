@@ -77,6 +77,7 @@ library(here)
 
 ```{r load-functions}
 source(here("R", "utils.R"))
+source(here("R","coverage-plots.R"))
 ```
 
 ```{r data}
@@ -188,9 +189,12 @@ In particular, adding a weighting to past expected cases that is more complex th
 - Calibration at 50 and 90 credible intervals
 - Coverage across intervals.
 
-```{r coverage}
+```{r eval-parameters}
+locs <- c("United Kingdom", "Germany", "Slovakia", "Italy", "Poland", "Greece")
 ranges <- c(30, 60, 90)
+```
 
+```{r coverage}
 coverage <- scores |>
   copy() |>
   DT(, horizon := as.character(horizon)) |>
@@ -247,23 +251,12 @@ The code for the forecating model defined above along with the infrastructure re
 
 ## Visualisation of forecasts by horizon {-}
 
-```{r vis-forecasts, fig.cap = "Forecasts of notified test positive cases (per 10,000 population) by epidemiological week in the Germany, Greece, Italy, Poland, Slovakia, and the United Kingdom,  by forecast horizon (one to four weeks). Incidence rates are shown on a log scale. 30\\%, 60\\%, and 90\\% credible intervals are shown. The black line and points are the notified cases as of the date of data extraction rather than those available at the time.", out.width = "95%", fig.height = 12, fig.width = 12}
-locs <- c("United Kingdom", "Germany", "Slovakia", "Italy", "Poland", "Greece")
+- Forecast performance overview for the ensemble and surrogate.
+- Forecast performance overview by forecast horizon. Highlight degrading performance with this impacting the surrogate model to a greater degree. 
+- Discussion country level differences in perforamance and link to potential growth rate trends. 
 
-forecasts[location_name %in% locs] |>
-  DT(, date := target_end_date) |>
-  plot_predictions(
-    by = c("horizon", "location_name"), range = c(30, 60, 90)
-  ) +
-  facet_grid(
-    location_name ~ horizon, scales = "free_y"
-  ) +
-  aes(fill = model, col = model) +
-  scale_y_log10(labels = comma, oob = squish, limits = c(NA, NA)) +
-  scale_fill_brewer(palette = "Dark2") +
-  scale_color_brewer(palette = "Dark2") +
-  labs(x = "Date", fill = "Model", col = "Model", ramp = "Range",
-        y = "Notified test positive cases per 10,000 population")
+```{r vis-forecasts, fig.cap = "Forecasts of notified test positive cases (per 10,000 population) by epidemiological week in the Germany, Greece, Italy, Poland, Slovakia, and the United Kingdom,  by forecast horizon (one to four weeks). Incidence rates are shown on a log scale. 30\\%, 60\\%, and 90\\% credible intervals are shown. The black line and points are the notified cases as of the date of data extraction rather than those available at the time.", out.width = "95%", fig.height = 12, fig.width = 12}
+plot_forecasts(forecasts, locs, ranges)
 ```
 
 ## Forecast evaluation {-}
@@ -278,77 +271,21 @@ forecasts[location_name %in% locs] |>
 
 ## Forecast calibration {-}
 
-- Figure 3:
-  Sub-figure 1:
-    - Calibraton of forecasts by horizon and model
-  Sub-figure 2:
-    - Coverage of forecasts by quantile
-  Sub-figure 3:
-    - Relative interval score by quantile by horizon.
-
+- Calibration of forecasts at credible ranges of interest.
+- Calibration across quantiles
+- Relative interval scores by quantile
 
 ```{r plot-coverage, fig.height = 12, fig.width = 18, out.width = "95%"}
-hlines <- data.table(
-  range = paste0(ranges, "% interval"), nominal = ranges / 100
-)
-
-plot_cov_levels <- ggplot(coverage) +
-  aes(
-    x = horizon, y = coverage, colour = model, group = interaction(range, model)
-  ) +
-  geom_line() +
-  geom_point() +
-  geom_hline(
-    data = hlines, aes(yintercept = nominal, x = NULL), linetype = "dashed"
-  ) +
-  scale_colour_brewer(palette = "Dark2") +
-  scale_y_continuous(labels = percent) +
-  facet_wrap(vars(range), ncol = 1, scales = "free_y") +
-  theme_scoringutils() +
-  labs(
-     y = "Proportion of data within forecast interval",
-     x = "Forecast horizon (weeks)",
-     col = "Model"
-  )
-
-plot_cov_quantile <- scores |>
-  summarise_scores(by = c("model", "quantile", "horizon")) |>
-  plot_quantile_coverage(scores) +
-  aes(col = model) +
-  scale_x_continuous(labels = percent) +
-  scale_y_continuous(labels = percent) +
-  scale_colour_brewer(palette = "Dark2") +
-  guides(col = guide_none()) +
-  facet_wrap(vars(horizon)) +
-  labs(col = "Model", y = "Percent of observations below quantile")
-
-plot_interval_score <- relative_interval_score |>
-  copy() |>
-  DT(,
-    .(relative_interval_score = median(relative_interval_score)),
-    by = c("horizon", "range")
-  ) |>
-  ggplot() +
-  aes(x = range / 100, y = relative_interval_score, col = as.factor(horizon)) +
-  geom_hline(yintercept = 1, linetype = 2) +
-  geom_point(size = 1.2) +
-  geom_line(alpha = 0.8) +
-  scale_x_continuous(labels = percent) +
-  scale_y_continuous(
-    trans = "log", breaks = c(seq(1, 2, by = 0.2), seq(2.4, 4, by = 0.4))
-  ) +
-  scale_colour_brewer(palette = "Accent") +
-  theme_scoringutils() +
-  labs(
-    x = "Quantile", y = "Median relative interval score",
-    col = "Forecast horizon (weeks)"
-  )
-
-(((plot_cov_levels /
-  plot_interval_score)  +
-  plot_layout(heights = c(3, 1), guides = "collect")
-) |
-  plot_cov_quantile) +
+(
+  (
+    (
+      plot_coverage_range(coverage, ranges) /
+        plot_rel_score_by_quantile(relative_interval_score)
+    )  +
+    plot_layout(heights = c(3, 1), guides = "collect")
+  ) |
+  plot_coverage_quantiles(scores)
+) +
   plot_layout(guides = "collect", widths = c(1, 2)) +
   plot_annotation(tag_levels = "a") &
   theme(
