@@ -77,7 +77,7 @@ library(here)
 
 ```{r load-functions}
 source(here("R", "utils.R"))
-source(here("R","coverage-plots.R"))
+source(here("R", "coverage-plots.R"))
 ```
 
 ```{r data}

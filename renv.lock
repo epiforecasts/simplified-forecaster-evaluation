@@ -121,6 +121,13 @@
       "Repository": "CRAN",
       "Hash": "a1a1c0ad0d87e82f366c12afa2bfd305"
     },
+    "bookdown": {
+      "Package": "bookdown",
+      "Version": "0.26",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "65ebdc552e88fc98c596f4797c5415ad"
+    },
     "bslib": {
       "Package": "bslib",
       "Version": "0.3.1",
