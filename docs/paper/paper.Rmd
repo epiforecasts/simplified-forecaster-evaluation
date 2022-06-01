@@ -78,6 +78,7 @@ library(here)
 
 ```{r load-functions}
 source(here("R", "utils.R"))
+source(here("R", "evaluate.R"))
 source(here("R", "coverage-plots.R"))
 ```
 
@@ -182,7 +183,7 @@ In particular, adding a weighting to past expected cases that is more complex th
 ## Forecast evaluation {-}
 
 - Visualise forecasts across time horizons in examplar countries.
-- Weighted interval score.
+- Weighted interval score on incidence rate per 10,000 people to account for population differences between locations.
 - Calibration and coverage.
 - Relative interval score.
 - Relative interval score overall, distribution of scores, by horizon both overall and distribution, by location overall and distribution.
@@ -196,32 +197,19 @@ ranges <- c(30, 60, 90)
 ```
 
 ```{r coverage}
-coverage <- scores |>
-  copy() |>
-  DT(, horizon := as.character(horizon)) |>
-  DT(, coverage_deviation := NULL) |>
-  add_coverage(ranges = ranges, by = c("model", "horizon")) |>
-  summarise_scores(fun = signif, digits = 2, by = c("model", "horizon")) |>
-  melt(
-    measure.vars = patterns("coverage_"), variable.name = "range",
-    value.name = "coverage"
-  )|>
-  DT(, range := gsub("coverage_", "", range)) |>
-  DT(, range := paste0(range, "% interval"))
+coverage <- calc_coverage(scores)
 ```
 
 ```{r relative-interval-score}
-cols <- c("location", "target_end_date", "horizon", "range", "model")
 relative_interval_score <- scores |>
-  copy() |>
-  setorderv(cols) |>
-  DT(, c(..cols, "interval_score")) |>
-  unique() |>
-  DT(,
-    relative_interval_score := interval_score / shift(interval_score),
-    by = c("location", "target_end_date", "horizon", "range")
+  calc_relative_score(
+    cols = c("location", "target_end_date", "horizon", "range")
+  )
+relative_wis <- scores |>
+  summarise_scores(
+    by = c("location_name", "target_end_date", "horizon", "model")
   ) |>
-  DT(model %in% "Surrogate")
+  calc_relative_score(cols = c("location_name", "target_end_date", "horizon"))
 ```
 
 ## Implementation {-}
@@ -270,6 +258,37 @@ plot_forecasts(forecasts, locs, ranges)
   Sub-figure 3:
      - Density/histogram of relative scores + mean line by location
 
+
+```{r}
+relative_wis |>
+  copy() |>
+  ggplot() +
+  aes(x = relative_interval_score) +
+  geom_vline(xintercept = 1, linetype = 2) +
+  geom_density() +
+  facet_wrap(vars(horizon)) +
+  scale_x_continuous(trans = "log")
+```
+
+```{r plot-eval, fig.height = 12, fig.width = 18, out.width = "95%"}
+ (
+  (
+    (
+      plot_rel_wis(coverage, ranges) /
+      plot_rel_wis_by_horizon(relative_wis)
+    )  +
+    plot_layout(heights = c(3, 1), guides = "collect")
+  ) |
+  plot_rel_wis_by_location(relative_wis)
+) +
+  plot_layout(guides = "collect", widths = c(2, 1)) +
+  plot_annotation(tag_levels = "a") &
+  theme(
+    legend.position = "bottom", legend.margin = margin(),
+    legend.justification = "centre"
+  )
+```
+
 ## Forecast calibration {-}
 
 - Calibration of forecasts at credible ranges of interest.
@@ -277,7 +296,7 @@ plot_forecasts(forecasts, locs, ranges)
 - Relative interval scores by quantile
 
 ```{r plot-coverage, fig.height = 12, fig.width = 18, out.width = "95%"}
-(
+ (
   (
     (
       plot_coverage_range(coverage, ranges) /
@@ -290,7 +309,8 @@ plot_forecasts(forecasts, locs, ranges)
   plot_layout(guides = "collect", widths = c(1, 2)) +
   plot_annotation(tag_levels = "a") &
   theme(
-    legend.position = "bottom", legend.margin = margin()
+    legend.position = "bottom", legend.margin = margin(),
+    legend.justification = "centre"
   )
 ```
 
