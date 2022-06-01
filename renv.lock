@@ -206,9 +206,14 @@
     "data.table": {
       "Package": "data.table",
       "Version": "1.14.3",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "70b8f1ae499f3d365d8b9a7d30cc8d47"
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteRepo": "data.table",
+      "RemoteUsername": "Rdatatable",
+      "RemoteRef": "HEAD",
+      "RemoteSha": "e9a323de01a17af70d5316016606fa8d35b25023",
+      "Hash": "6988d2b73098c094bcb8068d21f92ce5"
     },
     "desc": {
       "Package": "desc",
@@ -551,6 +556,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "115faaa1a50897c3e2339d1cb7d3d493"
+    },
+    "patchwork": {
+      "Package": "patchwork",
+      "Version": "1.1.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "c446b30cb33ec125ff02588b60660ccb"
     },
     "pillar": {
       "Package": "pillar",
