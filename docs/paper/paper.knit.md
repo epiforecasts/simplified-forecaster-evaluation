@@ -19,18 +19,7 @@ output:
     extra_dependencies: ["float"]
 ---
 
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
-  eval = TRUE,
-  echo = FALSE,
-  message = FALSE,
-  cache = TRUE,
-  messages = FALSE,
-  warnings = FALSE
-)
-```
+
 
 # Introduction {-}
 
@@ -67,46 +56,11 @@ knitr::opts_chunk$set(
 
 ## Data {-}
 
-```{r packages}
-library(data.table)
-library(scoringutils)
-library(lubridate)
-library(forcats)
-library(ggplot2)
-library(ggridges)
-library(patchwork)
-library(scales)
-library(here)
-```
 
-```{r load-functions}
-source(here("R", "utils.R"))
-source(here("R", "evaluate.R"))
-source(here("R", "evaluation-plots.R"))
-source(here("R", "coverage-plots.R"))
-```
 
-```{r data}
-# Load JHU frozen truth data. See data-raw/get-truth.R for munging
-truth <- fread(here("data", "truth.csv"))
 
-# Load population data
-population <- fread(here("data", "population.csv"))
 
-# Load ECDC forecast metadata. See data-raw/get-hub-metadata.R for munging
-#metadata <- fread(here("data", "forecast-metadata.csv"))
 
-# Load ECDC forecasts. See data-raw/get-hub-forecasts.R for munging
-# Merge with truth and rescale to incidence rate per 100,000
-forecasts <- fread(here("data", "forecasts.csv")) |>
-  merge_forecasts_with_truth(truth) |>
-  rescale_to_incidence_rate(population, scale = 1e4) |>
-  rename_models()
-
-# Load forecast scores
-scores <- fread(here("data", "scores.csv")) |>
-  rename_models()
-```
 
 - Data from JHU as used as truth data by the ECDC forecasting hub.
   - When accessed
@@ -195,26 +149,11 @@ In particular, adding a weighting to past expected cases that is more complex th
 - Calibration at 50 and 90 credible intervals
 - Coverage across intervals.
 
-```{r eval-parameters}
-locs <- c("United Kingdom", "Germany", "Slovakia", "Italy", "Poland", "Greece")
-ranges <- c(30, 60, 90)
-```
 
-```{r coverage}
-coverage <- calc_coverage(scores)
-```
 
-```{r relative-interval-score}
-relative_interval_score <- scores |>
-  calc_relative_score(
-    cols = c("location", "target_end_date", "horizon", "range")
-  )
-relative_wis <- scores |>
-  summarise_scores(
-    by = c("location_name", "target_end_date", "horizon", "model")
-  ) |>
-  calc_relative_score(cols = c("location_name", "target_end_date", "horizon"))
-```
+
+
+
 
 ## Implementation {-}
 
@@ -248,9 +187,15 @@ The code for the forecating model defined above along with the infrastructure re
 - Forecast performance overview by forecast horizon. Highlight degrading performance with this impacting the surrogate model to a greater degree. 
 - Discussion country level differences in perforamance and link to potential growth rate trends. 
 
-```{r vis-forecasts, fig.cap = "Forecasts of notified test positive cases (per 10,000 population) by epidemiological week in the Germany, Greece, Italy, Poland, Slovakia, and the United Kingdom,  by forecast horizon (one to four weeks). Incidence rates are shown on a log scale. 30\\%, 60\\%, and 90\\% credible intervals are shown. The black line and points are the notified cases as of the date of data extraction rather than those available at the time.", out.width = "95%", fig.height = 12, fig.width = 12}
-plot_forecasts(forecasts, locs, ranges)
+
 ```
+#> Warning: Transformation introduced infinite values in
+#> continuous y-axis
+```
+
+\begin{figure}
+\includegraphics[width=0.95\linewidth]{paper_files/figure-latex/vis-forecasts-1} \caption{Forecasts of notified test positive cases (per 10,000 population) by epidemiological week in the Germany, Greece, Italy, Poland, Slovakia, and the United Kingdom,  by forecast horizon (one to four weeks). Incidence rates are shown on a log scale. 30\%, 60\%, and 90\% credible intervals are shown. The black line and points are the notified cases as of the date of data extraction rather than those available at the time.}\label{fig:vis-forecasts}
+\end{figure}
 
 ## Forecast evaluation {-}
 
@@ -263,51 +208,20 @@ plot_forecasts(forecasts, locs, ranges)
      - Density/histogram of relative scores + mean line by location
 
 
-```{r make-rwis-plots}
-plot_rwis_horizon <- relative_wis |>
-  plot_relative_wis(y = as.factor(horizon), fill = as.factor(horizon)) +
-  scale_fill_brewer(palette = "Dark2") +
-  labs(y = "Forecast horizon (weeks)") +
-  guides(fill = guide_none())
 
-plot_rwis_location <- relative_wis |>
-  DT(horizon == 1 | horizon == 4) |>
-  plot_relative_wis(
-    y = location_name, fill = as.factor(horizon), alpha = 0.3,
-    jittered_points = FALSE, quantiles = NULL
-  ) +
-  scale_fill_brewer(palette = "Dark2") +
-  labs(y = "Forecast location", fill = "Forecast horizon (weeks)")
 
-plot_rwis_by_month <- relative_wis |>
-  DT(horizon == 1 | horizon == 4) |>
-  DT(, target_month := month(target_end_date, label = TRUE)) |>
-  DT(, target_month := fct_rev(target_month)) |>
-  plot_relative_wis(
-    y = target_month, fill = as.factor(horizon), alpha = 0.3,
-    jittered_points = TRUE, quantiles = NULL
-  ) +
-  scale_fill_brewer(palette = "Dark2") +
-  labs(y = "Target forecast month", fill = "Forecast horizon (weeks)")
+
+```
+#> Warning: Removed 69 rows containing non-finite values
+#> (stat_density_ridges).
+#> Warning: Removed 33 rows containing non-finite values
+#> (stat_density_ridges).
+#> Removed 33 rows containing non-finite values
+#> (stat_density_ridges).
 ```
 
-```{r assemble-eval, fig.height = 18, fig.width = 12, out.width = "95%"}
- (
-  (
-    (
-      plot_rwis_horizon / plot_rwis_by_month
-    )  +
-    plot_layout(heights = c(4, 5), guides = "collect")
-  ) |
-  plot_rwis_location + guides(fill = guide_none())
-) +
-  plot_layout(guides = "collect", widths = c(1, 1)) +
-  plot_annotation(tag_levels = "a") &
-  theme(
-    legend.position = "bottom", legend.margin = margin(),
-    legend.justification = "centre"
-  )
-```
+
+\includegraphics[width=0.95\linewidth]{paper_files/figure-latex/assemble-eval-1} 
 
 ## Forecast calibration {-}
 
@@ -315,24 +229,8 @@ plot_rwis_by_month <- relative_wis |>
 - Calibration across quantiles
 - Relative interval scores by quantile
 
-```{r plot-coverage, fig.height = 12, fig.width = 18, out.width = "95%"}
- (
-  (
-    (
-      plot_coverage_range(coverage, ranges) /
-      plot_rel_score_by_quantile(relative_interval_score)
-    )  +
-    plot_layout(heights = c(3, 1), guides = "collect")
-  ) |
-  plot_coverage_quantiles(scores)
-) +
-  plot_layout(guides = "collect", widths = c(1, 2)) +
-  plot_annotation(tag_levels = "a") &
-  theme(
-    legend.position = "bottom", legend.margin = margin(),
-    legend.justification = "centre"
-  )
-```
+
+\includegraphics[width=0.95\linewidth]{paper_files/figure-latex/plot-coverage-1} 
 
 # Discussion {-}
 

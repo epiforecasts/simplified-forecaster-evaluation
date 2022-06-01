@@ -1,32 +1,3 @@
-#' Plot forecasts by forecast horizon
-#'
-#' @param forecasts A data.tabble of forecasts
-#'
-#' @param locs A character vector of locations to plot.
-#'
-#' @param ranges A numeric vector of credible interval ranges to plot.
-#'
-#' @return A ggplot2 object.
-#' @importFrom scoringutils plot_predictions
-#' @import ggplot2
-#' @import data.table
-plot_forecasts <- function(forecasts, locs, ranges) {
-  forecasts[location_name %in% locs] |>
-    DT(, date := target_end_date) |>
-    plot_predictions(
-      by = c("horizon", "location_name"), range = ranges
-    ) +
-    facet_grid(
-      location_name ~ horizon, scales = "free_y"
-    ) +
-    aes(fill = model, col = model) +
-    scale_y_log10(labels = comma, oob = squish, limits = c(NA, NA)) +
-    scale_fill_brewer(palette = "Dark2") +
-    scale_color_brewer(palette = "Dark2") +
-    labs(x = "Date", fill = "Model", col = "Model", ramp = "Range",
-          y = "Notified test positive cases per 10,000 population")
-}
-
 #' Plot coverage at specified ranges
 #'
 #' @param coverage a  data.table of coverage
