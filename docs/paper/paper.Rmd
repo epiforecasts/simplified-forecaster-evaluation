@@ -280,7 +280,7 @@ plot_rwis_horizon <- relative_wis |>
   copy() |>
   DT(, horizon := fct_rev(as.factor(horizon))) |>
   plot_relative_wis(
-    y = horizon, fill = horizon
+    y = horizon, fill = horizon,
   ) +
   scale_fill_brewer(palette = "Dark2") +
   scale_color_brewer(palette = "Dark2") +
@@ -289,9 +289,8 @@ plot_rwis_horizon <- relative_wis |>
 
 plot_rwis_location <- relative_wis |>
   DT(horizon == 1 | horizon == 4) |>
-  DT(, horizon := fct_rev(as.factor(horizon))) |>
   plot_relative_wis(
-    y = location_name, fill = horizon, alpha = 0.3,
+    y = location_name, fill = as.factor(horizon), alpha = 0.3,
     jittered_points = FALSE, quantiles = NULL,  point_color = horizon
   ) +
   scale_fill_brewer(palette = "Dark2") +
@@ -322,7 +321,7 @@ plot_rwis_by_month <- relative_wis |>
     )  +
     plot_layout(heights = c(4, 5), guides = "collect")
   ) |
-  plot_rwis_location + guides(fill = guide_none())
+  plot_rwis_location
 ) +
   plot_layout(guides = "collect", widths = c(1, 1)) +
   plot_annotation(tag_levels = "a") &
@@ -349,7 +348,7 @@ plot_rwis_by_month <- relative_wis |>
   ) |
   plot_coverage_quantiles(scores)
 ) +
-  plot_layout(guides = "collect", widths = c(1, 2)) +
+  plot_layout(widths = c(1, 2), guides = "collect") +
   plot_annotation(tag_levels = "a") &
   theme(
     legend.position = "bottom", legend.margin = margin(),
