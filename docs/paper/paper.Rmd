@@ -34,18 +34,30 @@ knitr::opts_chunk$set(
 
 # Introduction {-}
 
-- Why
-  - ECDC and CDC forecasting hubs
-  - Ensemble shown to outperform individual models in many cases
-  - Thought of as being more desirable due to reliability etc vs multiple models
-  - Many models are complex and require large amounts of compute time.
-  - As the ensemble is made up of these models it means it is extremely resource demandning to construct requiring significant compute as well as multiple teams.
-  - As the ensemble is constructed from multiple models it functions as effectively a black box. This means it may be hard for policy-makers to understand its underyling assumptions
-  - Here we seek to refine forecasting ideas from our previous work alongside our experiances forecasting COVID-19 as contributors to the ECDC and CDC forecasting hubs to develop a simplified forecasting model that has characteristics fo the ensemble forecast whilst maintianing a interpretability and low resource demands.
+Multi-model and  multi-team ensembles have become increasingly popular as an approach to increase the robustness and performance of infectious disease forecasts over the last decade with significant success [@REF].
+These approaches have drawn heavily on the experiance of other domains, for example climate modelling [@REF], where ensembles of both multiple models and from multiple teams have a long history of providing superior forecasts.
+However, ensemble forecasts have range of potential downsides with the most obvious being their considerable cost to produce as they typically require contributions from multiple independent teams, the development of several models, and a centralised group to run the ensembling project, and that forecasts from these ensembles can be difficult to link to the underling model assumption.
+In climate forecasting emulation approaches have been used to circumvent some of the  resource requirment issue by training a simplified model, usually a non-parametric statistical model, to replicate the behaviour of either the entire model or sub-components [@REF].
+However, within epidemiological modelling we often want to use our models for applications other than forecasting, have fewer insights beyond forecast performance on which to base our mechanistic assumptions. 
+This means that non-parametric emulation is not an ideal solution. 
+In this work we propose and evaluate a surrogate forecast model approach which seeks to emulate the observed behaviour of recent COVID-19 forecast ensembles using a minimal set of easily communicated assumptions, limited computational resources, and an easily generalised implementation. 
+
+The trend towards large-scale multi-team ensemble forecasting in infectious diseases has accelerated during the COVID-19 pandemic, partially due to an increased need from stakeholders for reliable forecast models but also due to the percieved low quality of many forecasts otherwise being produced, with the establishment of the CDC forecasting hub [@REF] in early 2020, the Germany/Poland forecast hub [@REF] in late 2020, and ECDC forecast hub [@ECDC] in 2021. All of these collaborations, which the authors (particularly SF and JB have been involved with managing),  ensemble contributions from multiple independent teams using a similar ensembling approach (most recently an unweighted median ensemble [@REF]) and have shown that their ensemble forecasts outperform most individually contributed forecasts and provide forecasts that are more robust to outliers [@REF].
+However, they have struggled to provide feedback to those contributing forecasts that would allow them to improve their forecast approaches, have found it difficult to improve the quality of their ensemble forecasts [@REF], and have struggled to maintain incentives for forecasters to continue to contribute which may impact the long-term quality of the  ensembles they produce. 
+
+These forecast collaborations, and other similar infectious disease forecasting efforts, have focussed on forecasting reported cases and deaths by epidemiological week (i.e Saturday to Saturday) over a 1 to 4 week time horizon. Generally ground truth data is available daily, and is updated in retrospect as new data becomes available. Typically, the ensemble forecast produced each week is made up of at least 5 independent forecasts using a range of approaches and is produced using an unweighted median ensemble [@REF].
+The majority of submitted forecasts make use of the available daily data, along with potentially other leading predictors to produce daily forecasts that are then aggregated to weekly forecasts.
+Many use a range of outlier processing techniques to reduce reporting artefacts which can bias forecasts.
+In general, 4 main classes of forecast models are used, statistical forecasting models such as ARIMA models [@REF], mechanistic forecasting models based on the compartmental modelling framework and it's generalisations [@REF], semi-mechanistic approaches that blend both of these approaches [@REF], and human insight based forecast models that may also include elements of other methods [@REF].
+Real-time evaluation has shown that each of these classes of models may perform well though in general semi-mechanistic models, and models that include human insights have outperformed other approaches during certain periods of time [@REF].
+We have contributed a range of forecasts to these forecast collobarations generally focussed on semi-mechanistic statistical methods [@REF], and human insight based forecasts [@REF] with our forecasts performing relatively well compared to the majority of those submitted but rarely outperforming significantly.
+The model based forecasts we have contributed have focussed on trying to carefully model the underlying infectious disease dynamics from infection through to symptom onset, and test positivity using non-exponential delay distributions whilst also attempting to model the complexity of daily, within week, reporting periodicity [@REF].
+Our forecasts have generally captured changes in trend better than most submitted models that do not use human insight based on known policy changes but have not been robust to reporting issues such as large outliers in reporting and changes to reporting patterns. 
+Our previous methodology also requires signinficant computational resources running for an hour on a 16 core machine when producing forecasts from the ECDC. 
+In our model based forecasts we did not attempt to capture potential future interventions or known interventions not currently observed in the epidemiological data whereas in our human insight models these were implicitly included.
+We found that our human insight based forecasts significantly outperformed our model based forecasts and hypothesised that this may have been driven by including additional information not observed in the epidemiological data [@REF]. 
 
 - Extension of why
-   - Brief dicussion of implications of modelling NPIs/future changes in behaviour
-   - Brief discussion of reporting patterns in data. Daily/Weekly.
    - Brief discussion of EpiNow2 and related models
    - Brief dicussion of statistical modelling approaches (use MUNI-ARIMA as an example).
    - Brief discussion of scoring of hub models
@@ -53,6 +65,7 @@ knitr::opts_chunk$set(
     - Auto-correlated
     - Typically relatively trend following though shows some ability to forecast future changes. 
 
+Based on these insights here we define a simplified auto-regressive weekly growth rate model that assumes a non-stationary trend in growth rate. This means we do not need to model daily reporting processes, which can cause severe performance issues due to reporting artefacts
 - What
   - Simplified auto-regressive growth rate model assuming a non-stationary trend
   -  Explicit modelling of the assumption that rapid growth/decay of cases will typically result in future growth tending towards zero. This seeks to capture potential implementation and relaxation of NPIs as well as individuals attitudes to risk (assuming this is based on current growth rates and not case incidence).
