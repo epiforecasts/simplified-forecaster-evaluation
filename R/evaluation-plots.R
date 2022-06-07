@@ -65,7 +65,7 @@ plot_relative_wis <- function(relative_wis, alpha = 0.8,
     ) +
     scale_x_continuous(
       trans = "log", limits = c(NA, 5),
-      breaks = c(seq(0, 2, by = 0.2), seq(2.5, 5, by = 0.5))
+      breaks = c(seq(0, 2, by = 0.4), 3, 5)
     ) +
     geom_vline(xintercept = 1, linetype = 2, size = 1.05, alpha = 0.8) +
     theme_scoringutils() +

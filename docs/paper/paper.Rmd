@@ -280,13 +280,12 @@ plot_rwis_horizon <- relative_wis |>
   copy() |>
   DT(, horizon := fct_rev(as.factor(horizon))) |>
   plot_relative_wis(
-    y = horizon, fill = horizon,
-    point_color = horizon
+    y = horizon, fill = horizon
   ) +
   scale_fill_brewer(palette = "Dark2") +
   scale_color_brewer(palette = "Dark2") +
   labs(y = "Forecast horizon (weeks)") +
-  guides(fill = guide_none(), point_color = guide_none())
+  guides(fill = guide_none(), point_color = guide_none(), point = guide_none())
 
 plot_rwis_location <- relative_wis |>
   DT(horizon == 1 | horizon == 4) |>
@@ -311,7 +310,8 @@ plot_rwis_by_month <- relative_wis |>
     jittered_points = TRUE, quantiles = NULL
   ) +
   scale_fill_brewer(palette = "Dark2") +
-  labs(y = "Target forecast month", fill = "Forecast horizon (weeks)")
+  labs(y = "Target forecast month", fill = "Forecast horizon (weeks)") +
+  guides(fill = guide_none())
 ```
 
 ```{r assemble-eval, fig.height = 12, fig.width = 12, out.width = "95%"}
