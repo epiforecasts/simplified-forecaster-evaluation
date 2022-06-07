@@ -6,9 +6,15 @@ author:
     affiliation: 1
     corresponding: true
     email: sam.abbott@lshtm.ac.uk
+  - name:  Johannes Bracher
+    affiliation: 2
+  - name: Sebastian Funk
+    affiliation: 1
 affiliation:
   - code: 1
-    address: Cold Spring Harbor Laboratory, One Bungtown Road Cold Spring Harbor, NY 11724
+    address: London School of Hygiene and Tropical Medicine, London, UK
+  - code: 2
+    address: Chair of Statistics and Econometrics, Karlsruhe Institute of Technology (KIT), Karlsruhe, Germany
 abstract: > 
   We made the best model. It is both simple and amazing.
 bibliography: library.bib
@@ -52,29 +58,36 @@ In general, 4 main classes of forecast models are used, statistical forecasting 
 Real-time evaluation has shown that each of these classes of models may perform well though in general semi-mechanistic models, and models that include human insights have outperformed other approaches during certain periods of time [@REF].
 We have contributed a range of forecasts to these forecast collobarations generally focussed on semi-mechanistic statistical methods [@REF], and human insight based forecasts [@REF] with our forecasts performing relatively well compared to the majority of those submitted but rarely outperforming significantly.
 The model based forecasts we have contributed have focussed on trying to carefully model the underlying infectious disease dynamics from infection through to symptom onset, and test positivity using non-exponential delay distributions whilst also attempting to model the complexity of daily, within week, reporting periodicity [@REF].
-Our forecasts have generally captured changes in trend better than most submitted models that do not use human insight based on known policy changes but have not been robust to reporting issues such as large outliers in reporting and changes to reporting patterns. 
+Based on our observations our forecasts have generally captured changes in trend better than most submitted models that do not use human insight based on known policy changes but have not been robust to reporting issues such as large outliers in reporting and changes to reporting patterns. 
 Our previous methodology also requires signinficant computational resources running for an hour on a 16 core machine when producing forecasts from the ECDC. 
 In our model based forecasts we did not attempt to capture potential future interventions or known interventions not currently observed in the epidemiological data whereas in our human insight models these were implicitly included.
 We found that our human insight based forecasts significantly outperformed our model based forecasts and hypothesised that this may have been driven by including additional information not observed in the epidemiological data [@REF]. 
+Unlike our epidemiologically motivated forecast submissions the hub ensemble forecasts were typically robust to daily reporting artefacts.
+They also demonstrated some ability to forecast future changes in trend that were not present in the observed data similarly to our human insight forecasts indicating the likely inclusion of either human insight or assumptions about future interventions. 
+In general, the ensemble forecasts were more auto-correlated and less reactive to changes from stable or reducing case incidence to increasing incidence.
+On the other hand this also meant that the ensemble was less likely to adopt short-term changes in incidence and hence produced better long-term forecasts.
+Finally, the ensemble forecast tended to produce sharper forecasts and have a tendency towards under vs over predicting.
+There is some suggestion that this was partially driven by the ensemble forecasting having non-exponetial uncertainty, unlike many infectious disease forecasting models. 
 
-- Extension of why
-   - Brief discussion of EpiNow2 and related models
-   - Brief dicussion of statistical modelling approaches (use MUNI-ARIMA as an example).
-   - Brief discussion of scoring of hub models
-   - Summary of observed performance of the hub ensembles
-    - Auto-correlated
-    - Typically relatively trend following though shows some ability to forecast future changes. 
+Based on these insights from our own forecasting work and from observing the hub ensembles behaviour over time here we define a model with similar, but simplified, epidemiological characteristics to our previous approaches to model based forecasting [@REF] with aim of producing ensemble like perform without sacrificing interpretability.
+The first simplification we make is to model only weekly data, rather than using daily data and then aggregating, this means that the impact daily reporting artefacts is mitigated.
+It also serves to increase the auto-correlation of the forecasting model as there is an increased lag before changes in daily observations gain signifcant weight in the model this leads to the observed ensemble behaviour of being relatively auto-correlated and resistant to short-term changes in trend.
+The second simplification we make is to ignore the underlying latent infection process and focus only on the observed reported cases.
+This reduces computational requirements and removes the need for external information on the delay from infection to report which can potentially be misspecified leading to reduced forecast performance.
+However, this sacrifices some of the interpretability of the forecast model as any epidemiological summary statistics we now calculate will be based on reported cases and not latent infections.
+As discussed in [@gostic] this leads to varying amounts of bias depending on the epidemic phase. 
+The final simplification we make is to model the growth rate as a differenced auto-regressive process with order 1 rather than using a more complex method as we have done in other work [@EpiNow2].
+This represents a parsiminous approach in that we encode our expectation that the growth rate should vary over time and allow this to influance the forecast but we include only a single lag term and hence reduce the computational overhead of the model.
+In order to model potential unobserved interventions and more generally changes in transmission we include an additional growth rate modifier restricted to be between 0 and 1 that differs depending on if the growth rate is positive or negative (due to potential differing responses when cases are growing or increasing) and that acts in a multiplicative fashion (meaning that larger absolute growth rates are reduced to zero growth more rapidly). This reflects a simplified interpretation for how the ensemble appears to react to potential future changes. 
+The only observed for which we do not make an adaption is the apparent sharpness of the ensemble compared to our prior forecasting models choosing instead to make use of a negative binomial observation model allowing the inclusion of overdispersion. 
+This choice is motivated by our belief that the underlying process is an exponential one and therefore an exponential error model is a sensible choice though this is an area of current research.
+We suggest that part of the reason the hub ensembles exhibit this behaviour is due to the penalisation of overprediction compared to underprediction caused by the current usage of a generalsied form of the absolute error for the majority of forecast evaluation. 
 
-Based on these insights here we define a simplified auto-regressive weekly growth rate model that assumes a non-stationary trend in growth rate. This means we do not need to model daily reporting processes, which can cause severe performance issues due to reporting artefacts
-- What
-  - Simplified auto-regressive growth rate model assuming a non-stationary trend
-  -  Explicit modelling of the assumption that rapid growth/decay of cases will typically result in future growth tending towards zero. This seeks to capture potential implementation and relaxation of NPIs as well as individuals attitudes to risk (assuming this is based on current growth rates and not case incidence).
-  - Uses weekly vs daily data to side step issues of reporting periodicity and to replicate the observed auto-corelation of the hub ensembles.
-  - Simple extension of an already implemented model and resuse of its modular components.
-  - Implemented with a focus on reproducibility, simplicity, and low resource use. 
-  - The model runs using GitHub actions in a framework supplied by the ECDC forecast hub. We provide our own tools so that others can run the model using GitHub actions democratising our approach.
-
-- Aim: In this work we define a simplified forecasting model designed to replicate some of the observed characteristics of successful infectious disease ensemble models without sacrificing interpretability and with low resource requirements. We evaluate the performance of this model against the ECDC forecasting hub ensemble in real-tim, and discuss implications of our findings along with areas for future research.
+In this study, we define the model outlined above and summarise its implementation, with a focus on minimal resource use and reproducibility, as a GitHub action. 
+We briefly outline some of the summary statistics it produces and their epidemiological relevance. 
+We then evaluate it's real-time performance in comparison to the ECDC forecast hub ensemble by visualising forecasts, using the weighted interval score [@REF], a commonly used proper scoring rule, and quantifying its empirical coverage.
+We attempt to highlight settings where this model performs well as a surrogate to the ensemble forecast and areas where more work is needed. 
+Finally we summarise our findings, discuss their implications, and highlight areas for potential study. We aim for this work to highlight some of the potential implicit assumptions of current forecast hub ensembles, provide a sensible, low resource, surrogate model in settings where large-scale colloborative forecasting efforts are not possible, and provide inspiration for forecasters looking to make principled improvements to their models
 
 # Methods {-}
 
@@ -133,14 +146,6 @@ scores <- fread(here("data", "scores.csv")) |>
   - Ensemble construction and reference
   
 ## Model {-}
-
-### Motivation
-
-The same underlying structure with expected notifications being assumed to be a product of past expected notifications, and an exponentiated time-varying term.
-This term is then modelled in both instances as a differenced autoregressive process with a single lag term.
-By default it is assumed to vary inline with the timestep of the data but this can be altered to speed up computation or to improve out of sample performance.
-Observed cases are estimated from expected cases by assuming a negative binomial observation model.
-A detailed model definition is given below.
 
 ### Definition
 
