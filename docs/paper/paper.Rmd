@@ -180,20 +180,22 @@ These are calculated as follows:
 \end{align*}
 
 $T_s$ is a user set scaling parameter that defines the timespan over which the summary metrics apply dependent on the time step of the data.
-It can be set using the `scale_r` and defaults to 1 which returns summary statistics scaled to the timestep of the data.
-Depending on the setup of the model used these summary measures will be more or less related to their epidemiological definitions.
-In particular, adding a weighting to past expected cases that is more complex than a simple lag may cause interpretation issues.
 
 ## Forecast evaluation {-}
 
-- Visualise forecasts across time horizons in examplar countries.
-- Weighted interval score on incidence rate per 10,000 people to account for population differences between locations.
-- Calibration and coverage.
-- Relative interval score.
-- Relative interval score overall, distribution of scores, by horizon both overall and distribution, by location overall and distribution.
-- Relative interval score by interval range by horizon
-- Calibration at 50 and 90 credible intervals
-- Coverage across intervals.
+In order to standardise forecasts across forecast locations we first normalised both weekly notified test positive cases and forecast test positive cases by the population in the forecast region scaled to be a rate per 10,000 people.
+We then evaluated a subset of forecasts from the following countries Germany, Greece, Italy, Poland, Slovakia, and the United Kingdom visually by forecast horizon (1-4 weeks) for both the ensemble and surrogate model. 
+
+We evaluate forecasts quantatively using the weighted interval score (WIS) [@bracherEvaluatingEpidemicForecasts2021], which is a quantile based proper scoring rule that approximates the e continuous ranked probability score (CRPS).
+Both the WIS and CRPS are generalisations of absolute error in order to evaluate probablistic forecasts and are widely used to evaluate COVID-19 forecasts [@REF].
+We present WIS for the subset of forecasts we explore visually for both the ensemble and surrogate model by date and forecast horizon (1 and 4 weeks) as well as summarising across the study period.
+
+In order to understand the relative performance of the surrogate model compared to the ensemble model we calculate the relative performance (rWIS) by dividing the WIS for the surrogate model by the WIS of the ensemble model.
+In order to maintain the properiety of this score we do this after first taking the means of scores for the relavant stratification.
+We explore relative performance by forecast horizon, by forecast month and forecast horizon, and by forecast location and forecast horizon. 
+
+In addition to presenting the WIS for a subset of locations and the relative WIS for all locations we also calculate and visualise the empirical coverage, which is the percentage of observed values within a given interval or below a given quantile, of both the surrogate and ensemble model for the 30%, 60%, and 90% credible intervals and by quantile. 
+Lastly we calculate and visualise the relative interval score by quantile, stratified by forecast horizon.
 
 ```{r eval-parameters}
 locs <- c("United Kingdom", "Germany", "Slovakia", "Italy", "Poland", "Greece")
@@ -221,16 +223,16 @@ relativ_wis <- wis |>
 
 The model is implemented in `stan` [@stan] and `R` (`4.2.0`) [@R] as an extension of the baseline model from the `forecast.vocs` R package (`0.0.9.7000`) [@forecast.vocs].
 The `cmdstanr` R package (`0.5.2`) [@cmdstanr] is used for model fitting with 2 MCMC chains each having 1000 warm-up and 1000 sampling steps each [@cmdstanr].
-`cmstanr` surfaces several settings which trade-off between sampling speed and the robustness of approach
+`cmstanr` surfaces several settings which trade-off between sampling speed and the robustness of approach.
 Here we take a conservative approach, as model fit is not manually inspected during real-time usage and due to the expected complexity of the posterior [@betancourt_2017], and set the adapt delta setting to 0.99, and the maximum treedepth setting to 15. 
-For real-time usage convergance was not assessed but during model development the Rhat diagnostic was used alongside feedback from `cmdstanr` about the number of divergant transitions and exceedance of the maximum tree depth and posterior predictions visually compared to observed data [@cmdstanr].
+For real-time usage convergance was not assessed but during model development the Rhat diagnostic was used alongside feedback from `cmdstanr` about the number of divergant transitions and exceedance of the maximum tree depth. During development posterior predictions were also visually compared to observed data [@cmdstanr].
 
 To download and manipulate forecasts from the ECDC forecasting hub [@EuroHub] we use  the `data.table` (`1.14.2`) [@data.table] and `gh` (`1.3.0`) [@gh] R packages.
 We make use of further functionality from the `forecast.vocs` R package [@forecast.vocs] to prepare data for forecasting, to visualise forecasts and summary measures, and to summarise forecasts.
-Forecast evaluation is implemented using the `scoringutils` R package (1.0.0) [@scoringutils].
+Forecast evaluation is implemented using the `scoringutils` R package (1.0.0) [@scoringutils], and the `scoringRules` R package (1.0.1).
 
 To ensure reproducibility of this analysis dependencies are managed using the `renv` R package (`0.14.0`) [@renv] and a Dockerfile file along with built Docker image [@Boettiger:2015dw] (via GitHub Actions) is provided.
-Weekly forecasts also made use of `renv` and Docker to ensure reproducibility with GitHub actions used to produce the forecasts ensuring we meet our limited compute goal and that our implementation is independent from available compute resources democratising  access to our approach.
+Weekly forecasts are also made use of `renv` and Docker to ensure reproducibility with GitHub actions used to produce the forecasts ensuring we meet our goal of requring limited compute and that our implementation is independent from local resources resulting in democratised access to our approach.
 The code for this analysis can be found here: https://github.com/epiforecasts/simplified-forecaster-evaluation
 The code for the forecating model defined above along with the infrastructure required to forecast using GitHub Actions can be found here: https://github.com/seabbs/ecdc-weekly-growth-forecasts
 
@@ -243,7 +245,9 @@ The code for the forecating model defined above along with the infrastructure re
 - Total number of forecast models and average per location and per forecast date
 - Summarises general trends in incidence in the data
 
-## Visualisation of forecasts by horizon {-}
+## Forecast evaluation
+
+### Visualisation of forecasts by horizon {-}
 
 - Forecast performance overview for the ensemble and surrogate.
 - Forecast performance overview by forecast horizon. Highlight degrading performance with this impacting the surrogate model to a greater degree. 
@@ -264,7 +268,7 @@ The code for the forecating model defined above along with the infrastructure re
   )
 ```
 
-## Relative forecast evaluation {-}
+### Relative forecast evaluation {-}
 
 - Relative performance of surrogate model by forecast horizon.
    - Give mean relative performance difference by horizon
@@ -331,7 +335,7 @@ plot_rwis_by_month <- relative_wis |>
   )
 ```
 
-## Forecast calibration {-}
+### Forecast calibration {-}
 
 - Calibration of forecasts at credible ranges of interest.
 - Calibration across quantiles
