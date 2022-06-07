@@ -247,7 +247,7 @@ The code for the forecating model defined above along with the infrastructure re
 
 - Forecast performance overview for the ensemble and surrogate.
 - Forecast performance overview by forecast horizon. Highlight degrading performance with this impacting the surrogate model to a greater degree. 
-- Discussion country level differences in perforamance and link to potential growth rate trends. 
+- Discussion country level differences in performance and link to potential growth rate trends. 
 
 ```{r vis-forecasts, fig.cap = "a.) Weighted interval score at the 1 week and 4 week forecast horizon by epidemiological week in Germany, Greece, Italy, Poland, Slovakia, and the United Kingdom. b.)Forecasts of notified test positive cases (per 10,000 population) by epidemiological week in Germany, Greece, Italy, Poland, Slovakia, and the United Kingdom,  by forecast horizon (one to four weeks). Incidence rates are shown on a log scale. 30\\%, 60\\%, and 90\\% credible intervals are shown. The black line and points are the notified cases as of the date of data extraction rather than those available at the time.", out.width = "95%", fig.height = 12, fig.width = 18}
 (
@@ -264,16 +264,16 @@ The code for the forecating model defined above along with the infrastructure re
   )
 ```
 
-## Forecast evaluation {-}
+## Relative forecast evaluation {-}
 
-- Figure 2:
-  Sub-figure 1:
-    - Density/histogram of overall relative scores + mean line
-  Sub-figure 2:
-    - Density/histogram of relative scores + mean line by horizon
-  Sub-figure 3:
-     - Density/histogram of relative scores + mean line by location
-
+- Relative performance of surrogate model by forecast horizon.
+   - Give mean relative performance difference by horizon
+   - Discuss distribution.
+- Relative performance of surrogate model by month stratified by forecast horizon.
+  - Give mean relative performance by month for each horizon
+  - Discuss distribution
+- Relative performance of surrogate model by location sratified by forecast horizon.
+  - Discuss qualatative differences between locations
 
 ```{r make-rwis-plots}
 plot_rwis_horizon <- relative_wis |>
