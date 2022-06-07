@@ -27,6 +27,28 @@ plot_forecasts <- function(forecasts, locs, ranges) {
           y = "Notified test positive cases per 10,000 population")
 }
 
+plot_wis <- function(wis, locs) {
+  wis |>
+    DT(location_name %in% locs) |>
+    DT(horizon == 1 | horizon == 4) |>
+    ggplot() +
+    aes(
+      x = target_end_date, y = interval_score, col = model,
+      shape = as.factor(horizon)
+    ) +
+    geom_point(size = 1.2) +
+    geom_line(alpha = 0.8) +
+    scale_color_brewer(palette = "Dark2") +
+    theme_scoringutils() +
+    theme(legend.position = "bottom") +
+    scale_y_log10() +
+    facet_wrap(vars(location_name), scales = "free_y", ncol = 1) +
+    labs(
+      x = "Date", y = "Weighted interval score",
+      col = "Model", shape =  "Forecast horizon (weeks)"
+    )
+}
+
 plot_relative_wis <- function(relative_wis, alpha = 0.8,
                               jittered_points = TRUE,
                               quantiles = c(0.05, 0.35, 0.65, 0.95), ...) {

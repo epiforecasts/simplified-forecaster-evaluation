@@ -209,10 +209,11 @@ relative_interval_score <- scores |>
   calc_relative_score(
     cols = c("location", "target_end_date", "horizon", "range")
   )
-relative_wis <- scores |>
+wis <- scores |>
   summarise_scores(
     by = c("location_name", "target_end_date", "horizon", "model")
-  ) |>
+  )
+relativ_wis <- wis |>
   calc_relative_score(cols = c("location_name", "target_end_date", "horizon"))
 ```
 
@@ -248,8 +249,19 @@ The code for the forecating model defined above along with the infrastructure re
 - Forecast performance overview by forecast horizon. Highlight degrading performance with this impacting the surrogate model to a greater degree. 
 - Discussion country level differences in perforamance and link to potential growth rate trends. 
 
-```{r vis-forecasts, fig.cap = "Forecasts of notified test positive cases (per 10,000 population) by epidemiological week in the Germany, Greece, Italy, Poland, Slovakia, and the United Kingdom,  by forecast horizon (one to four weeks). Incidence rates are shown on a log scale. 30\\%, 60\\%, and 90\\% credible intervals are shown. The black line and points are the notified cases as of the date of data extraction rather than those available at the time.", out.width = "95%", fig.height = 12, fig.width = 12}
-plot_forecasts(forecasts, locs, ranges)
+```{r vis-forecasts, fig.cap = "a.) Weighted interval score at the 1 week and 4 week forecast horizon by epidemiological week in Germany, Greece, Italy, Poland, Slovakia, and the United Kingdom. b.)Forecasts of notified test positive cases (per 10,000 population) by epidemiological week in Germany, Greece, Italy, Poland, Slovakia, and the United Kingdom,  by forecast horizon (one to four weeks). Incidence rates are shown on a log scale. 30\\%, 60\\%, and 90\\% credible intervals are shown. The black line and points are the notified cases as of the date of data extraction rather than those available at the time.", out.width = "95%", fig.height = 12, fig.width = 18}
+(
+  plot_wis(wis, locs) +
+   theme(strip.text.x = element_blank()) |
+  plot_forecasts(forecasts, locs, ranges) +
+    guides(fill = guide_none(), fill_ramp = guide_none(), col = guide_none())
+) +
+  plot_layout(widths = c(1, 4), guides = "collect") +
+  plot_annotation(tag_levels = "a") &
+  theme(
+    legend.position = "bottom", legend.margin = margin(),
+    legend.justification = "centre"
+  )
 ```
 
 ## Forecast evaluation {-}
@@ -265,19 +277,30 @@ plot_forecasts(forecasts, locs, ranges)
 
 ```{r make-rwis-plots}
 plot_rwis_horizon <- relative_wis |>
-  plot_relative_wis(y = as.factor(horizon), fill = as.factor(horizon)) +
+  copy() |>
+  DT(, horizon := fct_rev(as.factor(horizon))) |>
+  plot_relative_wis(
+    y = horizon, fill = horizon,
+    point_color = horizon
+  ) +
   scale_fill_brewer(palette = "Dark2") +
+  scale_color_brewer(palette = "Dark2") +
   labs(y = "Forecast horizon (weeks)") +
-  guides(fill = guide_none())
+  guides(fill = guide_none(), point_color = guide_none())
 
 plot_rwis_location <- relative_wis |>
   DT(horizon == 1 | horizon == 4) |>
+  DT(, horizon := fct_rev(as.factor(horizon))) |>
   plot_relative_wis(
-    y = location_name, fill = as.factor(horizon), alpha = 0.3,
-    jittered_points = FALSE, quantiles = NULL
+    y = location_name, fill = horizon, alpha = 0.3,
+    jittered_points = FALSE, quantiles = NULL,  point_color = horizon
   ) +
   scale_fill_brewer(palette = "Dark2") +
-  labs(y = "Forecast location", fill = "Forecast horizon (weeks)")
+  scale_color_brewer(palette = "Dark2") +
+  labs(
+    y = "Forecast location", fill = "Forecast horizon (weeks)",
+    point_color = "Forecast horizon (weeks)"
+  )
 
 plot_rwis_by_month <- relative_wis |>
   DT(horizon == 1 | horizon == 4) |>
@@ -291,7 +314,7 @@ plot_rwis_by_month <- relative_wis |>
   labs(y = "Target forecast month", fill = "Forecast horizon (weeks)")
 ```
 
-```{r assemble-eval, fig.height = 18, fig.width = 12, out.width = "95%"}
+```{r assemble-eval, fig.height = 12, fig.width = 12, out.width = "95%"}
  (
   (
     (
