@@ -83,7 +83,7 @@ The only observed for which we do not make an adaption is the apparent sharpness
 This choice is motivated by our belief that the underlying process is an exponential one and therefore an exponential error model is a sensible choice though this is an area of current research.
 We suggest that part of the reason the hub ensembles exhibit this behaviour is due to the penalisation of overprediction compared to underprediction caused by the current usage of a generalsied form of the absolute error for the majority of forecast evaluation. 
 
-In this study, we define the model outlined above and summarise its implementation, with a focus on minimal resource use and reproducibility, as a GitHub action. 
+In this study, we define an initial attempt at a surrogate model to replicate the observed behaviour of current multi-team forecast ensembles whilst maintaining a set of clear assumptionse and summarise its implementation, with a focus on minimal resource use and reproducibility, as a GitHub action. 
 We briefly outline some of the summary statistics it produces and their epidemiological relevance. 
 We then evaluate it's real-time performance in comparison to the ECDC forecast hub ensemble by visualising forecasts, using the weighted interval score [@REF], a commonly used proper scoring rule, and quantifying its empirical coverage.
 We attempt to highlight settings where this model performs well as a surrogate to the ensemble forecast and areas where more work is needed. 
