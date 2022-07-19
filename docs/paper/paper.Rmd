@@ -87,7 +87,7 @@ In this study, we define an initial attempt at a surrogate model to replicate th
 We briefly outline some of the summary statistics it produces and their epidemiological relevance. 
 We then evaluate it's real-time performance in comparison to the ECDC forecast hub ensemble by visualising forecasts, using the weighted interval score [@REF], a commonly used proper scoring rule, and quantifying its empirical coverage.
 We attempt to highlight settings where this model performs well as a surrogate to the ensemble forecast and areas where more work is needed. 
-Finally we summarise our findings, discuss their implications, and highlight areas for potential study. We aim for this work to highlight some of the potential implicit assumptions of current forecast hub ensembles, provide a sensible, low resource, surrogate model in settings where large-scale colloborative forecasting efforts are not possible, and provide inspiration for forecasters looking to make principled improvements to their models
+Finally, we summarise our findings, discuss their implications, and highlight areas for potential study. We aim for this work to highlight some of the potential implicit assumptions of current forecast hub ensembles, provide a sensible, low resource, surrogate model in settings where large-scale colloborative forecasting efforts are not possible, and provide inspiration for forecasters looking to make principled improvements to their models
 
 # Methods {-}
 
@@ -133,18 +133,21 @@ forecasts <- fread(here("data", "forecasts.csv")) |>
 scores <- fread(here("data", "scores.csv")) |>
   rename_models()
 ```
-
-- Data from JHU as used as truth data by the ECDC forecasting hub.
-  - When accessed
-  - Aggregated to epiweek as in the ECDC forecasting GitHub
-  - Countries included
-  - Dates of data included
-- Forecasts from the ECDC forecast hub
-  - Forecasts dowloaded for the model proposed here and the ECDC ensemble
-  - Forecast format
-  - Forecases from when and horizon
-  - Ensemble construction and reference
   
+  We extracted forecasts and data on notified weekly COVID-19 cases from the ECDC forecasting hub from XX to the XX for the ensemble model (referenced as `EuroCOVIDhub-ensemble` by the hub team) and the surrogate model (submitted as `epiforecasts-weeklygrowth`).
+  We included all locations covered by the ECDC forecasting hub which were 32 European countries, including all countries of the European Union and European Free Trade Area, and the United Kingdom.
+  Data on notified weekly cases was originally sourced from the Johns Hopkins University curated data repository (JHU, [@REF]).
+  We used the latest available observed data. As observations are subject to revisions this means that the data used to produce forecasts for a given date may not reflect the data used for evaluation.
+  The follows the common practice of the forecasting hub projects in treating the latest available data as the forecast target regardless of the number of data revisions.
+  Incidence was aggregated over the Morbidity and Mortality Weekly Report (MMWR) epidemiological week definition of Sunday through Saturday.
+  
+  The ECDC forecast hub requests forecasts for 1 to 4 week forecast horizon and requires forecasts to use a pre-specified format with 23 quantiles of the predictive probability distribution.
+  No restrictions were placed on who could submit forecasts and the hub team actively invited particupation from research groups known to be involved with COVID-19 forecasting projects.
+  Forecasters used a wide range of forecasting methods including statistical approaches, mechanistic models including deterministic ordinary differential equation models and agent based model, semi-mechanistic models, expert elicitation models, and ensembles of mutliple approaches (described at https://covid19forecasthub.eu/community.html).
+  Teams submitted forecasts at the latest two days after the complete dataset for the latest forecasting week became available and were allowed to use all data available at the time of submission. 
+  The ensemble forecast was constructed by taking the median of all predictive quantiles without the exlusion of any valid submitted forecast (where validity was defined as passing minimal formatting checks by the hub team). 
+  Submitted forecasts and target observations are freely available with a permissive open-source license from the ECDC forecast hub GitHub repository. We provide code in the repository of this study to streamline access. 
+
 ## Model {-}
 
 ### Definition
@@ -393,6 +396,7 @@ plot_rwis_by_month <- relative_wis |>
 
 ## Further work {-}
 
+Whilst we found that our surrogate model performed compab
   - Other similar model formulations. More lag terms. Reduced run-times using approximate Bayesian approaches.
   
 ## Conclusions {-}
