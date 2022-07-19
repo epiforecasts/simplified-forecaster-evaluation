@@ -4,6 +4,10 @@
 # Download hub forecasts of interest
 Rscript data-raw/get-hub-forecasts.R
 
+
+# Make hub metadata for study period
+Rscript data-raw/get-hub-metadata.R
+
 # Download truth data
 Rscript data-raw/get-truth.R
 

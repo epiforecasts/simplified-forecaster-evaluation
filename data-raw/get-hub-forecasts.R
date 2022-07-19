@@ -20,7 +20,8 @@ models <- c("epiforecasts-weeklygrowth", "EuroCOVIDhub-ensemble")
 
 # First available forecast submission was the 15th of Janurary 2022 and has
 # continued each week
-up_to <- Sys.Date()
+# We freeze data extraction on the 19th of July 2022
+up_to <- as.Date("2022-07-19")
 forecast_dates <- seq(as.Date("2022-01-15"), up_to, by = "day")
 
 # Get forecasts for models of interest

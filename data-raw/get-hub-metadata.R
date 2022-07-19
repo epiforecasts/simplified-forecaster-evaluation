@@ -5,16 +5,19 @@ library(gh)
 
 # Load functions
 source(here("R", "get-hub-forecasts.R"))
+source(here("R", "utils.R"))
+
+# Load already processed forecasts and get target date range
+target_forecasts <- fread(here("data", "forecasts.csv"))
+
+forecast_dates <- target_forecasts |>
+  DT(, forecast_date) |>
+  unique()
 
 # Use memoise
 start_using_memoise()
 
-# First available forecast submission was the 15th of Janurary 2022 and has
-# continued each week
-up_to <- Sys.Date()
-forecast_dates <- seq(as.Date("2022-01-15"), up_to, by = "day")
-
-# Get all forecasts in this period
+# Get forecasts for models of interest
 hub_forecasts <- get_hub_forecasts(
   "covid19-forecast-hub-europe/covid19-forecast-hub-europe",
   dates = forecast_dates
@@ -23,5 +26,10 @@ hub_forecasts <- get_hub_forecasts(
 # Only keep forecasts for incident cases
 hub_forecasts <- hub_forecasts[grepl("inc case", target)]
 
-# Save forecasts
-fwrite(hub_forecasts, here("data", "forecasts.csv"))
+# Streamline to metadata
+metadata <- hub_forecasts |>
+  DT(, .(model, location, forecast_date)) |>
+  unique()
+
+# Save metadata
+fwrite(metadata, here("data", "metadata.csv"))

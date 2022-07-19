@@ -119,8 +119,8 @@ truth <- fread(here("data", "truth.csv"))
 # Load population data
 population <- fread(here("data", "population.csv"))
 
-# Load ECDC forecast metadata. See data-raw/get-hub-metadata.R for munging
-#metadata <- fread(here("data", "forecast-metadata.csv"))
+# Load forecast metedata. See data-raw/get-hub-metadata.R for munging
+metadata <- fread(here("data", "metadata.R"))
 
 # Load ECDC forecasts. See data-raw/get-hub-forecasts.R for munging
 # Merge with truth and rescale to incidence rate per 100,000
@@ -134,7 +134,7 @@ scores <- fread(here("data", "scores.csv")) |>
   rename_models()
 ```
   
-  We extracted forecasts and data on notified weekly COVID-19 cases from the ECDC forecasting hub from XX to the XX for the ensemble model (referenced as `EuroCOVIDhub-ensemble` by the hub team) and the surrogate model (submitted as `epiforecasts-weeklygrowth`).
+  We extracted forecasts and data on notified weekly COVID-19 cases from the ECDC forecasting hub from 15th of January 2022 to the 19th of July 2022 for the ensemble model (referenced as `EuroCOVIDhub-ensemble` by the hub team) and the surrogate model (submitted as `epiforecasts-weeklygrowth`).
   We included all locations covered by the ECDC forecasting hub which were 32 European countries, including all countries of the European Union and European Free Trade Area, and the United Kingdom.
   Data on notified weekly cases was originally sourced from the Johns Hopkins University curated data repository (JHU, [@REF]).
   We used the latest available observed data. As observations are subject to revisions this means that the data used to produce forecasts for a given date may not reflect the data used for evaluation.
@@ -147,6 +147,52 @@ scores <- fread(here("data", "scores.csv")) |>
   Teams submitted forecasts at the latest two days after the complete dataset for the latest forecasting week became available and were allowed to use all data available at the time of submission. 
   The ensemble forecast was constructed by taking the median of all predictive quantiles without the exlusion of any valid submitted forecast (where validity was defined as passing minimal formatting checks by the hub team). 
   Submitted forecasts and target observations are freely available with a permissive open-source license from the ECDC forecast hub GitHub repository. We provide code in the repository of this study to streamline access. 
+
+```{r metadata}
+# Number of locations
+locations <- metadata |>
+  DT(, location) |>
+  unique() |>
+  length()
+
+# Number of models overall
+models <- metadata |>
+  DT(, model) |>
+  unique() |>
+  length()
+
+# Models per forecast date
+models_per_forecast <- metadata |>
+  summarise_forecasts_by(by = "forecast_date")
+
+# Models per location
+models_per_location <- metadata |>
+  summarise_forecasts_by(by = "location")
+
+# Models with a single location target
+locations_per_model <- metadata |>
+  summarise_forecasts_by(var = "location", by = "model")
+
+# Single target models per location
+single_locs_models_per_loc <- metadata |>
+  DT(locations_per_model[n == 1], on = "model") |>
+  summarise_forecasts_by(by = "location")
+
+# Global models
+global_models <- locations_per_model |>
+  DT(n > 30) |>
+  DT(, model)
+
+# Partial coverage models
+partial_coverage <- locations_per_model |>
+  DT(n > 1) |>
+  DT(n <= 30)
+
+# Models coverage of forecast datees
+forecast_dates_by_models <- metadata |>
+  summarise_forecasts_by(var = "forecast_date", by = "model") |>
+  DT(order(n))
+```
 
 ## Model {-}
 
@@ -261,6 +307,7 @@ The code for the forecating model defined above along with the infrastructure re
 
 ## Data summary {-}
 
+We extracted forecasts starting from the 15th of January until the 19th of July 2022 for all countries covered by the ECDC forecasting hub (all ECDC nations and the UK). 
 - Date range of forecasts
 - Forecasts per country
 - Total number of forecast models and average per location and per forecast date

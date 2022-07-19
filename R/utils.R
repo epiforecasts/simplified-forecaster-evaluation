@@ -38,3 +38,10 @@ rename_models <- function(forecasts) {
     ))
   return(forecasts[])
 }
+
+summarise_forecasts_by <- function(forecasts, var = "model", by) {
+  forecasts |>
+    DT(, c(..var, ..by)) |>
+    unique() |>
+    DT(, .(n = .N), by = by)
+  }
