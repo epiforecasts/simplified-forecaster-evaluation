@@ -120,7 +120,7 @@ truth <- fread(here("data", "truth.csv"))
 population <- fread(here("data", "population.csv"))
 
 # Load forecast metedata. See data-raw/get-hub-metadata.R for munging
-metadata <- fread(here("data", "metadata.R"))
+metadata <- fread(here("data", "metadata.csv"))
 
 # Load ECDC forecasts. See data-raw/get-hub-forecasts.R for munging
 # Merge with truth and rescale to incidence rate per 100,000
@@ -151,19 +151,21 @@ scores <- fread(here("data", "scores.csv")) |>
 ```{r metadata}
 # Number of locations
 locations <- metadata |>
-  DT(, location) |>
-  unique() |>
-  length()
+  DT(, uniqueN(location))
 
 # Number of models overall
 models <- metadata |>
-  DT(, model) |>
-  unique() |>
-  length()
+  DT(, uniqueN(model))
+
+# Number of forecast dates
+forecast_dates <- metadata |>
+  DT(, uniqueN(target_end_date))
+
+# Forecasts
 
 # Models per forecast date
 models_per_forecast <- metadata |>
-  summarise_forecasts_by(by = "forecast_date")
+  summarise_forecasts_by(by = "target_end_date")
 
 # Models per location
 models_per_location <- metadata |>
@@ -171,12 +173,34 @@ models_per_location <- metadata |>
 
 # Models with a single location target
 locations_per_model <- metadata |>
-  summarise_forecasts_by(var = "location", by = "model")
+    summarise_forecasts_by(var = "location", by = "model")
+
+locs_per_model_single_date <- metadata |>
+    summarise_forecasts_by(
+    var = "location", by = c("model", "target_end_date")
+    ) |>
+    DT(, unique(.SD[n == max(n), .(n)]), by = "model")
+
+locs_per_model_date <- metadata |>
+  summarise_forecasts_by(
+    var = "location", by = c("model", "target_end_date")
+  ) |>
+  DT(locs_per_model_single_date[, .(model, max_n = n)], on = "model") |>
+  DT(, n_per := n / max_n) |>
+  DT(, .SD[!all(n == max_n)], by = "model")
+
+models_per_loc_date <- metadata |>
+  summarise_forecasts_by(var = "model", by = c("target_end_date", "location"))
 
 # Single target models per location
 single_locs_models_per_loc <- metadata |>
   DT(locations_per_model[n == 1], on = "model") |>
   summarise_forecasts_by(by = "location")
+
+# Local models
+local_models <- locations_per_model |>
+  DT(n == 1) |>
+  DT(, model)
 
 # Global models
 global_models <- locations_per_model |>
@@ -184,13 +208,13 @@ global_models <- locations_per_model |>
   DT(, model)
 
 # Partial coverage models
-partial_coverage <- locations_per_model |>
+partial_models <- locations_per_model |>
   DT(n > 1) |>
   DT(n <= 30)
 
 # Models coverage of forecast datees
 forecast_dates_by_models <- metadata |>
-  summarise_forecasts_by(var = "forecast_date", by = "model") |>
+  summarise_forecasts_by(var = "target_end_date", by = "model") |>
   DT(order(n))
 ```
 
@@ -307,7 +331,10 @@ The code for the forecating model defined above along with the infrastructure re
 
 ## Data summary {-}
 
-We extracted forecasts starting from the 15th of January until the 19th of July 2022 for all countries covered by the ECDC forecasting hub (all ECDC nations and the UK). 
+We extracted forecasts starting from the 15th of January until the 19th of July 2022 for all countries covered by the ECDC forecasting hub (all ECDC nations and the UK making `r locations` unique locations). In total `r nrow(metadata)` forecasts were made across all locations, `r forecast_dates` forecast dates from `r models` independent forecast models (including the ECDC baseline model). Of these models, `r length(global_models)` forecasted in at least 30 locations including our original submission  (referred to as "epiforecasts-EpiNow2" by the hub), and our surrogate model (referred to as "epiforecasts-weeklygrowth" by the hub). Of the remainining models submitted `r length(local_models)` were submitted in only one location. These models were gernerally submitted to a subset of locations with particular clustering in Germany and Poland (likely due to the folding of the German/Poland forecasting hub into the ECDC forecasting hub project). Italy was also an outlier with `r single_locs_models_per_loc[location == "IT", n]` models that submitted nowhere else. `r length(partial_models)` models submitted for between 2 and 30 locations likely indicating manual curation of submissions.
+
+Across all forecast dates and locations the minimum number of independent forecasts was `r models_per_loc_date[, min(n)]` with the maxmimum being `r models_per_loc_date[, max(n)]`. The median number of independent forecasts per location and forecast date was `r models_per_loc_date[, median(n)]`. Across all forecast dates all locations recieved forecasts from at least `r models_per_location[, min(n)]` models with the median number of forecast models per location being `r models_per_location[, median(n)]`.
+
 - Date range of forecasts
 - Forecasts per country
 - Total number of forecast models and average per location and per forecast date

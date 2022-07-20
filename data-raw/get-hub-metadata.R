@@ -26,9 +26,14 @@ hub_forecasts <- get_hub_forecasts(
 # Only keep forecasts for incident cases
 hub_forecasts <- hub_forecasts[grepl("inc case", target)]
 
+# Drop the Hub ensemble
+hub_forecasts <- hub_forecasts |>
+  DT(!model %in% "EuroCOVIDhub-ensemble")
+  
 # Streamline to metadata
 metadata <- hub_forecasts |>
-  DT(, .(model, location, forecast_date)) |>
+  DT(target %in% "1 wk ahead inc case") |>
+  DT(, .(model, location, forecast_date, target_end_date)) |>
   unique()
 
 # Save metadata
