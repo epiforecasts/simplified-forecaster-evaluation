@@ -318,7 +318,7 @@ wis <- scores |>
   summarise_scores(
     by = c("location_name", "target_end_date", "horizon", "model")
   )
-relativ_wis <- wis |>
+relative_wis <- wis |>
   calc_relative_score(cols = c("location_name", "target_end_date", "horizon"))
 ```
 
