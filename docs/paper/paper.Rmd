@@ -161,8 +161,6 @@ models <- metadata |>
 forecast_dates <- metadata |>
   DT(, uniqueN(target_end_date))
 
-# Forecasts
-
 # Models per forecast date
 models_per_forecast <- metadata |>
   summarise_forecasts_by(by = "target_end_date")
@@ -171,13 +169,13 @@ models_per_forecast <- metadata |>
 models_per_location <- metadata |>
   summarise_forecasts_by(by = "location")
 
-# Models with a single location target
+# Models with a location target
 locations_per_model <- metadata |>
     summarise_forecasts_by(var = "location", by = "model")
 
 locs_per_model_single_date <- metadata |>
     summarise_forecasts_by(
-    var = "location", by = c("model", "target_end_date")
+      var = "location", by = c("model", "target_end_date")
     ) |>
     DT(, unique(.SD[n == max(n), .(n)]), by = "model")
 
@@ -212,11 +210,11 @@ partial_models <- locations_per_model |>
   DT(n > 2) |>
   DT(n <= 30)
 
-#Varying submissions
+# Varying submissions
 varying_submissions <- locs_per_model_date |>
   DT(partial_models[, .(model)], on = "model")
 
-# Models coverage of forecast datees
+# Models coverage of forecast dats
 forecast_dates_by_models <- metadata |>
   summarise_forecasts_by(var = "target_end_date", by = "model") |>
   DT(order(n)) |>
@@ -356,6 +354,7 @@ Across all forecast dates and locations the minimum number of independent foreca
 - Forecast performance overview for the ensemble and surrogate.
 - Forecast performance overview by forecast horizon. Highlight degrading performance with this impacting the surrogate model to a greater degree. 
 - Discussion country level differences in performance and link to potential growth rate trends. 
+- Discuss differences between countries with different numbers and kinds of submitted forecast models.
 
 ```{r vis-forecasts, fig.cap = "a.) Weighted interval score at the 1 week and 4 week forecast horizon by epidemiological week in Germany, Greece, Italy, Poland, Slovakia, and the United Kingdom. b.)Forecasts of notified test positive cases (per 10,000 population) by epidemiological week in Germany, Greece, Italy, Poland, Slovakia, and the United Kingdom,  by forecast horizon (one to four weeks). Incidence rates are shown on a log scale. 30\\%, 60\\%, and 90\\% credible intervals are shown. The black line and points are the notified cases as of the date of data extraction rather than those available at the time.", out.width = "95%", fig.height = 12, fig.width = 18}
 (
@@ -375,6 +374,7 @@ Across all forecast dates and locations the minimum number of independent foreca
 ### Relative forecast evaluation {-}
 
 - Relative performance of surrogate model by forecast horizon.
+   - Overall performance (mean)
    - Give mean relative performance difference by horizon
    - Discuss distribution.
 - Relative performance of surrogate model by month stratified by forecast horizon.
@@ -470,6 +470,13 @@ plot_rwis_by_month <- relative_wis |>
 
 ## Stengths and weaknesses {-}
 
+- Real-time evaluation of a model with development tracked using version control (showing no changes since January 2022).
+- Conducted using reproducibility best practices with all code available for reuse. THe model is implemented in GitHub actions so can be reused without any compute resources and is by definition fast to run.
+- Only use absolute scoring which has implications for what we consider a good model. This is the approach used by the hub and so makes sense here but area of active research to understand what is more appropriate.
+- Limited exploration of model formulations. Likely that there are alternatives that perform closer to the ensemble
+- As our target is not to produce the best COVID-19 forecast model, or the best COVID-19 forecast model as defined using the metrics used to evaluate by the ECDC but rather to develop a model that closely matches the Hub ensemble whilst maintaining interpretability and using limited resources it is likely that it will perform less  well than a forecast model designed with the first two criterion in mind. 
+  - However, if we start from the review that the forecast hub ensemble has traits that are desirable for use by policy-makers (i.e robustness and good average performance) then our approach makes sense. This is the view often used in the literature.
+
 ## Literature context {-}
 
   - Emulators in weather forecasting and elsewhere
@@ -481,6 +488,8 @@ plot_rwis_by_month <- relative_wis |>
 
 Whilst we found that our surrogate model performed compab
   - Other similar model formulations. More lag terms. Reduced run-times using approximate Bayesian approaches.
+  - Role of simple models for adjusting for susceptible population. Highlight useful now but not in early pandemic
+  - Follow up study comparing these results to retrospective forecasts from early in the pandemic or on other infectious disease outbreaks (though limited by requirement of a multi-team ensemble to compare to).
   
 ## Conclusions {-}
 
