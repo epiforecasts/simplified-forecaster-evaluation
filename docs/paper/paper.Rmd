@@ -468,6 +468,17 @@ plot_rwis_by_month <- relative_wis |>
 
 ## Summary {-}
 
+In this study, we defined a surrogate model aiming to replicate some of the observed behaviour of the ECDC forecast hub multi-team ensemble for forecasting test positive reported COVID-19 cases in ECDC nations and the UK. We first derived a set of assumptions for how the surrogate model should behaved based on our observations of the ECDC forecast hub ensemble, our experiance submitting forecasts to various forecast Hubs and our observations of the performance of other models. We restricted ourselves to a model that could be easily understand, that produced meaningful summary statistics, and that could be run with low compute resources. We further provide a fully reproducibile workflow for running this model using GitHub actions and code to evaluate its performance. 
+
+Over the 6 months of the study period, we found that our surrogate model performed adequately at reproducing the forecast hub ensemble with average performance that was in general slightly worse though this varied by location and forecast date. Performance was closest for short forecast horizons and degraded relative to the forecast hub ensemble as the horizon increased. We observed that our surrogate model displayed similar levels of robustness to the forecast ensemble with few outlier forecasts unlike our previous forecasting efforts [@refNikosinGermany] and also partially captured the hub ensembles propensity to forecast reductions in incidence after periods of increase. Unlike the forecast hub ensemble our surrogate model was well calibrated at all horizons and credible intervals explored though it was overly uncertain at short horizons. We found that the majority of the difference in performance between our surrogate model and the hub ensemble occured in the tails of the predictive distribution with similar central forecasts.
+
+In this study, we define an initial attempt at a surrogate model to replicate the observed behaviour of current multi-team forecast ensembles whilst maintaining a set of clear assumptionse and summarise its implementation, with a focus on minimal resource use and reproducibility, as a GitHub action. 
+We briefly outline some of the summary statistics it produces and their epidemiological relevance. 
+We then evaluate it's real-time performance in comparison to the ECDC forecast hub ensemble by visualising forecasts, using the weighted interval score [@REF], a commonly used proper scoring rule, and quantifying its empirical coverage.
+We attempt to highlight settings where this model performs well as a surrogate to the ensemble forecast and areas where more work is needed. 
+Finally, we summarise our findings, discuss their implications, and highlight areas for potential study. We aim for this work to highlight some of the potential implicit assumptions of current forecast hub ensembles, provide a sensible, low resource, surrogate model in settings where large-scale colloborative forecasting efforts are not possible, and provide inspiration for forecasters looking to make principled improvements to their models
+
+
 ## Stengths and weaknesses {-}
 
 - Real-time evaluation of a model with development tracked using version control (showing no changes since January 2022).
@@ -476,6 +487,7 @@ plot_rwis_by_month <- relative_wis |>
 - Limited exploration of model formulations. Likely that there are alternatives that perform closer to the ensemble
 - As our target is not to produce the best COVID-19 forecast model, or the best COVID-19 forecast model as defined using the metrics used to evaluate by the ECDC but rather to develop a model that closely matches the Hub ensemble whilst maintaining interpretability and using limited resources it is likely that it will perform less  well than a forecast model designed with the first two criterion in mind. 
   - However, if we start from the review that the forecast hub ensemble has traits that are desirable for use by policy-makers (i.e robustness and good average performance) then our approach makes sense. This is the view often used in the literature.
+- As the majority of the difference in relative performance occurred in the tail of the predictive distribution and that performance in the central predictive distribution was fairly similar this indicates that fore post-processing could make performance more similar. However, this would like reduce the calibration of our surrogate model which is not to be desired. Instead we hypothesis that this feature is driven by potentially inappropriate use of absolute scoring methods for exponential processes though our choice here was motivated by the methodology adopted by the forecast hubs.
 
 ## Literature context {-}
 
