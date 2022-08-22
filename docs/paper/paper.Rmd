@@ -67,7 +67,7 @@ They also demonstrated some ability to forecast future changes in trend that wer
 In general, the ensemble forecasts were more auto-correlated and less reactive to changes from stable or reducing case incidence to increasing incidence.
 On the other hand this also meant that the ensemble was less likely to adopt short-term changes in incidence and hence produced better long-term forecasts.
 Finally, the ensemble forecast tended to produce sharper forecasts and have a tendency towards under vs over predicting.
-There is some suggestion that this was partially driven by the ensemble forecasting having non-exponetial uncertainty, unlike many infectious disease forecasting models. 
+There is some suggestion that this was partially driven by the ensemble forecasting having non-exponential uncertainty, unlike many infectious disease forecasting models. 
 
 Based on these insights from our own forecasting work and from observing the hub ensembles behaviour over time here we define a model with similar, but simplified, epidemiological characteristics to our previous approaches to model based forecasting [@REF] with aim of producing ensemble like perform without sacrificing interpretability.
 The first simplification we make is to model only weekly data, rather than using daily data and then aggregating, this means that the impact daily reporting artefacts is mitigated.
@@ -230,7 +230,7 @@ forecast_dates_by_models <- metadata |>
 
 ## Model {-}
 
-### Definition
+### Definition {-}
 
 We model the expectation ($\lambda_t$) of reported cases ($C_t$) as an order 1 autoregressive (AR(P)) process by epidemiological week ($t$).
 The model is initialised by assuming that the initial reported cases are representative with a small amount of error (2.5%).
@@ -269,7 +269,7 @@ The Beta priors for $\xi{+,-}$ have been chosen to be weakly informative that th
 Similarly the prior for $\beta$ has been chosen to be weakly informative that there is weak auto-correlation in differenced growth rates.
 $\sigma$ has also been made weakly informative under the assumption that the potential change in growth rates in a single timestep should be relatively small.
 
-### Summary statistics
+### Summary statistics {-}
 
 As well as posterior predictions and forecasts for notifcations the model also returns several epidemiological summary statistics which may be useful for drawing inferences about underlying transmission dynamics.
 These are the log scale growth rate ($g^{o, \delta}_t$), and the instantaneous effective reproduction number ($R^{o, \delta}_t$).
@@ -347,14 +347,17 @@ We extracted forecasts starting from the 15th of January until the 19th of July 
 
 Across all forecast dates and locations the minimum number of independent forecasts was `r models_per_loc_date[, min(n)]` with the maxmimum being `r models_per_loc_date[, max(n)]`. The median number of independent forecasts per location and forecast date was `r models_per_loc_date[, median(n)]`. All locations recieved forecasts from at least `r models_per_location[, min(n)]` models with the median number of forecast models per location being `r models_per_location[, median(n)]`. Coverage of forecast dates varied across submitted models with `r forecast_dates_by_models[n_per == 1, .N]` models submitting for all dates, `r forecast_dates_by_models[n_per >= 0.9, .N]` models submitting for at least 90% of dates, and `r forecast_dates_by_models[n_per < 0.50, .N]` models submitting for fewer than 50% of forecast dates. In general, there was no clear difference in forecast date coverage between models that submitted for all locations vs a small subset but models with partial coverage of locations all also had partial coverage of forecast dates.
 
-## Forecast evaluation
+## Forecast evaluation {-}
 
 ### Visualisation of forecasts by horizon {-}
 
-- Forecast performance overview for the ensemble and surrogate.
-- Forecast performance overview by forecast horizon. Highlight degrading performance with this impacting the surrogate model to a greater degree. 
-- Discussion country level differences in performance and link to potential growth rate trends. 
-- Discuss differences between countries with different numbers and kinds of submitted forecast models.
+In our example set of locations, the absolute performance of the ensemble and the surrogate model was similar in all locations at short forecast horizons though varied by location.
+Performance was most comparable in Slovakia but in the United Kingdom and Germany in particular the surrogate model outperformed visibly worse for some forecast dates (Figure \@ref(fig:vis-forecasts)).
+For both the ensemble and the surrogate performance visibly decreased as the forecast horizon increased though the relative difference in performance between models was relatively stable across horizons.
+In general in the study period the ensemble appeared to be liable to underpredict and the surrogate model appeared more likely to overpredict. 
+Both models forecast large reductions in incidence in Poland during May that did not occur whilst only the ensemble forecast spuriously forecast similar large reductions in Germany during June.
+In comparison to the ensemble model the surrogate model appeared less likely to place weight on infeasibly large reductions in incidence during periods of declining incidence but on other hand was more likely to forecast continuing increases in incidence (for example in Febuary in Slokavkia and Poland).
+Italy and Germany, which had the highest number of submitted models of the example locations had little clear difference in performance between the ensemble and surrogate models compared to other example locations.
 
 ```{r vis-forecasts, fig.cap = "a.) Weighted interval score at the 1 week and 4 week forecast horizon by epidemiological week in Germany, Greece, Italy, Poland, Slovakia, and the United Kingdom. b.)Forecasts of notified test positive cases (per 10,000 population) by epidemiological week in Germany, Greece, Italy, Poland, Slovakia, and the United Kingdom,  by forecast horizon (one to four weeks). Incidence rates are shown on a log scale. 30\\%, 60\\%, and 90\\% credible intervals are shown. The black line and points are the notified cases as of the date of data extraction rather than those available at the time.", out.width = "95%", fig.height = 12, fig.width = 18}
 (
