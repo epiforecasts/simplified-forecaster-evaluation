@@ -1,7 +1,4 @@
 on:
-  schedule:
-    - cron:  '6 12 * * *'
-    - cron: '6 10 * * *'
   push:
     branches:
       - main
@@ -10,10 +7,10 @@ on:
       - '*'
   workflow_dispatch:
 
-name: render-documentation
+name: render-paper
 
 jobs:
-  render-documentation:
+  render-paper:
     runs-on: macOS-latest
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
