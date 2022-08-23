@@ -21,24 +21,21 @@ jobs:
       - uses: r-lib/actions/setup-renv@v2
         with:
           cache-version: 2
-      - uses: r-lib/actions/setup-tinytex@v2
-
-    
-      - name: Render project paper
+      - uses: r-lib/actions/setup-tinytex@v
+      - name: Render
         run: |
-          rmarkdown::render("paper/paper.Rmd", output_dir = "docs")
+          rmarkdown::render("paper/paper.Rmd", output_dir = "rendered-paper")
         shell: Rscript {0}
-
-      - name: Upload documentation
+      - name: Upload
         uses: actions/upload-artifact@v2
         with:
-          name: documentation
+          name: paper
           retention-days: 5
-          path: docs
+          path: rendered-paper
 
-  publish-documentation:
+  publish-paper:
     if: github.ref == 'refs/heads/main' && github.repository == 'epiforecasts/simplfied-forecaster-evaluation'
-    needs: render-documentation
+    needs: render-paper
     runs-on: macOS-latest
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
@@ -50,13 +47,13 @@ jobs:
         git rm -rf .
     - uses: actions/download-artifact@v2
       with:
-        name: documentation
+        name: rendered-paper
         path: .
-    - name: Commit and push documentation
+    - name: Commit and push
       run: |
         git config user.email "action@github.com"
-        git config user.name "GitHub Action - Published documentation"
+        git config user.name "GitHub Action - Published paper"
         git add --all
-        git commit -m "Published documentation"
+        git commit -m "Published paper"
         git push -f origin gh-pages:gh-pages
-        echo "reports published to GitHub"
+        echo "paper published to GitHub"
