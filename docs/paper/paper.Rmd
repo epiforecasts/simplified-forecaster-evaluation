@@ -19,7 +19,6 @@ abstract: >
   We made the best model. It is both simple and amazing.
 bibliography: library.bib
 output:
-  rticles::peerj_article: default
   bookdown::pdf_book:
     base_format: rticles::peerj_article
     extra_dependencies: ["float"]
@@ -95,6 +94,7 @@ Finally, we summarise our findings, discuss their implications, and highlight ar
 
 ```{r packages}
 library(data.table)
+library(purrr)
 library(scoringutils)
 library(lubridate)
 library(forcats)
@@ -318,6 +318,29 @@ wis <- scores |>
   )
 relative_wis <- wis |>
   calc_relative_score(cols = c("location_name", "target_end_date", "horizon"))
+
+relative_wis_by_horizon <- scores |>
+  summarise_scores(by = c("horizon", "model")) |>
+  calc_relative_score(cols = c("horizon")) |>
+  DT(, ris := round(relative_interval_score, 2))
+
+relative_median_wis_by_horizon <- relative_wis |>
+  DT(,
+     .(relative_interval_score = median(relative_interval_score)),
+     by = horizon
+  ) |>
+  DT(, ris := round(relative_interval_score, 2))
+
+relative_wis_thresholds <- relative_wis |>
+  DT(,
+    .(
+      better_than = sum(relative_interval_score < 1) / .N,
+      fifty_percent = sum(relative_interval_score < 1.5) / .N,
+      more_than_100_percent = sum(relative_interval_score > 2) / .N
+    )
+  ) |>
+  DT(, map(.SD, ~ round(. * 100, digits = 0))) |>
+  DT(, map(.SD, ~ paste0(., "%")))
 ```
 
 ## Implementation {-}
@@ -360,7 +383,7 @@ In comparison to the ensemble model the surrogate model appeared less likely to 
 Italy and Germany, which had the highest number of submitted models of the example locations had little clear difference in performance between the ensemble and surrogate models compared to other example locations.
 
 ```{r vis-forecasts, fig.cap = "a.) Weighted interval score at the 1 week and 4 week forecast horizon by epidemiological week in Germany, Greece, Italy, Poland, Slovakia, and the United Kingdom. b.)Forecasts of notified test positive cases (per 10,000 population) by epidemiological week in Germany, Greece, Italy, Poland, Slovakia, and the United Kingdom,  by forecast horizon (one to four weeks). Incidence rates are shown on a log scale. 30\\%, 60\\%, and 90\\% credible intervals are shown. The black line and points are the notified cases as of the date of data extraction rather than those available at the time.", out.width = "95%", fig.height = 12, fig.width = 18}
-(
+p <- (
   plot_wis(wis, locs) +
    theme(strip.text.x = element_blank()) |
   plot_forecasts(forecasts, locs, ranges) +
@@ -372,19 +395,23 @@ Italy and Germany, which had the highest number of submitted models of the examp
     legend.position = "bottom", legend.margin = margin(),
     legend.justification = "centre"
   )
+suppressWarnings(print(p))
 ```
 
 ### Relative forecast evaluation {-}
 
-- Relative performance of surrogate model by forecast horizon.
-   - Overall performance (mean)
-   - Give mean relative performance difference by horizon
-   - Discuss distribution.
-- Relative performance of surrogate model by month stratified by forecast horizon.
-  - Give mean relative performance by month for each horizon
-  - Discuss distribution
-- Relative performance of surrogate model by location sratified by forecast horizon.
-  - Discuss qualatative differences between locations
+Evaluating the ensemble and surrogate models using the weighted interval score across all locations and forecast dates we found that the mean relative performance of the surrogate model was `r relative_wis_by_horizon[horizon == 1, ris]` at the one week horizon, `r relative_wis_by_horizon[horizon == 2, ris]` at the two week horizon, `r relative_wis_by_horizon[horizon == 3, ris]` at the three week horizon, and `r relative_wis_by_horizon[horizon == 4, ris]` at the four week horizon.
+Indicating that the ensemble forecast outperformed the surrogate forecast for all horizons by approximately 100% on average with the surrogate model performing worst at the one and four week horizon.
+However, much of this outperformance was driven by a small subset of forecasts with relative performance having a heavy tail (Figure \@ref(fig:assemble-eval) a). 
+If we instead consider median relative performance (note not a proper score) we find that, relative to the ensemble, the surrogate scored `r relative_median_wis_by_horizon[horizon == 1, ris]` at the one week horizon, `r relative_median_wis_by_horizon[horizon == 2, ris]` at the two week horizon, `r relative_median_wis_by_horizon[horizon == 3, ris]` at the three week horizon, and `r relative_median_wis_by_horizon[horizon == 4, ris]` at the four week horizon.
+Looking across the distribution of relative scores by horizon we see little evidence that relative forecast quality decreased with time, though the tail of the distribution appears slightly heavier at the 4 week time horizon (Figure \@ref(fig:assemble-eval) a).
+`r relative_wis_thresholds[, better_than]` of surrogate forecasts scored better than the comparable ensemble forecast, `r relative_wis_thresholds[, fifty_percent]` performed within 50% of the comparable ensemble forecat, and scored `r relative_wis_thresholds[, more_than_100_percent]` performed worse than 100% more than the comparable ensemble forecast.
+
+The surrogate models relative performance varied over time with sustantially worse performance in January to March compared to later in the year across all forecast horizons (Figure \@ref(fig:assemble-eval) b).
+The majority in the difference in peformance appeared to be driven by a thicker right tail with this being particular feature of forecasts at longer horizons. Notably forecast performance in March had a big-model distribution at the four week horizon with a substational fraction of surrogate forecasts outperforming the ensemble.
+This viariation in performance may have been linked to the BA.2 wave which peaked in most locations during this time period.
+
+There was also substantial variation across forecast locations with the surrogate performing well in some locations at some forecast horizons, for example the four week horizon in the United Kingdom, and badly in others, for example the four week forecast in Switzerland (Figure \@ref(fig: assemble-eval) c). In general, across locations, as observed overall, relative forecast performance was comparable across horizons though with a heavier right tail at longer horizons. Some locations showed less of this behaviour, for example Spain, and in some it was very dominant, for exampel Switzerland. 
 
 ```{r make-rwis-plots}
 plot_rwis_horizon <- relative_wis |>
@@ -424,8 +451,8 @@ plot_rwis_by_month <- relative_wis |>
   guides(fill = guide_none())
 ```
 
-```{r assemble-eval, fig.height = 12, fig.width = 12, out.width = "95%"}
- (
+```{r assemble-eval, fig.height = 12, fig.width = 12, out.width = "95%", fig.cap = "Relative weighted interval score by location, horizon, and forecast date for the surrogate forecast model compared to the ensemble forecast model on the log scale. a.) Density of the relative score by horizon. Horizontal black lines give the 5\\%, 35\\%, 65\\%, and 95\\% quantiles. b.) Density of the relative score by month for a given forecast horizon stratified by the one and four week forecast horizon. c.) Density of the relative score by forecast location stratified by the one and four week forecast horizon. The dashed line on all plots indicates when the ensemble forecast is equivalent to the surrogate forecast. The vertical black lines on the y axis give gives individual relative scores."}
+p <- (
   (
     (
       plot_rwis_horizon / plot_rwis_by_month
@@ -440,6 +467,7 @@ plot_rwis_by_month <- relative_wis |>
     legend.position = "bottom", legend.margin = margin(),
     legend.justification = "centre"
   )
+suppressWarnings(print(p))
 ```
 
 ### Forecast calibration {-}
@@ -448,8 +476,8 @@ plot_rwis_by_month <- relative_wis |>
 - Calibration across quantiles
 - Relative interval scores by quantile
 
-```{r plot-coverage, fig.height = 12, fig.width = 18, out.width = "95%"}
- (
+```{r plot-coverage, fig.height = 12, fig.width = 18, out.width = "95%", fig.cap = "a.), b.), c.)"}
+p <- (
   (
     (
       plot_coverage_range(coverage, ranges) /
@@ -465,6 +493,7 @@ plot_rwis_by_month <- relative_wis |>
     legend.position = "bottom", legend.margin = margin(),
     legend.justification = "centre"
   )
+suppressWarnings(print(p))
 ```
 
 # Discussion {-}
