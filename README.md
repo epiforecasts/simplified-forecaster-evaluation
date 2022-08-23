@@ -26,6 +26,6 @@ Alternatively a docker [container](https://github.com/epiforecasts/simplfied-for
 
 ## Reproducibility
 
-Once all dependencies are installed (see above) the paper analysis can be rerun using `paper/paper.Rmd either interactively or rerendered as a document using `Rmarkdown`. To make this step easier we also provide a GitHub action to publish an updated version of the analysis to the `gh-pages` branch. 
+Once all dependencies are installed (see above) the paper analysis can be rerun using `paper/paper.Rmd` either interactively or rerendered as a document using `Rmarkdown`. To make this step easier we also provide a GitHub action to publish an updated version of the analysis to the `gh-pages` branch. 
 
 See `data-raw` for the code to re-extract forecasts and truth data, create metadata, normalise by population, and score forecasts against truth data. All steps of this process can be done automatically using `data-raw/update.sh`. Results from these steps will be stored in `data` as `.csv` files.
