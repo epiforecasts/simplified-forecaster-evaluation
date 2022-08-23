@@ -189,6 +189,13 @@
       "Repository": "CRAN",
       "Hash": "bb4341986bc8b914f0f0acf2e4a3f2f7"
     },
+    "cpp11": {
+      "Package": "cpp11",
+      "Version": "0.4.2",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "fa53ce256cd280f468c080a58ea5ba8c"
+    },
     "crayon": {
       "Package": "crayon",
       "Version": "1.5.1",
@@ -277,6 +284,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "77bd60a6157420d4ffa93b27cf6a58b8"
+    },
+    "forcats": {
+      "Package": "forcats",
+      "Version": "0.5.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "81c3244cab67468aac4c60550832655d"
     },
     "forecast.vocs": {
       "Package": "forecast.vocs",
@@ -487,6 +501,13 @@
       "Repository": "CRAN",
       "Hash": "31b53df2593afd03a4969ae028c437b1"
     },
+    "lubridate": {
+      "Package": "lubridate",
+      "Version": "1.8.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "2ff5eedb6ee38fb1b81205c73be1be5a"
+    },
     "magrittr": {
       "Package": "magrittr",
       "Version": "2.0.3",
@@ -675,13 +696,6 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "61f94b51fc49feea6637bb09e7ac81f3"
-    },
-    "rticles": {
-      "Package": "rticles",
-      "Version": "0.23",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "4cab3463b39137d4dd113b751cb2805d"
     },
     "sass": {
       "Package": "sass",
