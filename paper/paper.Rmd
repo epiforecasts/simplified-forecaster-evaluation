@@ -1,6 +1,6 @@
 ---
 title: Evaluating a simplified forecast model in comparison to the ECDC forecasting hub ensemble
-preprint: false
+preprint: true
 author: 
   - name: Sam Abbott
     affiliation: 1
@@ -415,8 +415,8 @@ The surrogate models relative performance varied over time with sustantially wor
 The majority in the difference in peformance appeared to be driven by a thicker right tail with this being particular feature of forecasts at longer horizons. Notably forecast performance in March had a bimodal distribution at the four week horizon with a substational fraction of surrogate forecasts outperforming the ensemble.
 This variation in performance may have been linked to the BA.2 wave which peaked in most locations during this time period.
 
-There was also substantial variation across forecast locations with the surrogate performing well in some locations at some forecast horizons, for example the four week horizon in the United Kingdom, and badly in others, for example the four week forecast in Switzerland (Figure \@ref(fig: assemble-eval) c).
-In general, across locations, as observed overall, relative forecast performance was comparable across horizons though with a heavier right tail at longer horizons. Some locations showed less of this behaviour, for example Spain, and in some it was very dominant, for exampel Switzerland. 
+There was also substantial variation across forecast locations with the surrogate performing well in some locations at some forecast horizons, for example the four week horizon in the United Kingdom, and badly in others, for example the four week forecast in Switzerland (Figure \@ref(fig:assemble-eval) c).
+In general, across locations, as observed overall, relative forecast performance was comparable across horizons though with a heavier right tail at longer horizons. Some locations showed less of this behaviour, for example Spain, and in some it was very dominant, for example Switzerland. 
 
 ```{r make-rwis-plots}
 plot_rwis_horizon <- relative_wis |>
@@ -477,7 +477,7 @@ suppressWarnings(print(p))
 
 ### Forecast calibration {-}
 
-Overall the surrogate model was well calibrated at the 30%, 60% and 90% credible intervals whilst the ensemble model was in general poorly calibrated with calibration becoming worse at larger credible intervals (at 30%, at 60%, and at 90%).
+Overall the surrogate model was well calibrated at the 30%, 60% and 90% credible intervals whilst the ensemble model was in general poorly calibrated with calibration becoming worse at larger credible intervals.
 When stratified by forecast horizon the ensemble forecast was best calibrated at the one week forecast horizon and then became progressively less well calibrated as foreast horizon increased with the worst calibration at the 90% credible interval (Figure \@ref(fig:plot-coverage) a). 
 In comparison the surrogate forecast was less well calibrated at the one week forecast horizon with a tendancy to have a larger empirical coverage than required at longer horizons the surrogate forecast transioned to being well calibrated and then had a lower coverage than optimal though to a much lower degree than the ensemble forecast.
 This was not the case for the 90% credible interval where the surrogate model stably covered slightly more than the expected interval indicating forecasts were somewhat overly uncertain for this intervals. 

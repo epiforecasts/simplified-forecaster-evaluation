@@ -8,8 +8,6 @@
 *.pdf
 *.zip
 nohup.out
-!docs/footer.html
-!docs/header.html
 .cache
 paper_cache
 paper_files
