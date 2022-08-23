@@ -91,7 +91,7 @@ plot_rel_score_by_quantile <- function(relative_interval_score) {
     scale_colour_brewer(palette = "Accent") +
     theme_scoringutils() +
     labs(
-      x = "Quantile", y = "Median relative interval score",
+      x = "Interval", y = "Median relative interval score",
       col = "Forecast horizon (weeks)"
     )
   return(plot_interval_score)

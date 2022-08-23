@@ -312,6 +312,10 @@ relative_interval_score <- scores |>
   calc_relative_score(
     cols = c("location", "target_end_date", "horizon", "range")
   )
+
+overall_ae_median <- scores |>
+  DT(, as.list(summary(ae_median)), by = "model")
+
 wis <- scores |>
   summarise_scores(
     by = c("location_name", "target_end_date", "horizon", "model")
@@ -408,10 +412,11 @@ Looking across the distribution of relative scores by horizon we see little evid
 `r relative_wis_thresholds[, better_than]` of surrogate forecasts scored better than the comparable ensemble forecast, `r relative_wis_thresholds[, fifty_percent]` performed within 50% of the comparable ensemble forecat, and scored `r relative_wis_thresholds[, more_than_100_percent]` performed worse than 100% more than the comparable ensemble forecast.
 
 The surrogate models relative performance varied over time with sustantially worse performance in January to March compared to later in the year across all forecast horizons (Figure \@ref(fig:assemble-eval) b).
-The majority in the difference in peformance appeared to be driven by a thicker right tail with this being particular feature of forecasts at longer horizons. Notably forecast performance in March had a big-model distribution at the four week horizon with a substational fraction of surrogate forecasts outperforming the ensemble.
-This viariation in performance may have been linked to the BA.2 wave which peaked in most locations during this time period.
+The majority in the difference in peformance appeared to be driven by a thicker right tail with this being particular feature of forecasts at longer horizons. Notably forecast performance in March had a bimodal distribution at the four week horizon with a substational fraction of surrogate forecasts outperforming the ensemble.
+This variation in performance may have been linked to the BA.2 wave which peaked in most locations during this time period.
 
-There was also substantial variation across forecast locations with the surrogate performing well in some locations at some forecast horizons, for example the four week horizon in the United Kingdom, and badly in others, for example the four week forecast in Switzerland (Figure \@ref(fig: assemble-eval) c). In general, across locations, as observed overall, relative forecast performance was comparable across horizons though with a heavier right tail at longer horizons. Some locations showed less of this behaviour, for example Spain, and in some it was very dominant, for exampel Switzerland. 
+There was also substantial variation across forecast locations with the surrogate performing well in some locations at some forecast horizons, for example the four week horizon in the United Kingdom, and badly in others, for example the four week forecast in Switzerland (Figure \@ref(fig: assemble-eval) c).
+In general, across locations, as observed overall, relative forecast performance was comparable across horizons though with a heavier right tail at longer horizons. Some locations showed less of this behaviour, for example Spain, and in some it was very dominant, for exampel Switzerland. 
 
 ```{r make-rwis-plots}
 plot_rwis_horizon <- relative_wis |>
@@ -472,11 +477,21 @@ suppressWarnings(print(p))
 
 ### Forecast calibration {-}
 
-- Calibration of forecasts at credible ranges of interest.
-- Calibration across quantiles
-- Relative interval scores by quantile
+Overall the surrogate model was well calibrated at the 30%, 60% and 90% credible intervals whilst the ensemble model was in general poorly calibrated with calibration becoming worse at larger credible intervals (at 30%, at 60%, and at 90%).
+When stratified by forecast horizon the ensemble forecast was best calibrated at the one week forecast horizon and then became progressively less well calibrated as foreast horizon increased with the worst calibration at the 90% credible interval (Figure \@ref(fig:plot-coverage) a). 
+In comparison the surrogate forecast was less well calibrated at the one week forecast horizon with a tendancy to have a larger empirical coverage than required at longer horizons the surrogate forecast transioned to being well calibrated and then had a lower coverage than optimal though to a much lower degree than the ensemble forecast.
+This was not the case for the 90% credible interval where the surrogate model stably covered slightly more than the expected interval indicating forecasts were somewhat overly uncertain for this intervals. 
 
-```{r plot-coverage, fig.height = 12, fig.width = 18, out.width = "95%", fig.cap = "a.), b.), c.)"}
+Stratifying calibration by quantile and forecast horizon the ensemble forecast was overly precise at all horizons for quantiles larger than the median whilst being comparably well calibrated for intervals below the median (Figure \@ref(fig:plot-coverage) b).
+In contrast the surrogate ensemble forecast was generally equally well calibrated at shorter horizons with a tendency to produce conservative forecasts.
+At longer horizons however quantiles below the median were liable to have poor coverage suggesting a bias towards over-predicting.
+
+Breaking down the relative weighted interval score by forecast interval we observe that the majority of the difference in overall scores is likely driven by larger intervals and in particular the tails of the forecast (Figure \@ref(fig:plot-coverage) c).
+This is true across forecast horizons but the magnitude of the different increases. This implies that the surogate and ensemble model produced comparably performing point forecasts and indeed if we consider the absolute error of the median forecasts we see that the median for the ensemble forecast was `r overall_ae_median[model == "Ensemble", round(Median, digits = 1)]` whilst the median for the surrogate forecast was `r overall_ae_median[model == "Surrogate", round(Median, digits = 1)]`.
+However, when we consider the mean absolute error of the median we find that the ensemble forecast outperformed the surrogate forecast (`r overall_ae_median[model == "Ensemble", round(Mean, digits = 1)]` vs. `r overall_ae_median[model == "Surrogate", round(Mean, digits = 1)]`) as noted elsewhere.
+This indicates a right skew in performance for the surrogate model point forecasts not observed for the ensemble forecast which matches that observed when evaluating the full predictive distributions of both forecasts.
+
+```{r plot-coverage, fig.height = 12, fig.width = 18, out.width = "95%", fig.cap = "a.) Empirical coverage of the surrogate and ensemble forecasts at the 90\\%, 60\\%, and 30\\% credible intervals stratified by forecast horizon. Ideally a well calibrated forecast should have empirical coverage for a given credible interval that equals the range of that interval (i.e 90\\%). b.) Median relative weighted interval score by quantile and forecast horizon for the surrogate forecast compared to the ensemble forecast. c.) Empirical coverage by quantile for both the surrrogate and ensemble forecasts. A well calibrated forecast should have empirical quantiles that match the theoretical ones. The green area of this figure corresponds to conservative forecasts."}
 p <- (
   (
     (
