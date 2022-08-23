@@ -7,3 +7,4 @@ File | Purpose
 `get-population.R` | Download population data to be used to calculate incidence rates.
 `get-truth.R` | Download JHU reported case data.
 `score-forecasts.R` | Score all forecasts against truth data after normalising by population.
+`update.sh` | Update all datasets and score forecasts.
