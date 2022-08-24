@@ -35,7 +35,7 @@ jobs:
           path: rendered-paper
 
   publish-paper:
-    if: github.ref == 'refs/heads/main' && github.repository == 'epiforecasts/simplfied-forecaster-evaluation'
+    if: github.ref == 'refs/heads/main' && github.repository == 'epiforecasts/simplified-forecaster-evaluation'
     needs: render-paper
     runs-on: macOS-latest
     env:
