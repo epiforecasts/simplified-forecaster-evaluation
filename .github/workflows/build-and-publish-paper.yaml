@@ -25,14 +25,14 @@ jobs:
       - name: Render
         run: |
           renv::load()
-          rmarkdown::render("paper/paper.Rmd", output_dir = "rendered-paper")
+          rmarkdown::render("paper/paper.Rmd", output_dir = "paper")
         shell: Rscript {0}
       - name: Upload
         uses: actions/upload-artifact@v2
         with:
           name: paper
           retention-days: 5
-          path: rendered-paper
+          path: paper
 
   publish-paper:
     if: github.ref == 'refs/heads/main' && github.repository == 'epiforecasts/simplified-forecaster-evaluation'
@@ -48,7 +48,7 @@ jobs:
         git rm -rf .
     - uses: actions/download-artifact@v2
       with:
-        name: rendered-paper
+        name: paper
         path: .
     - name: Commit and push
       run: |
