@@ -534,6 +534,15 @@ Indeed, median point performance of the forecasts were comparable though the sur
 
 ## Stengths and weaknesses {-}
 
+Our study benefits from having been conducted using forecasts conducted in real-time, rather than retrospectively, and submitted to an independent forecast research hub (though we note the overlap between authors on this study and the ECDC forecast hub).
+This means that we can be confident we have captured how our forecast methodology behaves in real-world usage and that others can evaluate this for themselves. 
+The downsides of this approach is that it was not possible to update the surrogate model over time in response to initial evaluation or to explore other parameterisations that might be more successful.
+However, as our study has been conducted with a focus on reproducibility and openness our findings can be replicated or extended by others regardless of compute availability (due to our use of GitHub actions as a compute platform which is freely available to researchers).
+Importantly in this study we focus on replicating the forecast hub ensembles observed beaviour rather than attempting to define an optimal forecast for forecast consumers.
+This means that if the forecast ensemble is not optimal then we are optimising for the wrong target. 
+That being said understanding what represents a useful forecast is difficult and an area of active research with a widespread assumption that large-scale ensembles of independent forecasts is the current state of the art. 
+Our focus on replicating the performance of the hub ensemble is also useful as it highlights some of the emergent behaviour of the ensemble captured in our assumptions, such as auto-correlation across time points, modelled decrease in growth rate as the forecast horizon increases
+
 - Real-time evaluation of a model with development tracked using version control (showing no changes since January 2022).
 - Conducted using reproducibility best practices with all code available for reuse. THe model is implemented in GitHub actions so can be reused without any compute resources and is by definition fast to run.
 - Only use absolute scoring which has implications for what we consider a good model. This is the approach used by the hub and so makes sense here but area of active research to understand what is more appropriate.
@@ -558,6 +567,26 @@ Whilst we found that our surrogate model performed compab
   
 ## Conclusions {-}
 
+# Additional Information and Declarations {-}
+
+## Competing interests {-}
+
+JB and SF, and KS have recieved funding to run forecast hub projects.
+
+## Author contribution {-}
+
+SA conceived the study, developed the initial set of assumptions for the surrogate model, implemented the model into code, designed and conducted the forecast evaluation, and wrote the first draft of the manuscript. All other authors provided feedback on the manuscript and contributed to revisions. SF provided funding.
+
+## Data availability {-}
+
+All data and code is available here: https://github.com/epiforecasts/simplified-forecaster-evaluation
+
+## Funding {-}
+
+SA, and SF were funded by a Wellcome senior fellowship to SF (), KS was funded by, and JB was funded by.
+
 # Acknowledgments {-}
+
+We thank the ECDC for support the forecasting hub, and all forecasters who submitted forecasts for making this study possible. We thank the forecast hub team for publishing all data in an accessible format. We thank Molly for being a good Labrador.
 
 # References
