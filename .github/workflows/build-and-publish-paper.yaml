@@ -24,6 +24,7 @@ jobs:
       - uses: r-lib/actions/setup-tinytex@v2
       - name: Render
         run: |
+          renv::load()
           rmarkdown::render("paper/paper.Rmd", output_dir = "rendered-paper")
         shell: Rscript {0}
       - name: Upload
