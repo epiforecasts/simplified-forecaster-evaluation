@@ -1,0 +1,25 @@
+Package: simplified.forecaster
+Title: Evaluating a Simplified Forecast Model in Comparison to the ECDC Forecasting Hub Ensemble
+Description: This repository contains the documentation, results, and code of a
+   project evaluating a simplified forecasting model in comparison the ECDC
+   forecasting hub ensemble. See the documentation for further details. 
+Depends:
+  rstan,
+  data.table,
+  gh,
+  here,
+  scoringutils,
+  forecast.vocs,
+  forcats,
+  ggplot2,
+  ggridges,y
+  lubridate,
+  patchwork,
+  purrr,
+  scales,
+  glue,
+  memoise,
+  renv,
+  rmarkdown,
+  bookdown,
+  rticles
