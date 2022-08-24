@@ -40,7 +40,7 @@ knitr::opts_chunk$set(
 # Introduction {-}
 
 Multi-model and  multi-team ensembles have become increasingly popular as an approach to increase the robustness and performance of infectious disease forecasts over the last decade with significant success [@REF].
-These approaches have drawn heavily on the experiance of other domains, for example climate modelling [@REF], where ensembles of both multiple models and from multiple teams have a long history of providing superior forecasts.
+These approaches have drawn heavily on the experience of other domains, for example climate modelling [@REF], where ensembles of both multiple models and from multiple teams have a long history of providing superior forecasts.
 However, ensemble forecasts have range of potential downsides with the most obvious being their considerable cost to produce as they typically require contributions from multiple independent teams, the development of several models, and a centralised group to run the ensembling project, and that forecasts from these ensembles can be difficult to link to the underling model assumption.
 In climate forecasting emulation approaches have been used to circumvent some of the  resource requirment issue by training a simplified model, usually a non-parametric statistical model, to replicate the behaviour of either the entire model or sub-components [@REF].
 However, within epidemiological modelling we often want to use our models for applications other than forecasting, have fewer insights beyond forecast performance on which to base our mechanistic assumptions. 
@@ -88,7 +88,7 @@ We then evaluate it's real-time performance in comparison to the ECDC forecast h
 We attempt to highlight settings where this model performs well as a surrogate to the ensemble forecast and areas where more work is needed. 
 Finally, we summarise our findings, discuss their implications, and highlight areas for potential study. We aim for this work to highlight some of the potential implicit assumptions of current forecast hub ensembles, provide a sensible, low resource, surrogate model in settings where large-scale colloborative forecasting efforts are not possible, and provide inspiration for forecasters looking to make principled improvements to their models
 
-# Methods {-}
+# Materials and Methods {-}
 
 ## Data {-}
 
@@ -536,20 +536,19 @@ Indeed, median point performance of the forecasts were comparable though the sur
 
 Our study benefits from having been conducted using forecasts conducted in real-time, rather than retrospectively, and submitted to an independent forecast research hub (though we note the overlap between authors on this study and the ECDC forecast hub).
 This means that we can be confident we have captured how our forecast methodology behaves in real-world usage and that others can evaluate this for themselves. 
-The downsides of this approach is that it was not possible to update the surrogate model over time in response to initial evaluation or to explore other parameterisations that might be more successful.
+The downsides of this approach is that it was not possible to update the surrogate model over time in response to initial evaluation or to explore other parameterisations that might be more successful of which there are likely several.
 However, as our study has been conducted with a focus on reproducibility and openness our findings can be replicated or extended by others regardless of compute availability (due to our use of GitHub actions as a compute platform which is freely available to researchers).
-Importantly in this study we focus on replicating the forecast hub ensembles observed beaviour rather than attempting to define an optimal forecast for forecast consumers.
-This means that if the forecast ensemble is not optimal then we are optimising for the wrong target. 
-That being said understanding what represents a useful forecast is difficult and an area of active research with a widespread assumption that large-scale ensembles of independent forecasts is the current state of the art. 
+Importantly in this study we focussed on replicating the forecast hub ensembles observed beaviour rather than attempting to define an optimal forecast for forecast consumers.
+It is likely that if we had instead aimed to develop a forecast methodology that minimised the evaluation critiera we planned to use, especially if we relaxed our assumed compute resource constraints, we would have produced forecasts that performed better relative to the hub ensemble.
+However, if we start from the view that the forecast hub ensemble has traits that are desirable for use by policy-makers (i.e robustness and good average performance) then our approach makes sense and may be optimal for producing a "good" forecast.
+This is the view often used in the literature when describing forecast ensembles.
 Our focus on replicating the performance of the hub ensemble is also useful as it highlights some of the emergent behaviour of the ensemble captured in our assumptions, such as auto-correlation across time points, modelled decrease in growth rate as the forecast horizon increases
-
-- Real-time evaluation of a model with development tracked using version control (showing no changes since January 2022).
-- Conducted using reproducibility best practices with all code available for reuse. THe model is implemented in GitHub actions so can be reused without any compute resources and is by definition fast to run.
-- Only use absolute scoring which has implications for what we consider a good model. This is the approach used by the hub and so makes sense here but area of active research to understand what is more appropriate.
-- Limited exploration of model formulations. Likely that there are alternatives that perform closer to the ensemble
-- As our target is not to produce the best COVID-19 forecast model, or the best COVID-19 forecast model as defined using the metrics used to evaluate by the ECDC but rather to develop a model that closely matches the Hub ensemble whilst maintaining interpretability and using limited resources it is likely that it will perform less  well than a forecast model designed with the first two criterion in mind. 
-  - However, if we start from the review that the forecast hub ensemble has traits that are desirable for use by policy-makers (i.e robustness and good average performance) then our approach makes sense. This is the view often used in the literature.
-- As the majority of the difference in relative performance occurred in the tail of the predictive distribution and that performance in the central predictive distribution was fairly similar this indicates that fore post-processing could make performance more similar. However, this would like reduce the calibration of our surrogate model which is not to be desired. Instead we hypothesis that this feature is driven by potentially inappropriate use of absolute scoring methods for exponential processes though our choice here was motivated by the methodology adopted by the forecast hubs.
+It also highlights some of the differences between our surrogate forecast model and the ensemble that may lead to new insights, such as the generally poor coverage of the ensemble that could not be explained by the assumptions we used in developing our surrogate methodology.
+Whilst we normalised reported cases to be population adjusted incidence rates our results are conditional on the use of the weighted interval score as an evaluation metrice.
+As this proper scoring rule measures absolute performance this means that forecasts during periods of higher incidence are given more weight than forecasts from periods of low incidence.
+It also means that potentially overpredicting is penalised more than underpredicting as incidence rates are bounded at zero but relatively weakly bounded by populations at the upper bound (as incidence rates are typically only a small fraction of the overall population).
+This bias could explain the relatively poor performance of the surrogate model, compared to the ensemble, despite the surrogate model being comparably well calibrated.
+We consider alternative methods of forecast evaluation that would be robust to this potential source of bias but choice to stick closely to the methodology used by the ECDC forecast hub as these choices inform the development of submitted models and so are key to our findings.
 
 ## Literature context {-}
 
@@ -562,9 +561,10 @@ Our focus on replicating the performance of the hub ensemble is also useful as i
 
 Whilst we found that our surrogate model performed compab
   - Other similar model formulations. More lag terms. Reduced run-times using approximate Bayesian approaches.
-  - Role of simple models for adjusting for susceptible population. Highlight useful now but not in early pandemic
+  - Role of simple models for adjusting for susceptible population. Highlight useful now but not in early pandemic.
+  - As the majority of the difference in relative performance occurred in the tail of the predictive distribution and that performance in the central predictive distribution was fairly similar this indicates that fore post-processing could make performance more similar. However, this would like reduce the calibration of our surrogate model which is not to be desired. Instead we hypothesis that this feature is driven by potentially inappropriate use of absolute scoring methods for exponential processes though our choice here was motivated by the methodology adopted by the forecast hubs.
   - Follow up study comparing these results to retrospective forecasts from early in the pandemic or on other infectious disease outbreaks (though limited by requirement of a multi-team ensemble to compare to).
-  
+
 ## Conclusions {-}
 
 # Additional Information and Declarations {-}
@@ -579,7 +579,9 @@ SA conceived the study, developed the initial set of assumptions for the surroga
 
 ## Data availability {-}
 
-All data and code is available here: https://github.com/epiforecasts/simplified-forecaster-evaluation
+All data and code is available here: 
+
+https://github.com/epiforecasts/simplified-forecaster-evaluation
 
 ## Funding {-}
 
