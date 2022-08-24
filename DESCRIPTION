@@ -22,4 +22,5 @@ Depends:
   renv,
   rmarkdown,
   bookdown,
-  rticles
+  rticles,
+  trackdown
