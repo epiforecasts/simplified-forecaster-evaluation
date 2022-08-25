@@ -534,7 +534,7 @@ As noted elsewhere, the forecast hub ensemble was poorly calibrated, particularl
 Stratifying the relative weighted interval score by interval we found that larger intervals (i.e the tails of the forecast distribution) were responsible for the majority of difference in performance difference. 
 Indeed, median point performance of the forecasts were comparable though the surrogate model performed susbtantially worse on average due to its skewed performance distribution.
 
-## Stengths and weaknesses {-}
+## Limitations {-}
 
 Our study benefits from having been conducted using forecasts conducted in real-time, rather than retrospectively, and submitted to an independent forecast research hub (though we note the overlap between authors on this study and the ECDC forecast hub).
 This means that we can be confident we have captured how our forecast methodology behaves in real-world usage and that others can evaluate this for themselves. 
@@ -554,20 +554,41 @@ We consider alternative methods of forecast evaluation that would be robust to t
 
 ## Literature context {-}
 
-  - Emulators in weather forecasting and elsewhere
-  - ECDC and CDC ensemble papers
-  - Other forecasting models contributed to the ensembles
-  - Baseline models
+There are no other studies in the epidemiology literature which we are aware of that attempt to develop a forecasting model based on the observed behaviour of a multi-team, multi-model ensemble.
+There are also few studies that focus on delivering computationally feasible forecasting models in a reproducibile framework backed by an openly accesible compute platform. 
+However, the CDC, ECDC, and Germany/Poland forecasting hubs have published a range of evaluations of forecasts submitted to their platforms and the relative performance of their ensembles. 
+In general these studies have struggled to draw general conclusions about the structural assumptions of forecast models they consider "good" (generally they have defined this as minimising the weighted interval score as done in this study).
+The CDC forecast hub identified the top 5 performing models and noted they made the following structural assumptions.
+However, they did not extensively compare and contrast these conclusions in order arrive at a set of desired forecast assumptions as done in this study to motivate the surrogate model.
+Similary, the Germany and Poland, and ECDC forecasting hubs were able to identify forecast models that performed comparably well but did not derive structural assumptions that led to this performance or detail explicitly what the desirable performance characteristics would be, aside from optimising the weighted interval score.
+All comparable forecast hub projects found that their ensemble was often the best choice, had desirable characteristics such as robustness, though this was rarely fully defined, and should be the output used by forecast consumers.
+In general, during the study period all projects used the same median ensemble forecast of all submissions after having concluded it was a favourable choice. 
+The CDC forecasting hub also evaluated a range of other ensemble approaches, such as inverse weighted interval score weighting, unweighted ensembles of a selection of models based on recent performance, and mean ensemble.
+Work on this is still ongoing but these more complex ensembling approaches were shown to outperform the median of all submitted forecasts in many cases.
+That being said no forcast hub has switched to these for their operational forecast implying they do not think the evidence base is strong enough for them to be used by forecast consumers and hence the median of all submitted forecasts remains the communities suggested default ensemble option. 
+Other studies have been published evaluating single forecast models in comparison to ensemble performance from the forecast hub but in general these have not focussed on replicating ensemble behaviour but rather optimising the target evaluation  metric. 
+Our previous work also highlighted the lack of calibration in an ensemble forecast from the Germany/Poland forecasting hub compared to forecasts from epidemiological models and also noted the bias towards underprediction observed in the ensemble forecasts and not the model based forecasts [@refNikosinGermany].
 
 ## Further work {-}
 
-Whilst we found that our surrogate model performed compab
-  - Other similar model formulations. More lag terms. Reduced run-times using approximate Bayesian approaches.
-  - Role of simple models for adjusting for susceptible population. Highlight useful now but not in early pandemic.
-  - As the majority of the difference in relative performance occurred in the tail of the predictive distribution and that performance in the central predictive distribution was fairly similar this indicates that fore post-processing could make performance more similar. However, this would like reduce the calibration of our surrogate model which is not to be desired. Instead we hypothesis that this feature is driven by potentially inappropriate use of absolute scoring methods for exponential processes though our choice here was motivated by the methodology adopted by the forecast hubs.
-  - Follow up study comparing these results to retrospective forecasts from early in the pandemic or on other infectious disease outbreaks (though limited by requirement of a multi-team ensemble to compare to).
+Whilst we derived our surrogate model from a range of assumptions based on observing ensemble forecasts behaviour and the behaviour and structure of submitted models this was by no means as structure or complete a process as it could have been.
+In follow up work a more rigorous approach to this could be taken in order to further refine this set of assumptions. 
+The findings from our study may also be useful for informing these improved assumptions. 
+In addition, the model we derived based on our assumptions was likely not optimal both in terms of compute time and accuracy at reproducing ensemble like behaviour.
+Models with a more complex auto-correlation structure, and more refined approaches to localise trends should be explored in order to improve relative performance to ensemble forecasts.
+An example of a family of possible approaches are structural time series model which have many of the characteristcs implied by our assumptions for how forecast ensembles typically operate.
+As we identified that the tails of our predictive distributions were responsible for a large proportion of the difference in performance compared to the forecast ensemble.
+It may be the case that post processing of forecasts from our surrogate model to enhance their similarity to the forecast ensemble is a sensible strategy.
+This seems likely to improve out of sample performance but does not help with the secondary aim of understanding the implicit assumptions driving the performance of multi-model, multi-team infectious disease forecast ensembles.
+As we have hypothesised that the use of absolute scoring measures is inappropriate and leads to performance characteristics that are unlikely to be favoured by forecast stakeholders more work should be done in this area.
+If new forecast ensemble methods are adopted as best practice by forecast hubs then follow up work attempting to create surrogate forecat models must also use these appproaches and this will likely alter the observed characteristics of the hub ensemble forecasts, for example the tendency to be poorly calibrated.
+Lastly, here we have only explored a surrogate for an ensemble for a single disease and a limited set of locations.
+Follow up work should explore whether this behaviour holds across diseases and locations.
+However, this work is limited by the lack of large-scale forecat ensembling projects despite them showing obvious promise to improve the forecasts available to stakeholders.
 
 ## Conclusions {-}
+
+We conclude that our simplified forecast model may have captured some of the dynamics of the hub ensemble but that more work needs to be done to understand the epidemiological model that represents its behaviour and whether or not this is the optimal choice for stakeholders requirements. We also conclude that our findings are largely driven by the choice of evaluation measure used by the forecast hub and that if this is misspecified then the forecast hub submissions may not be optimised to forecast users' expectations or requirements. Our work maybe be useful for forecast users to understand the inherent assumptions of the forecasts they are making use of and to methodology developers thinking about how to develop forecasts that perform similary to current multi-model and multi-team forecast ensembles that are trusted by stakeholders.
 
 # Additional Information and Declarations {-}
 
