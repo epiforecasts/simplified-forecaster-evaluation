@@ -8,6 +8,8 @@ author:
     email: sam.abbott@lshtm.ac.uk
   - name: Katharine Sherratt
     affiliation: 1
+  - name: Hugo Gruson
+    affiliation: 1
   - name:  Johannes Bracher
     affiliation: 2
   - name: Sebastian Funk
@@ -598,7 +600,7 @@ JB and SF, and KS have recieved funding to run forecast hub projects.
 
 ## Author contribution {-}
 
-SA conceived the study, developed the initial set of assumptions for the surrogate model, implemented the model into code, designed and conducted the forecast evaluation, and wrote the first draft of the manuscript. All other authors provided feedback on the manuscript and contributed to revisions. SF provided funding.
+SA conceived the study, developed the initial set of assumptions for the surrogate model, implemented the model into code, designed and conducted the forecast evaluation, and wrote the first draft of the manuscript. All other authors provided feedback on the manuscript and contributed to revisions. SF provided funding. HG reviewed the code and reproducibility of the analysis.
 
 ## Data availability {-}
 
