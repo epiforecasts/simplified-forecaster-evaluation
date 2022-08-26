@@ -98,7 +98,7 @@ Finally, we summarise our findings, discuss their implications, and highlight ar
 
 ## Data {-}
 
-```{r packages}
+```{r packages, cache = FALSE}
 library(data.table)
 library(purrr)
 library(scoringutils)
