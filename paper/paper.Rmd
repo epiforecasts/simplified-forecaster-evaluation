@@ -8,6 +8,8 @@ author:
     email: sam.abbott@lshtm.ac.uk
   - name: Katharine Sherratt
     affiliation: 1
+  - name: Nikos Bosse
+    affiliation: 1
   - name: Hugo Gruson
     affiliation: 1
   - name:  Johannes Bracher
