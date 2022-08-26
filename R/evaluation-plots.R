@@ -45,7 +45,8 @@ plot_wis <- function(wis, locs) {
     facet_wrap(vars(location_name), scales = "free_y", ncol = 1) +
     labs(
       x = "Date", y = "Weighted interval score",
-      col = "Model", shape =  "Forecast horizon (weeks)"
+      col = "Model", shape =  "Forecast horizon (weeks)",
+      linetype =  "Forecast horizon (weeks)"
     )
 }
 
