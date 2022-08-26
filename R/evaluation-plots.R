@@ -34,7 +34,7 @@ plot_wis <- function(wis, locs) {
     ggplot() +
     aes(
       x = target_end_date, y = interval_score, col = model,
-      shape = as.factor(horizon)
+      shape = as.factor(horizon), linetype = as.factor(horizon)
     ) +
     geom_point(size = 1.2) +
     geom_line(alpha = 0.8) +
