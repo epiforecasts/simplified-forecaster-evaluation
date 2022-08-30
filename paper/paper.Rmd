@@ -504,11 +504,11 @@ When stratified by forecast horizon the ensemble forecast was best calibrated at
 In comparison, the surrogate forecast was less well calibrated at the one-week forecast horizon with a tendency to have a larger empirical coverage than required at longer horizons the surrogate forecast transitioned to being well calibrated and then had lower coverage than optimal though to a much lower degree than the ensemble forecast.
 This was not the case for the 90% credible interval where the surrogate model stably covered slightly more than the expected interval indicating forecasts were somewhat overly uncertain for this interval. 
 
-Stratifying calibration by quantile and forecast horizon the ensemble forecast was overly precise at all horizons for quantiles larger than the median whilst being comparably well calibrated for intervals below the median (Figure \@ref(fig:plot-coverage) b).
+Stratifying calibration by quantile and forecast horizon the ensemble forecast was overly precise at all horizons for quantiles larger than the median whilst being comparably well calibrated for intervals below the median (Figure \@ref(fig:plot-coverage) c).
 In contrast, the surrogate ensemble forecast was generally equally well calibrated at shorter horizons with a tendency to produce conservative forecasts.
 At longer horizons, however, quantiles below the median were liable to have poor coverage suggesting a bias towards over-predicting.
 
-Breaking down the relative weighted interval score by forecast interval we observe that the majority of the difference in overall scores is likely driven by differences in the outer intervals [b][c][d]and in particular the tails of the forecast (Figure \@ref(fig:plot-coverage) c).
+Breaking down the relative weighted interval score by forecast interval we observe that the majority of the difference in overall scores is likely driven by differences in the outer intervals [b][c][d][e]and in particular the tails of the forecast (Figure \@ref(fig:plot-coverage) b).
 This is true across forecast horizons but the magnitude of the different increases. This implies that the surrogate and ensemble model produced comparably performing point forecasts and indeed if we consider the absolute error of the median forecasts we see that the median for the ensemble forecast was `r overall_ae_median[model == "Ensemble", round(Median, digits = 1)]` whilst the median for the surrogate forecast was `r overall_ae_median[model == "Surrogate", round(Median, digits = 1)]`.
 However, when we consider the mean absolute error of the median we find that the ensemble forecast outperformed the surrogate forecast (`r overall_ae_median[model == "Ensemble", round(Mean, digits = 1)]` vs. `r overall_ae_median[model == "Surrogate", round(Mean, digits = 1)]`) as noted elsewhere.
 This indicates a right skew in performance for the surrogate model point forecasts not observed for the ensemble forecast which matches that observed when evaluating the full predictive distributions of both forecasts.
@@ -542,9 +542,9 @@ We first defined a set of assumptions for how the surrogate model should behave 
 We restricted ourselves to a model that could be easily understood, that produced epidemiologically meaningful summary statistics, and that could be run with low compute resources.
 We further provide a fully reproducible workflow for running and evaluating this model using GitHub actions facilitating others to do the same. 
 
-Over the 6 months of the study period, we found that our surrogate model produced forecasts that were visually similar to those from the forecast hub ensemble though with greater uncertainty.
-In a subset of example locations, we observed some variation in performance across locations, that the ensemble appeared biased toward underprediction, and the surrogate model appeared slightly biased toward overprediction.
-Evaluating the relative performance of the surrogate model compared to the ECDC forecast hub ensemble we found that the mean performance was substantially worse but that this was largely driven by a relatively small subset of forecasts.
+Over the 6 months of the study period, we found that our surrogate model produced forecasts that were visually similar to those from the forecast hub ensemble though with greater uncertainty[f][g].
+In a subset of example locations, we observed some variation in performance across locations, that the ensemble appeared biased toward underprediction, and the surrogate model appeared slightly biased toward overprediction[h].
+Evaluating the relative performance of the surrogate model compared to the ECDC forecast hub ensemble we found that the mean performance was substantially worse, which was driven by a relatively small subset of forecasts.
 The median relative performance was only marginally worse across forecast horizons with the distribution of relative scores having a heavy right tail.
 Performance varied by location and forecast date with the surrogate model performing worse in the first part of 2022 which may have been linked to increasing incidence rates across forecast locations linked to BA.2.
 Unlike our earlier forecasting efforts, the effect of outlier forecasts was much reduced though the surrogate model was less likely to outperform the ensemble than our earlier forecasting model methodology [@refNikosinGermany].
@@ -641,3 +641,9 @@ We thank the ECDC for supporting the forecasting hub, and all forecasters who su
 https://epiforecasts.io/scoringutils/reference/score_quantile.html
 
 Perhaps there is an implementation nuance? I agree I was surprised by the magnitude of this difference.
+[e]Aah I was just looking at Figure 3c here (I think it needs to be 3b). Oooh ok I think I now know what you mean. I would think that Figure 3b) is misleading. For every interval x, this is the score from the surrogate over the score for the ensemble for that interval x, right? Two reasons it's misleading: 
+1) I think the values that you are dividing just become very small and therefore what you get is unstable, because the denominator gets smaller and smaller
+2) the outer values don't influence the average a lot, because you first add the values for the individual intervals up (to get one WIS for ensemble and surrogate) and then you divide these values. The plot suggests that you divide the values for all the quantiles and then average to get your relative score
+[f]WIS decompositions would be nice to look at. Although I guess can be left to future Sam (or never Sam)
+[g]Suggest add to slack as a suggestion for discussion there (close once done please).
+[h]As Johannes mentioned a while ago: It is a priori unclear what the "correct" distribution of overprediction, underprediction and dispersion is. So I think it is technically not correct to talk about a bias towards over / underprediction. Adding here as a comment because it might be relevant throughout. We could look at the bias value from scoringutils.
