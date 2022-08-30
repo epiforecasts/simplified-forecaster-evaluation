@@ -45,10 +45,10 @@ knitr::opts_chunk$set(
 
 # Introduction {-}
 
-Multi-model and  multi-team ensembles have become increasingly popular as an approach to increase the robustness and performance of infectious disease forecasts over the last decade with significant success [@REF].
+Multi-model and multi-team ensembles have become increasingly popular as an approach to increase the robustness and performance of infectious disease forecasts over the last decade with significant success [@REF].
 These approaches have drawn heavily on the experience of other domains, for example, climate modelling [@REF], where ensembles of both multiple models and from multiple teams have a long history of providing superior forecasts.
 However, ensemble forecasts have a range of potential downsides with the most obvious being their considerable cost to produce as they typically require contributions from multiple independent teams, the development of several models, and a centralised group to run the ensembling project, and that forecasts from these ensembles can be difficult to link to the underlying model assumption.
-In climate forecasting emulation approaches have been used to circumvent some of the  resource requirement issues by training a simplified model, usually, a non-parametric statistical model, to replicate the behaviour of either the entire model or sub-components [@REF].
+In climate forecasting emulation approaches have been used to circumvent some of the resource requirement issues by training a simplified model, usually, a non-parametric statistical model, to replicate the behaviour of either the entire model or sub-components [@REF].
 However, within epidemiological modelling, we often want to use our models for applications other than forecasting and have fewer insights beyond forecast performance on which to base our mechanistic assumptions. 
 This means that non-parametric emulation is less suitable for use in epidemiological forecasting though for epidemiological scenario analysis in-sample emulation using non-parametric methods may have a role [@REFLSHTMTBEMULATOR].
 In this work, we propose and evaluate a surrogate forecast model approach which seeks to emulate the observed behaviour of recent COVID-19 forecast ensembles using a minimal set of easily communicated assumptions, limited computational resources, and an easily generalised implementation. 
@@ -59,41 +59,41 @@ However, they have struggled to provide feedback to those contributing forecasts
 These forecast collaborations, and other similar infectious disease forecasting efforts, have focussed on forecasting reported cases and deaths by epidemiological week (i.e Saturday to Saturday) over a one to four-week time horizon. Generally, ground truth data is available daily, and is updated in retrospect as new data becomes available. Typically, the ensemble forecast produced each week comprises at least 5 independent forecasts using a range of approaches and is produced using an unweighted median ensemble [@REF].
 Most submitted forecasts use available daily data, along with potentially other leading predictors, to produce daily forecasts that are then aggregated into weekly forecasts.
 Many use a range of outlier processing techniques to reduce reporting artefacts which can bias forecasts.
-In general, 4 main classes of forecast models are submitted, statistical forecasting models such as ARIMA models [@REF], mechanistic forecasting models based on the compartmental modelling framework and it's generalisations [@REF], semi-mechanistic approaches that blend both of these approaches [@REF], and human insight based forecast models that may also include elements of other methods [@REF].
+In general, 4 main classes of forecast models are submitted, statistical forecasting models such as ARIMA models [@REF], mechanistic forecasting models based on the compartmental modelling framework and its generalisations [@REF], semi-mechanistic approaches that blend both of these approaches [@REF], and human insight based forecast models that may also include elements of other methods [@REF].
 Real-time evaluation has shown that each of these classes of models may perform well though in general semi-mechanistic models, and models that include human insights have outperformed other approaches during certain periods of time [@REF].
-We have contributed a range of forecasts to these forecast collobarations generally focussed on semi-mechanistic statistical methods [@REF], and human insight based forecasts [@REF] with our forecasts performing relatively well compared to the majority of those submitted but rarely outperforming significantly.
-The model based forecasts we have contributed have focussed on trying to carefully model the underlying infectious disease dynamics from infection through to symptom onset, and test positivity using non-exponential delay distributions whilst also attempting to model the complexity of daily, within week, reporting periodicity [@REF].
+We have contributed a range of forecasts to these forecast collaborations generally focussed on semi-mechanistic statistical methods [@REF], and human insight-based forecasts [@REF] with our forecasts performing relatively well compared to the majority of those submitted but rarely outperforming significantly.
+The model-based forecasts we have contributed have focussed on trying to carefully model the underlying infectious disease dynamics from infection through to symptom onset, and test positivity using non-exponential delay distributions whilst also attempting to model the complexity of daily, within week, reporting periodicity [@REF].
 Based on our observations our forecasts have generally captured changes in trend better than most submitted models that do not use human insight based on known policy changes but have not been robust to reporting issues such as large outliers in reporting and changes to reporting patterns. 
-Our previous methodology also requires signinficant computational resources running for an hour on a 16 core machine when producing forecasts for the ECDC forecasting hub. 
-In our model based forecasts we did not attempt to capture potential future interventions or known interventions not currently observed in the epidemiological data whereas in our human insight models these were implicitly included.
-We found that our human insight based forecasts significantly outperformed our model based forecasts and hypothesised that this may have been driven by including additional information not observed in the epidemiological data [@REF]. 
-Unlike our epidemiologically motivated forecast submissions the hub ensemble forecasts were typically robust to daily reporting artefacts.
-They also demonstrated some ability to forecast future changes in trend that were not present in the observed data similarly to our human insight forecasts indicating the likely inclusion of either human insight, or assumptions about future interventions. 
+Our previous methodology also requires significant computational resources running for an hour on a 16-core machine when producing forecasts for the ECDC forecasting hub. 
+In our model-based forecasts, we did not attempt to capture potential future interventions or known interventions not currently observed in the epidemiological data whereas in our human insight models these were implicitly included.
+We found that our human insight-based forecasts significantly outperformed our model-based forecasts and hypothesised that this may have been driven by including additional information not observed in the epidemiological data [@REF]. 
+Unlike our epidemiologically motivated forecast submissions, the hub ensemble forecasts were typically robust to daily reporting artefacts.
+They also demonstrated some ability to forecast future changes in trends that were not present in the observed data similarly to our human insight forecasts indicating the likely inclusion of either human insight, or assumptions about future interventions. 
 In general, the ensemble forecasts were more auto-correlated and less reactive to changes from stable or reducing case incidence to increasing incidence.
-On the other hand this also meant that the ensemble was less likely to adopt short-term changes in incidence and hence produced better long-term forecasts.
+On the other hand, this also meant that the ensemble was less likely to adopt short-term changes in incidence and hence produced better long-term forecasts.
 Finally, the ensemble forecast tended to produce sharper forecasts and have a tendency towards under vs over predicting.
 There is some suggestion that this was partially driven by the ensemble forecast having non-exponential uncertainty, unlike many infectious disease forecasting models. 
 
-Based on these insights from observing the performance of our own forecast submissions and from the hub ensembles over time here we define a model with similar, but simplified, epidemiological characteristics to our previous approaches to model based forecasting [@REF] with aim of producing ensemble like performance without sacrificing interpretability.
-The first simplification we make is to model only weekly data, rather than using daily data and then aggregating, this means that the impact daily reporting artefacts is mitigated.
-It also serves to increase the auto-correlation of the forecasting model as there is an increased lag before changes in daily observations gain signifcant weight in the model this leads to the observed ensemble behaviour of being relatively auto-correlated and resistant to short-term changes in trend.
+Based on these insights from observing the performance of our own forecast submissions and from the hub ensembles over time here we define a model with similar, but simplified, epidemiological characteristics to our previous approaches to model-based forecasting [@REF] with aim of producing ensemble like performance without sacrificing interpretability.
+The first simplification we make is to model only weekly data, rather than using daily data and then aggregating, this means that the impact of daily reporting artefacts is mitigated.
+It also serves to increase the auto-correlation of the forecasting model as there is an increased lag before changes in daily observations gain significant weight in the model this leads to the observed ensemble behaviour of being relatively auto-correlated and resistant to short-term changes in trend.
 The second simplification we make is to ignore the underlying latent infection process and focus only on the observed reported cases.
 This reduces computational requirements and removes the need for external information on the delay from infection to report which can potentially be misspecified leading to potentially reduced forecast performance.
 However, this sacrifices some of the interpretability of the forecast model as any epidemiological summary statistics we now calculate will be based on reported cases and not latent infections.
 As discussed in [@gostic] this leads to varying amounts of bias depending on the epidemic phase. 
-The final simplification we make is to model the growth rate as a differenced auto-regressive process with order 1 rather than using a gaussian process based method as we have done in other work [@EpiNow2].
-This represents a parsiminous approach in that we encode our expectation that the growth rate should vary over time and allow this to influance the forecast but we include only a single lag term, reducing the computational overhead of the model.
-In order to model potential unobserved interventions and more generally changes in transmission we include an additional growth rate modifier restricted to be between 0 and 1 that differs depending on if the growth rate is positive or negative (due to potential differing responses when cases are growing or increasing) and that acts in a multiplicative fashion (meaning that larger absolute growth rates are reduced to zero growth more rapidly).
-This reflects a simplified interpretation for how the ensemble appears to react to potential future changes by assuming a gradual return to stable incidence. 
+The final simplification we make is to model the growth rate as a differenced auto-regressive process with order 1 rather than using a gaussian process-based method as we have done in other work [@EpiNow2].
+This represents a parsimonious approach in that we encode our expectation that the growth rate should vary over time and allow this to influence the forecast but we include only a single lag term, reducing the computational overhead of the model.
+In order to model potential unobserved interventions and more general changes in transmission, we include an additional growth rate modifier restricted to be between 0 and 1 that differs depending on if the growth rate is positive or negative (due to potential differing responses when cases are growing or increasing) and that acts in a multiplicative fashion (meaning that larger absolute growth rates are reduced to zero growth more rapidly).
+This reflects a simplified interpretation of how the ensemble appears to react to potential future changes by assuming a gradual return to stable incidence. 
 The only observation for which we do not make an adaption is the apparent sharpness of the ensemble compared to our prior forecasting models choosing instead to make use of a negative binomial observation model allowing the inclusion of overdispersion. 
 This choice is motivated by our belief that the underlying transmission process is an exponential one and therefore a count error model (where variance is linked to the mean)  is a sensible choice though this is an area of current research.
-We suggest that part of the reason the hub ensembles exhibit this behaviour is due to the penalisation of overprediction compared to underprediction caused by the use of a generalsied form of the absolute error for the majority of forecast evaluation. 
+We suggest that part of the reason the hub ensembles exhibit this behaviour is due to the penalisation of overprediction compared to underprediction caused by the use of a generalised form of absolute error for the majority of forecast evaluations. 
 
-In this study, we define an initial attempt at a surrogate model to replicate the observed behaviour of current multi-team forecast ensembles whilst maintaining a set of clear assumptions and summarise its implementation, with a focus on minimal resource use and reproducibility, as a GitHub action. 
+In this study, we define an initial attempt at a surrogate model to replicate the observed behaviour of current multi-team forecast ensembles whilst maintaining a set of clear assumptions and summarising its implementation, with a focus on minimal resource use and reproducibility, as a GitHub action. 
 We briefly outline some of the summary statistics it produces and their epidemiological relevance. 
-We then evaluate it's real-time performance in comparison to the ECDC forecast hub ensemble by visualising forecasts, using the weighted interval score [@REF], a commonly used proper scoring rule, and quantifying its empirical coverage.
+We then evaluate its real-time performance in comparison to the ECDC forecast hub ensemble by visualising forecasts, using the weighted interval score [@REF], a commonly used proper scoring rule, and quantifying its empirical coverage.
 We attempt to highlight settings where this model performs well as a surrogate to the ensemble forecast and areas where more work is needed. 
-Finally, we summarise our findings, discuss their implications, and highlight areas for potential study. We aim for this work to highlight some of the potential implicit assumptions of current forecast hub ensembles, provide a sensible, low resource, surrogate model in settings where large-scale colloborative forecasting efforts are not possible, and provide inspiration for forecasters looking to make principled improvements to their models
+Finally, we summarise our findings, discuss their implications, and highlight areas for potential study. We aim for this work to highlight some of the potential implicit assumptions of current forecast hub ensembles, provide a sensible, low-resource, surrogate model in settings where large-scale collaborative forecasting efforts are not possible, and provide inspiration for forecasters looking to make principled improvements to their models
 
 # Materials and Methods {-}
 
@@ -141,19 +141,19 @@ scores <- fread(here("data", "scores.csv")) |>
   rename_models()
 ```
   
-  We extracted forecasts and data on notified weekly COVID-19 cases from the ECDC forecasting hub from 15th of January 2022 to the 19th of July 2022 for the ensemble model (referred to as the `EuroCOVIDhub-ensemble` by the hub team) and the surrogate model (submitted as `epiforecasts-weeklygrowth`).
+  We extracted forecasts and data on notified weekly COVID-19 cases from the ECDC forecasting hub from the 15th of January 2022 to the 19th of July 2022 for the ensemble model (referred to as the `EuroCOVIDhub-ensemble` by the hub team) and the surrogate model (submitted as `epiforecasts-weeklygrowth`).
   We included all locations covered by the ECDC forecasting hub which were 32 European countries, including all countries of the European Union and European Free Trade Area, and the United Kingdom.
   Data on notified weekly cases was originally sourced from the Johns Hopkins University (JHU) curated data repository [@REF].
   We used the latest available observed data as of the 20th of August 2022. As observations are subject to revisions this means that the data used to produce forecasts for a given date may not reflect the data used for evaluation.
-  The follows the common practice of the forecasting hub projects in treating the latest available data as the forecast target regardless of the number of potential data revisions.
+  This follows the common practice of the forecasting hub projects in treating the latest available data as the forecast target regardless of the number of potential data revisions.
   Incidence was aggregated over the Morbidity and Mortality Weekly Report (MMWR) epidemiological week definition of Sunday through Saturday.
   
-  The ECDC forecast hub requests forecasts for 1 to 4 week forecast horizon and requires forecasts to use a pre-specified format with 23 quantiles of the predictive probability distribution.
-  No restrictions were placed on who could submit forecasts and the hub team actively invited particupation from research groups known to be involved with COVID-19 forecasting projects.
-  Forecasters used a wide range of forecasting methods including statistical approaches, mechanistic models including deterministic ordinary differential equation models and agent based model, semi-mechanistic models, expert elicitation models, and ensembles of mutliple approaches [@https://covid19forecasthub.eu/community.html].
+  The ECDC forecast hub requests forecasts for 1 to 4-week forecast horizon and requires forecasts to use a pre-specified format with 23 quantiles of the predictive probability distribution.
+  No restrictions were placed on who could submit forecasts and the hub team actively invited participation from research groups known to be involved with COVID-19 forecasting projects.
+  Forecasters used a wide range of forecasting methods including statistical approaches, mechanistic models including deterministic ordinary differential equation models and agent-based models, semi-mechanistic models, expert elicitation models, and ensembles of multiple approaches [@https://covid19forecasthub.eu/community.html].
   Teams submitted forecasts at the latest two days after the complete dataset for the forecast week became available and were allowed to use all data available at the time of submission (i.e including up to two days of data for the current week). 
-  The ensemble forecast was constructed by taking the median of all predictive quantiles without the exlusion of any valid submitted forecast (where validity was defined as passing minimal formatting checks by the hub team). 
-A ensemble was only produced for locations with at least 3 independent forecast models including the hub baseline model.
+  The ensemble forecast was constructed by taking the median of all predictive quantiles without the exclusion of any valid submitted forecast (where validity was defined as passing minimal formatting checks by the hub team). 
+An ensemble was only produced for locations with at least 3 independent forecast models including the hub baseline model.
   Submitted forecasts and target observations are available from the ECDC forecast hub GitHub repository [@REF]. We provide code in the repository of this study to streamline access. 
 
 ```{r metadata}
@@ -279,7 +279,7 @@ $\sigma$ has also been made weakly informative under the assumption that the pot
 
 ### Summary statistics {-}
 
-As well as posterior predictions and forecasts for notifcations the model also returns several epidemiological summary statistics which may be useful for drawing inferences about underlying transmission dynamics.
+As well as posterior predictions and forecasts for notifications the model also returns several epidemiological summary statistics which may be useful for drawing inferences about underlying transmission dynamics.
 These are the log scale weekly growth rate ($g^{o, \delta}_t$), and the instantaneous effective reproduction number ($R^{o, \delta}_t$).
 These are calculated as follows:
 
@@ -296,16 +296,16 @@ In order to standardise forecasts across forecast locations we first normalised 
 We then evaluated a subset of forecasts from the following countries Germany, Greece, Italy, Poland, Slovakia, and the United Kingdom visually by forecast horizon (1-4 weeks) for both the ensemble and surrogate model. 
 These countries were selected in order to include forecasts based on different numbers and types of submitted forecast models, to be at least partially representative of the full sample of forecast locations, and to include nations for which the authors had a good understanding of local data and transmission dynamics in the study period. 
 
-We evaluate forecasts for all locations and horizons quantatively using the weighted interval score (WIS) [@bracherEvaluatingEpidemicForecasts2021], which is a quantile based proper scoring rule that approximates the continuous ranked probability score (CRPS).
-Both the WIS and CRPS are generalisations of absolute error in order to evaluate probablistic forecasts and are widely used to evaluate COVID-19 forecasts, including by the ECDC forecast hub  [@REF].
+We evaluate forecasts for all locations and horizons quantitatively using the weighted interval score (WIS) [@bracherEvaluatingEpidemicForecasts2021], which is a quantile-based proper scoring rule that approximates the continuous ranked probability score (CRPS).
+Both the WIS and CRPS are generalisations of the absolute error in order to evaluate probabilistic forecasts and are widely used to evaluate COVID-19 forecasts, including by the ECDC forecast hub  [@REF].
 We present WIS for the subset of forecasts we explore visually for both the ensemble and surrogate model by date and forecast horizon (1 and 4 weeks).
 
-In order to understand the relative performance of the surrogate model compared to the ensemble model we calculate the relative performance (rWIS) by dividing the WIS for the surrogate model by the WIS of the ensemble model for all locations and forecast horizons.
-In order to maintain the properiety of this score we do this after first taking the means of scores for the relavant stratification.
+In order to understand the relative performance of the surrogate model compared to the ensemble model, we calculate the relative performance (rWIS) by dividing the WIS for the surrogate model by the WIS of the ensemble model for all locations and forecast horizons.
+In order to maintain the propriety of this score, we do this after first taking the means of scores for the relevant stratification.
 We explore relative performance by forecast horizon, by month and horizon, and by location and horizon. 
 
-In addition to presenting the WIS for a subset of locations and the relative WIS for all locations we also calculate and visualise the empirical coverage, which is the percentage of observed values within a given interval or below a given quantile, of both the surrogate and ensemble model for the 30%, 60%, and 90% credible intervals and by quantile. 
-Lastly we calculate and visualise the relative weighted interval score by quantile, stratified by forecast horizon.
+In addition to presenting the WIS for a subset of locations and the relative WIS for all locations, we also calculate and visualise the empirical coverage, which is the percentage of observed values within a given interval or below a given quantile, of both the surrogate and ensemble model for the 30%, 60%, and 90% credible intervals and by quantile. 
+Lastly, we calculate and visualise the relative weighted interval score by quantile, stratified by forecast horizon.
 
 ```{r eval-parameters}
 locs <- c("United Kingdom", "Germany", "Slovakia", "Italy", "Poland", "Greece")
@@ -359,55 +359,55 @@ relative_wis_thresholds <- relative_wis |>
 ## Implementation {-}
 
 The model is implemented in `stan` [@stan] and `R` (`4.2.0`) [@R] as an extension of the baseline model from the `forecast.vocs` R package (`0.0.9.7000`)  [@forecast.vocs].
-We note that our use of a Heaviside step function introduces a discontinuity to the posterior making it less suited for use with `stan`. Other model formulations without feature this would be more efficient and robust.
+We note that our use of a Heaviside step function introduces a discontinuity to the posterior making it less suited for use with `stan`. Other model formulations without this feature would be more efficient and robust.
 The `cmdstanr` R package (`0.5.2`) [@cmdstanr] is used for model fitting with 2 MCMC chains each having 1000 warm-up and 1000 sampling steps each [@cmdstanr].
-`cmstanr` surfaces several settings which trade-off between sampling speed and the robustness of approach.
-Here we take a conservative approach, as model fit is not manually inspected during real-time usage and due to the expected complexity of the posterior [@betancourt_2017], and set the adapt delta setting to 0.99, and the maximum treedepth setting to 15. 
-For real-time usage convergance was not assessed but during model development the Rhat diagnostic was used alongside feedback from `cmdstanr` about the number of divergant transitions and exceedance of the maximum tree depth [@cmdstanr]. During development posterior predictions were also visually compared to observed data.
+`cmstanr` surfaces several settings that trade-off between sampling speed and the robustness of the approach.
+Here we take a conservative approach, as the model fit is not manually inspected during real-time usage and due to the expected complexity of the posterior [@betancourt_2017], and set the adapt delta setting to 0.99, and the maximum tree depth setting to 15. 
+For real-time usage convergence was not assessed but during model development, the Rhat diagnostic was used alongside feedback from `cmdstanr` about the number of divergent transitions and exceedance of the maximum tree depth [@cmdstanr]. During development, posterior predictions were also visually compared to observed data.
 
 To download and manipulate forecasts from the ECDC forecasting hub [@EuroHub] we use  the `data.table` (`1.14.2`) [@data.table] and `gh` (`1.3.0`) [@gh] R packages.
-We make use of further functionality from the `forecast.vocs` R package [@forecast.vocs] to prepare data for forecasting, to visualise forecasts and summary measures, and to summarise forecasts.
+We make use of further functionality from the `forecast.vocs` R package [@forecast.vocs] to prepare data for forecasting, visualise forecasts and summary measures, and summarise forecasts.
 Forecast evaluation is implemented using the `scoringutils` R package (1.0.0) [@scoringutils], and the `scoringRules` R package (1.0.1) [@REF].
 
-To ensure reproducibility of this analysis dependencies are managed using the `renv` R package (`0.14.0`) [@renv] and a Dockerfile file along with built Docker image [@Boettiger:2015dw] (via GitHub Actions) is provided in the code repository.
-Weekly forecasts are also made using of `renv` and GitHub actions to ensure they require limited compute and that our implementation is independent from local resources facilitating democratised access.
+To ensure the reproducibility of this analysis dependencies are managed using the `renv` R package (`0.14.0`) [@renv] and a Dockerfile file along with a built Docker image [@Boettiger:2015dw] (via GitHub Actions) is provided in the code repository.
+Weekly forecasts are also made using `renv` and GitHub actions to ensure they require limited compute and that our implementation is independent of local resources facilitating democratised access.
 The code for this analysis can be found here: https://github.com/epiforecasts/simplified-forecaster-evaluation
-The code for the forecating model defined above along with the infrastructure required to forecast using GitHub Actions can be found here: https://github.com/seabbs/ecdc-weekly-growth-forecasts
+The code for the forecasting model defined above along with the infrastructure required to forecast using GitHub Actions can be found here: https://github.com/seabbs/ecdc-weekly-growth-forecasts
 Versions archived on Zenodo are available [@REF] and [@REF].
 
 # Results {-}
 
 ## Data summary {-}
 
-In our study period, incidence rates across ECDC nations and in the UK were primary driven by the spread of noval subvariants of concern related to the Omicron variant. Many nations, such as the UK saw large BA.1 waves in early January to late January that then resulted in declining incidence rates through Febuary.
-From late Febuary, througth to the end of May, most nations then saw another wave, typically with lower reported incidence rates, driven by BA.2. This wave was typically characterised by a lower peak than the BA.1 wave but a longer tail.
+In our study period, incidence rates across ECDC nations and in the UK were primarily driven by the spread of novel subvariants of concern related to the Omicron variant and changes in population susceptibility. Many nations, such as the UK saw large BA.1 waves in January that then resulted in declining incidence rates through February.
+From late February, through to the end of May, most nations then saw another wave, typically with lower reported incidence rates, driven by BA.2. This wave was typically characterised by a lower peak than the BA.1 wave with a more gradual decrease in incidence.
 The end of our study period was characterised by the gradual take-over of the BA.4/BA.5 subvariants that again had a lower peak and lower absolute growth rates. Unlike earlier periods in the pandemic, our study period did not see the use of new non-pharmaceutical interventions (NPIs) in response to increasing COVID-19 incidence in most locations.
-In addition, in general ascertainment rates likely reduced over time in most locations due to reductions in routine testing, and reductions in test availability. Whilst both the reduced use of NPIs and testing generally occured across nations our study period also marked an increase in the heterogenity of the response to COVID-19 pandemic with nations changing policy at different times and to different degrees.
+In addition, in general, ascertainment rates likely reduced over time in most locations due to reductions in routine testing, and reductions in test availability. Whilst both the reduced use of NPIs and testing generally occurred across nations our study period also marked an increase in the heterogeneity of the response to the COVID-19 pandemic with nations changing policy at different times and to different degrees.
 This is in contrast to the early COVID-19 pandemic response for which most nations took similar actions at similar times.
 
 We extracted forecasts starting from the 15th of January until the 19th of July 2022 for all countries covered by the ECDC forecasting hub (all ECDC nations and the UK making `r locations` unique locations).
 In total `r nrow(metadata)` forecasts were made across all locations, `r forecast_dates` forecast dates from `r models` independent forecast models (including the ECDC baseline model).
 Of these models, `r length(global_models)` forecasted in at least 30 locations including our original submission  (referred to as `epiforecasts-EpiNow2` by the hub), and our surrogate model.
 Of the remaining models submitted `r length(local_models)` were submitted in only one location.
-These models were generally submitted to a subset of locations with particular clustering in Germany and Poland (likely due to the folding of the German/Poland forecasting hub into the ECDC forecasting hub project).
+Single location models were clustered in a few locations, particularly Germany and Poland (likely due to the folding of the German/Poland forecasting hub into the ECDC forecasting hub project).
 Italy was also an outlier with `r single_locs_models_per_loc[location == "IT", n]` models that submitted nowhere else.
-`r nrow(partial_models)` models submitted for between 3 and 30 locations and all these models varied the number of locations they submitted forecasts for over time, potentially indicating manual curation or models targeted at specific conditions.
+`r nrow(partial_models)` models were submitted for between 3 and 30 locations and all these models varied the number of locations they submitted forecasts for over time, potentially indicating manual curation or models targeted at specific conditions.
 
-Across all forecast dates and locations the minimum number of independent forecasts was `r models_per_loc_date[, min(n)]` with the maxmimum being `r models_per_loc_date[, max(n)]`. The median number of independent forecasts per location and forecast date was `r models_per_loc_date[, median(n)]`. All locations recieved forecasts from at least `r models_per_location[, min(n)]` models with the median number of forecast models per location being `r models_per_location[, median(n)]`. Coverage of forecast dates varied across submitted models with `r forecast_dates_by_models[n_per == 1, .N]` models submitting for all dates, `r forecast_dates_by_models[n_per >= 0.9, .N]` models submitting for at least 90% of dates, and `r forecast_dates_by_models[n_per < 0.50, .N]` models submitting for fewer than 50% of forecast dates. In general, there was no clear difference in forecast date coverage between models that submitted for all locations vs a small subset but models with partial coverage of locations all also had partial coverage of forecast dates.
+Across all forecast dates and locations the minimum number of independent forecasts was `r models_per_loc_date[, min(n)]` with the maximum being `r models_per_loc_date[, max(n)]`. The median number of independent forecasts per location and forecast date was `r models_per_loc_date[, median(n)]`. All locations received forecasts from at least `r models_per_location[, min(n)]` models with the median number of forecast models per location being `r models_per_location[, median(n)]`. Coverage of forecast dates varied across submitted models with `r forecast_dates_by_models[n_per == 1, .N]` models submitting for all dates, `r forecast_dates_by_models[n_per >= 0.9, .N]` models submitting for at least 90% of dates, and `r forecast_dates_by_models[n_per < 0.50, .N]` models submitting for fewer than 50% of forecast dates. In general, there was no clear difference in forecast date coverage between models that submitted for all locations vs a small subset but models with partial coverage of locations all also had partial coverage of forecast dates.
 
 ## Forecast evaluation {-}
 
 ### Visualisation of forecasts by horizon {-}
 
-In our example set of locations, the absolute performance of the ensemble and the surrogate model was similar in all locations at short forecast horizons though varied by location.
-Performance was most comparable in Slovakia but in the United Kingdom and Germany in particular the surrogate model outperformed visibly worse for some forecast dates (Figure \@ref(fig:vis-forecasts)).
+In our example set of locations, the absolute performance of the ensemble and the surrogate model was similar in all locations at short forecast horizons though this varied by location.
+Performance was most comparable in Slovakia but in the United Kingdom and Germany in particular the surrogate model performed visibly worse for some forecast dates (Figure \@ref(fig:vis-forecasts)).
 For both the ensemble and the surrogate performance visibly decreased as the forecast horizon increased though the relative difference in performance between models was relatively stable across horizons.
-In general in the study period the ensemble appeared to be liable to underpredict and the surrogate model appeared more likely to overpredict. 
+In general, in the study period, the ensemble appeared to be liable to underpredict and the surrogate model appeared more likely to over-predict. 
 Both models forecast large reductions in incidence in Poland during May that did not occur whilst only the ensemble forecast spuriously forecast similar large reductions in Germany during June.
-In comparison to the ensemble model the surrogate model appeared less likely to place weight on infeasibly large reductions in incidence during periods of declining incidence but on other hand was more likely to forecast continuing increases in incidence (for example in Febuary in Slokavkia and Poland).
+In comparison to the ensemble model the surrogate model appeared less likely to place weight on infeasibly large reductions in incidence during periods of declining incidence but on other hand was more likely to forecast continuing increases in incidence (for example in February in Slovakia and Poland).
 Italy and Germany, which had the highest number of submitted models of the example locations had little clear difference in performance between the ensemble and surrogate models compared to other example locations.
 
-```{r vis-forecasts, fig.cap = "a.) Weighted interval score at the 1 week and 4 week forecast horizon by epidemiological week in Germany, Greece, Italy, Poland, Slovakia, and the United Kingdom. b.)Forecasts of notified test positive cases (per 10,000 population) by epidemiological week in Germany, Greece, Italy, Poland, Slovakia, and the United Kingdom,  by forecast horizon (one to four weeks). Incidence rates are shown on a log scale. 30\\%, 60\\%, and 90\\% credible intervals are shown. The black line and points are the notified cases as of the date of data extraction rather than those available at the time.", out.width = "95%", fig.height = 12, fig.width = 18}
+```{r vis-forecasts, fig.cap = "a.) Weighted interval scores at the 1-week and 4-week forecast horizon by epidemiological week in Germany, Greece, Italy, Poland, Slovakia, and the United Kingdom. b.)Forecasts of notified test positive cases (per 10,000 population) by epidemiological week in Germany, Greece, Italy, Poland, Slovakia, and the United Kingdom,  by forecast horizon (one to four weeks). Incidence rates are shown on a log scale. 30\\%, 60\\%, and 90\\% credible intervals are shown. The black line and points are the notified cases as of the date of data extraction rather than those available at the time.", out.width = "95%", fig.height = 12, fig.width = 18}
 p <- (
   plot_wis(wis, locs) +
    theme(strip.text.x = element_blank()) |
