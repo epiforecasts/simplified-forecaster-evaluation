@@ -56,7 +56,7 @@ In this work, we propose and evaluate a surrogate forecast model approach which 
 The trend towards large-scale multi-team ensemble forecasting in infectious diseases has accelerated during the COVID-19 pandemic, partially due to an increased need from stakeholders for reliable forecast models but also due to the perceived low quality of many forecasts otherwise being produced, with the establishment of the CDC forecasting hub [@REF] in early 2020, the Germany/Poland forecast hub [@REF] in late 2020, and the ECDC forecast hub [@ECDC] in 2021. All of these collaborations, which the authors (particularly SF and JB) have been involved with managing,  ensembled contributions from multiple independent teams using a similar approach (most recently an unweighted median ensemble [@REF]) and have shown that their ensemble forecasts outperform most individually contributed forecasts whilst remaining generally robust to outliers in reporting [@REF].
 However, they have struggled to provide feedback to those contributing forecasts that would allow them to improve their forecast approaches, have found it difficult to improve the quality of their ensemble forecasts [@REF], and have struggled to maintain incentives for forecasters to continue to contribute which may impact the long-term quality of the ensembles they produce. 
 
-These forecast collaborations, and other similar infectious disease forecasting efforts, have focussed on forecasting reported cases and deaths by epidemiological week (i.e Saturday to Saturday) over a one to four-week time horizon. Generally, ground truth data is available daily, and is updated in retrospect as new data becomes available. Typically, the ensemble forecast produced each week comprises at least 5 independent forecasts using a range of approaches and is produced using an unweighted median ensemble [@REF].
+These forecast collaborations, and other similar infectious disease forecasting efforts, have focussed on forecasting reported cases and deaths by epidemiological week (i.e Saturday to Saturday) over a one to four-week time horizon. Generally, ground truth data is available daily, and is updated in retrospect as new data becomes available. Typically, the ensemble forecast produced each week comprises at least 3 independent forecasts using a range of approaches and is produced using an unweighted median ensemble [@REF].
 Most submitted forecasts use available daily data, along with potentially other leading predictors, to produce daily forecasts that are then aggregated into weekly forecasts.
 Many use a range of outlier processing techniques to reduce reporting artefacts which can bias forecasts.
 In general, 4 main classes of forecast models are submitted, statistical forecasting models such as ARIMA models [@REF], mechanistic forecasting models based on the compartmental modelling framework and its generalisations [@REF], semi-mechanistic approaches that blend both of these approaches [@REF], and human insight based forecast models that may also include elements of other methods [@REF].
@@ -64,7 +64,7 @@ Real-time evaluation has shown that each of these classes of models may perform 
 We have contributed a range of forecasts to these forecast collaborations generally focussed on semi-mechanistic statistical methods [@REF], and human insight-based forecasts [@REF] with our forecasts performing relatively well compared to the majority of those submitted but rarely outperforming significantly.
 The model-based forecasts we have contributed have focussed on trying to carefully model the underlying infectious disease dynamics from infection through to symptom onset, and test positivity using non-exponential delay distributions whilst also attempting to model the complexity of daily, within the week, reporting periodicity [@REF].
 Based on our observations our forecasts have generally captured changes in trend better than most submitted models that do not use human insight based on known policy changes but have not been robust to reporting issues such as large outliers in reporting and changes to reporting patterns. 
-Our previous methodology also requires significant computational resources running for an hour on a 16-core machine when producing forecasts for the ECDC forecasting hub. 
+Our previous methodology also requires significant computational resources running for an hour on a 16-core machine when producing forecasts for the ECDC forecasting hub.[a][b] 
 In our model-based forecasts, we did not attempt to capture potential future interventions or known interventions not currently observed in the epidemiological data whereas in our human insight models these were implicitly included.
 We found that our human insight-based forecasts significantly outperformed our model-based forecasts and hypothesised that this may have been driven by including additional information not observed in the epidemiological data [@REF]. 
 Unlike our epidemiologically motivated forecast submissions, the hub ensemble forecasts were typically robust to daily reporting artefacts.
@@ -90,7 +90,7 @@ The only observation for which we do not make an adaptation is the apparent shar
 This choice is motivated by our belief that the underlying transmission process is an exponential one and therefore a count error model (where variance is linked to the mean)  is a sensible choice though this is an area of current research.
 We suggest that part of the reason the hub ensembles exhibit this behaviour is due to the penalisation of overprediction compared to underprediction caused by the use of a generalised form of absolute error for the majority of forecast evaluations. 
 
-In this study, we define an initial attempt at a surrogate model to replicate the observed behaviour of current multi-team forecast ensembles whilst maintaining a set of clear assumptions and summarising its implementation, with a focus on minimal resource use and reproducibility, as a GitHub action. 
+In this study, we define an initial attempt at a surrogate model to replicate the observed behaviour of current multi-team forecast ensembles whilst maintaining a set of clear assumptions and summarising its implementation, with a focus on minimal resource use and reproducibility, as a GitHub Actions workflow. 
 We briefly outline some of the summary statistics it produces and their epidemiological relevance. 
 We then evaluate its real-time performance in comparison to the ECDC forecast hub ensemble by visualising forecasts, using the weighted interval score [@REF], a commonly used proper scoring rule, and quantifying the empirical coverage of the forecasts produced.
 We attempt to highlight settings where this model performs well as a surrogate to the ensemble forecast and areas where more work is needed. 
@@ -257,7 +257,7 @@ This process can be defined as follows,
 
 \begin{align*}
   r_0 &\sim \text{Normal}\left(0, 0.25 \right) \\
-  r_t &= \left(\mathcal{H}[a](r_{t-1} > 0) \xi_{+} + \mathcal{H}(r_{t-1} \le 0) \xi_{-}\right)r_{t-1} + \epsilon_t  \\
+  r_t &= \left(\mathcal{H}[c](r_{t-1} > 0) \xi_{+} + \mathcal{H}(r_{t-1} \le 0) \xi_{-}\right)r_{t-1} + \epsilon_t  \\
   \epsilon_t &= \mathcal{H}(t > 0) \beta \epsilon_{t-1} + \eta_t
 \end{align*}
 
@@ -508,7 +508,7 @@ Stratifying calibration by quantile and forecast horizon the ensemble forecast w
 In contrast, the surrogate ensemble forecast was generally equally well calibrated at shorter horizons with a tendency to produce conservative forecasts.
 At longer horizons, however, quantiles below the median were liable to have poor coverage suggesting a bias towards over-predicting.
 
-Breaking down the relative weighted interval score by forecast interval we observe that the majority of the difference in overall scores is likely driven by differences in the outer intervals [b][c][d][e]and in particular the tails of the forecast (Figure \@ref(fig:plot-coverage) b).
+Breaking down the relative weighted interval score by forecast interval we observe that the majority of the difference in overall scores is likely driven by differences in the outer intervals [d][e][f][g][h]and in particular the tails of the forecast (Figure \@ref(fig:plot-coverage) b).
 This is true across forecast horizons but the magnitude of the different increases. This implies that the surrogate and ensemble model produced comparably performing point forecasts and indeed if we consider the absolute error of the median forecasts we see that the median for the ensemble forecast was `r overall_ae_median[model == "Ensemble", round(Median, digits = 1)]` whilst the median for the surrogate forecast was `r overall_ae_median[model == "Surrogate", round(Median, digits = 1)]`.
 However, when we consider the mean absolute error of the median we find that the ensemble forecast outperformed the surrogate forecast (`r overall_ae_median[model == "Ensemble", round(Mean, digits = 1)]` vs. `r overall_ae_median[model == "Surrogate", round(Mean, digits = 1)]`) as noted elsewhere.
 This indicates a right skew in performance for the surrogate model point forecasts not observed for the ensemble forecast which matches that observed when evaluating the full predictive distributions of both forecasts.
@@ -542,8 +542,8 @@ We first defined a set of assumptions for how the surrogate model should behave 
 We restricted ourselves to a model that could be easily understood, that produced epidemiologically meaningful summary statistics, and that could be run with low compute resources.
 We further provide a fully reproducible workflow for running and evaluating this model using GitHub actions facilitating others to do the same. 
 
-Over the 6 months of the study period, we found that our surrogate model produced forecasts that were visually similar to those from the forecast hub ensemble though with greater uncertainty[f][g].
-In a subset of example locations, we observed some variation in performance across locations, that the ensemble appeared biased toward underprediction, and the surrogate model appeared slightly biased toward overprediction[h].
+Over the 6 months of the study period, we found that our surrogate model produced forecasts that were visually similar to those from the forecast hub ensemble though with greater uncertainty.
+In a subset of example locations, we observed some variation in performance across locations, that the ensemble appeared biased toward underprediction, and the surrogate model appeared slightly biased toward overprediction[i].
 Evaluating the relative performance of the surrogate model compared to the ECDC forecast hub ensemble we found that the mean performance was substantially worse, which was driven by a relatively small subset of forecasts.
 The median relative performance was only marginally worse across forecast horizons with the distribution of relative scores having a heavy right tail.
 Performance varied by location and forecast date with the surrogate model performing worse in the first part of 2022 which may have been linked to increasing incidence rates across forecast locations linked to BA.2.
@@ -583,7 +583,7 @@ All comparable forecast hub projects found that their ensemble was often the bes
 In general, during the study period, all projects used the same unweighted median ensemble forecast of all submissions after having concluded it was a favourable choice [@REF]. 
 The CDC forecasting hub also evaluated a range of other ensemble approaches, such as inverse weighted interval score weighting, unweighted ensembles of a selection of models based on recent performance, and mean ensembling [@REF].
 Work on this is still ongoing but these more complex ensembling approaches were shown to outperform the median of all submitted forecasts in many cases.
-That being said no forecast hub has switched to these alternative ensemble designs for their operational forecast implying they do not think the evidence base is strong enough for them to be used by forecast consumers and hence the median of all submitted forecasts remains the community-suggested default ensemble option and a sensible target for our study. 
+That being said no forecast hub has switched to these alternative ensemble designs for their operational forecast suggesting they do not think the evidence base is strong enough for them to be used by forecast consumers and hence the median of all submitted forecasts remains the community-suggested default ensemble option and a sensible target for our study. 
 Other studies have been published evaluating single forecast models in comparison to ensemble performance from the forecast hub but in general, these have not focussed on replicating ensemble behaviour but rather optimising the target evaluation metric. 
 Our previous work also highlighted the lack of calibration in an ensemble forecast from the Germany/Poland forecasting hub compared to forecasts from epidemiological models and noted the bias towards underprediction observed in the ensemble forecasts and not the model-based forecasts [@refNikosinGermany].
 
@@ -633,17 +633,22 @@ We thank the ECDC for supporting the forecasting hub, and all forecasters who su
 
 # References
 
-[a]Isn't the indicator function with 1(.) just more common and potentially easier to read?
-[b]I would be very surprised if that were true. The reason is that the outer intervals get tiny weights in the WIS and performance usually is more strongly influenced by the inner intervals.
-[c]This hangs on if the output from score is already weighted or not which I was not clear on?
-[d]Which was my understanding of the implementation (weighting happens in score and summarise_score is just an averaging?)
+[a]For this to be really informative, you would need to specify the CPU clock speed. There are huge disparities between the most recent 16-core machines and older ones.
+[b]Agree it could/should list the Azure type and clock speed but disagree it brings no information as the comparison is to a 2 core CI process available in 2022 (i.e when the paper is written). 
+
+I think perhaps adding this detail could be a bit overwhelming for an introduction but worth adding to try it out
+[c]Isn't the indicator function with 1(.) just more common and potentially easier to read?
+[d]I would be very surprised if that were true. The reason is that the outer intervals get tiny weights in the WIS and performance usually is more strongly influenced by the inner intervals.
+[e]This hangs on if the output from score is already weighted or not which I was not clear on?
+[f]Which was my understanding of the implementation (weighting happens in score and summarise_score is just an averaging?)
 
 https://epiforecasts.io/scoringutils/reference/score_quantile.html
 
 Perhaps there is an implementation nuance? I agree I was surprised by the magnitude of this difference.
-[e]Aah I was just looking at Figure 3c here (I think it needs to be 3b). Oooh ok I think I now know what you mean. I would think that Figure 3b) is misleading. For every interval x, this is the score from the surrogate over the score for the ensemble for that interval x, right? Two reasons it's misleading: 
+[g]Aah I was just looking at Figure 3c here (I think it needs to be 3b). Oooh ok I think I now know what you mean. I would think that Figure 3b) is misleading. For every interval x, this is the score from the surrogate over the score for the ensemble for that interval x, right? Two reasons it's misleading: 
 1) I think the values that you are dividing just become very small and therefore what you get is unstable, because the denominator gets smaller and smaller
 2) the outer values don't influence the average a lot, because you first add the values for the individual intervals up (to get one WIS for ensemble and surrogate) and then you divide these values. The plot suggests that you divide the values for all the quantiles and then average to get your relative score
-[f]WIS decompositions would be nice to look at. Although I guess can be left to future Sam (or never Sam)
-[g]Suggest add to slack as a suggestion for discussion there (close once done please).
-[h]As Johannes mentioned a while ago: It is a priori unclear what the "correct" distribution of overprediction, underprediction and dispersion is. So I think it is technically not correct to talk about a bias towards over / underprediction. Adding here as a comment because it might be relevant throughout. We could look at the bias value from scoringutils.
+[h]That sounds like a wording/interpretation issue vs a change the plot issue? 
+
+Do you have suggestions for that wording or if suggesting the plot is changed what it should be changed to?
+[i]As Johannes mentioned a while ago: It is a priori unclear what the "correct" distribution of overprediction, underprediction and dispersion is. So I think it is technically not correct to talk about a bias towards over / underprediction. Adding here as a comment because it might be relevant throughout. We could look at the bias value from scoringutils.
