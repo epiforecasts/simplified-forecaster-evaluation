@@ -270,11 +270,11 @@ This process can be defined as follows,
 
 \begin{align*}
   r_0 &\sim \text{Normal}\left(0, 0.25 \right) \\
-  r_t &= \left(\mathcal{H}(r_{t-1} > 0) \xi_{+} + \mathcal{H}(r_{t-1} \le 0) \xi_{-}\right)r_{t-1} + \epsilon_t  \\
+  r_t &= \left(\mathcal{H}(r_{t-1}) \xi_{+} + (1 - \mathcal{H}(r_{t-1})) \xi_{-}\right)r_{t-1} + \epsilon_t  \\
   \epsilon_t &= \mathcal{H}(t > 0) \beta \epsilon_{t-1} + \eta_t
 \end{align*}
 
-Where $\mathcal{H}$ is the Heaviside step function and is defined such that it attains the value of 1 if the argument is true and the value of 0 otherwise, and $\epsilon_t$ and $\eta_t$ are error terms. 
+Where $\mathcal{H}(r_{t-1})$ is the Heaviside step function and is defined such that it attains the value of 1 if the argument is greater than 0 and 0 otherwise, and $\epsilon_t$ and $\eta_t$ are error terms. 
 The following priors are used,
 
 \begin{align*}
