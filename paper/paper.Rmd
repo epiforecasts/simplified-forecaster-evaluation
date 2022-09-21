@@ -164,7 +164,7 @@ Incidence was aggregated over the Morbidity and Mortality Weekly Report (MMWR) e
   
 The European forecast hub requests forecasts for one to four-week forecast horizon and requires forecasts to use a pre-specified format with 23 quantiles of the predictive probability distribution.
 No restrictions were placed on who could submit forecasts and the hub team actively invited participation from research groups known to be involved with COVID-19 forecasting projects.
-Forecasters used a wide range of forecasting methods including statistical approaches, mechanistic models including deterministic ordinary differential equation models and agent-based models, semi-mechanistic models, expert elicitation models, and ensembles of multiple approaches [@https://covid19forecasthub.eu/community.html].
+Forecasters used a wide range of forecasting methods including statistical approaches, mechanistic models including deterministic ordinary differential equation models and agent-based models, semi-mechanistic models, expert elicitation models, and ensembles of multiple approaches [@EuroHub].
 Teams submitted forecasts at the latest two days after the complete dataset for the forecast week became available and were allowed to use all data available at the time of submission (i.e including up to two days of data for the current week). 
 The ensemble forecast was constructed by taking the median of all predictive quantiles without the exclusion of any validly submitted forecast (where validity was defined as passing minimal formatting checks by the hub team and timely submission). 
 An ensemble was only produced for locations with at least 3 independent forecast models including the hub baseline model.
@@ -271,10 +271,10 @@ This process can be defined as follows,
 \begin{align*}
   r_0 &\sim \text{Normal}\left(0, 0.25 \right) \\
   r_t &= \left(\mathcal{H}(r_{t-1}) \xi_{+} + (1 - \mathcal{H}(r_{t-1})) \xi_{-}\right)r_{t-1} + \epsilon_t  \\
-  \epsilon_t &= \mathcal{H}(t > 0) \beta \epsilon_{t-1} + \eta_t
+  \epsilon_t &= \mathcal{H}(t) \beta \epsilon_{t-1} + \eta_t
 \end{align*}
 
-Where $\mathcal{H}(r_{t-1})$ is the Heaviside step function and is defined such that it attains the value of 1 if the argument is greater than 0 and 0 otherwise, and $\epsilon_t$ and $\eta_t$ are error terms. 
+Where $\mathcal{H}(x)$ is the Heaviside step function and is defined such that it attains the value of 1 if the argument is greater than 0 and 0 otherwise, and $\epsilon_t$ and $\eta_t$ are error terms. 
 The following priors are used,
 
 \begin{align*}
@@ -304,7 +304,7 @@ These are calculated as follows:
 
 $T_s = 7$ is a parameter that defines the weekly timespan over which the summary metrics apply dependent on the time step of the data.
 
-## Forecast evaluation[d] {-}
+## Forecast evaluation {-}
 
 To standardise forecasts across forecast locations we first normalised both weekly notified test positive cases and forecast test positive cases by the population in the forecast region scaled to be an incidence rate per 10,000 people.
 We then evaluated a subset of forecasts from the following countries Germany, Greece, Italy, Poland, Slovakia, and the United Kingdom visually by forecast horizon (1-4 weeks) for both the ensemble and surrogate model. 
