@@ -1,5 +1,5 @@
 ---
-title: Evaluating a simplified forecast model in comparison to the ECDC forecasting hub ensemble
+title: Evaluating a simplified forecast model in comparison to the European forecasting hub ensemble
 preprint: true
 author: 
   - name: Sam Abbott
@@ -65,7 +65,7 @@ In this work, we propose and evaluate a surrogate forecast model approach which 
 
 In this work, we propose and evaluate a surrogate forecast model approach which seeks to emulate the observed behaviour of recent COVID-19 forecast ensembles using a minimal set of easily communicated assumptions, limited computational resources with an easily generalised implementation. 
 
-The trend towards large-scale multi-team ensemble forecasting in infectious diseases has accelerated during the COVID-19 pandemic, partially due to an increased need from stakeholders for reliable forecast models but also due to the perceived low quality of many forecasts otherwise being produced, with the establishment of the CDC forecasting hub [@REF] in early 2020, the Germany/Poland forecast hub [@REF] in late 2020, and the ECDC forecast hub [@ECDC] in 2021.
+The trend towards large-scale multi-team ensemble forecasting in infectious diseases has accelerated during the COVID-19 pandemic, partially due to an increased need from stakeholders for reliable forecast models but also due to the perceived low quality of many forecasts otherwise being produced, with the establishment of the CDC forecasting hub [@REF] in early 2020, the Germany/Poland forecast hub [@REF] in late 2020, and the European forecast hub [@ECDC] in 2021.
 All of these collaborations, which the authors (particularly SF and JB) have been involved with managing,  ensembled contributions from multiple independent teams using a similar approach (most recently an unweighted median ensemble [@REF]) and have shown that their ensemble forecasts outperform most individually contributed forecasts whilst remaining generally robust to outliers in reporting [@REF].
 However, they have struggled to provide feedback to those contributing forecasts that would allow them to improve their forecast approaches, have found it difficult to improve the quality of their ensemble forecasts [@REF], and have struggled to maintain incentives for forecasters to continue to contribute which may impact the long-term quality of the ensembles they produce. 
 
@@ -79,7 +79,7 @@ We have contributed a range of forecasts to these forecast collaborations genera
 Our forecasts have performed relatively well compared to the majority of other submitted forecasts, but rarely outperforming significantly.
 The model-based forecasts we have contributed have focussed on trying to carefully model the underlying infectious disease dynamics from infection through to symptom onset, and test positivity using non-exponential delay distributions whilst also attempting to model the complexity of daily, within the week, reporting periodicity [@REF].
 Based on our observations our forecasts have generally captured changes in trend better than most submitted models that do not use human insight based on known policy changes, but have not been robust to reporting issues such as large outliers in reporting and changes to reporting patterns. 
-Our previous methodology also requires significant computational resources running for an hour on a 16-core machine when producing forecasts for the ECDC forecasting hub. 
+Our previous methodology also requires significant computational resources running for an hour on a 16-core machine when producing forecasts for the European forecasting hub. 
 In our model-based forecasts, we did not attempt to capture potential future interventions or known interventions not currently observed in the epidemiological data whereas in our human insight models these were implicitly included.
 We found that our human insight-based forecasts significantly outperformed our model-based forecasts and hypothesised that this may have been driven by including additional information not observed in the epidemiological data [@REF]. 
 Unlike our epidemiologically motivated forecast submissions, the hub ensemble forecasts were typically robust to daily reporting artefacts. They also demonstrated some ability to forecast future changes in trends that were not present in the observed data similarly to our human insight forecasts indicating the likely inclusion of either human insight, or assumptions about future interventions. 
@@ -144,7 +144,7 @@ population <- fread(here("data", "population.csv"))
 # Load forecast metedata. See data-raw/get-hub-metadata.R for munging
 metadata <- fread(here("data", "metadata.csv"))
 
-# Load ECDC forecasts. See data-raw/get-hub-forecasts.R for munging
+# Load European forecasts. See data-raw/get-hub-forecasts.R for munging
 # Merge with truth and rescale to incidence rate per 100,000
 forecasts <- fread(here("data", "forecasts.csv")) |>
   merge_forecasts_with_truth(truth) |>

@@ -1,6 +1,6 @@
-# Evaluating a simplified forecast model in comparison to the ECDC forecasting hub ensemble
+# Evaluating a simplified forecast model in comparison to the European forecasting hub ensemble
 
-This repository contains the documentation, results, and code of a project evaluating a simplified forecasting model in comparison the ECDC forecasting hub ensemble. See the documentation for further details. 
+This repository contains the documentation, results, and code of a project evaluating a simplified forecasting model in comparison the European forecasting hub ensemble. See the documentation for further details. 
 
 ## Citation
 
