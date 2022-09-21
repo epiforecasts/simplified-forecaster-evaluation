@@ -46,7 +46,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Introduction {-}[a][b]
+# Introduction {-}
 
 Multi-model and multi-team ensembles have become increasingly popular as an approach to increase the robustness and performance of infectious disease forecasts over the last decade [@Cramer2022-sp; @Bracher2021-wk; @Sherratt2022-ue].
 These approaches have drawn heavily on the experience of other domains, for example, climate modelling [@REF], where ensembles of both multiple models and from multiple teams have a long history of providing superior forecasts.
@@ -316,9 +316,9 @@ We present WIS for the subset of forecasts we explore visually for both the ense
 
 To understand the relative performance of the surrogate model compared to the ensemble model, we calculate the relative performance (rWIS) by dividing the WIS for the surrogate model by the WIS of the ensemble model for all locations and forecast horizons.
 To maintain the propriety of this score, we do this after first taking the means of scores for the relevant stratification.
-We explore relative performance by forecast horizon, by month and horizon, and by location and horizo[e]n. 
+We explore relative performance by forecast horizon, by month and horizon, and by location and horizon. 
 
-In addition to presenting the WIS for a subset of locations and the relative WIS for all locations, we also calculate and visualise the empirical coverage, which is the percentage of observed values within a given interval or below a given quantile, of both the surrogate and ensemble model for the 30%, 60%, and 90% prediction intervals and by quantile.[f] 
+In addition to presenting the WIS for a subset of locations and the relative WIS for all locations, we also calculate and visualise the empirical coverage, which is the percentage of observed values within a given interval or below a given quantile, of both the surrogate and ensemble model for the 30%, 60%, and 90% prediction intervals and by quantile. 
 Lastly, we calculate and visualise the relative weighted interval score by quantile, stratified by forecast horizon.
 
 ```{r eval-parameters}
@@ -510,7 +510,7 @@ p <- (
 suppressWarnings(print(p))
 ```
 
-### Forecast calibration[g][h] {-}
+### Forecast calibration {-}
 
 Overall the surrogate model was relatively well calibrated at the 30%, 60% and 90% prediction intervals whilst the ensemble model was in general poorly calibrated with calibration becoming worse at larger prediction intervals (Figure \@ref(fig:plot-coverage) a).
 When stratified by forecast horizon the ensemble forecast was best calibrated at the one-week forecast horizon and then became progressively less well calibrated as the forecast horizon increased with the worst calibration at the 90% prediction interval (Figure \@ref(fig:plot-coverage) a). 
@@ -523,7 +523,7 @@ In contrast, the surrogate ensemble forecast was generally equally well calibrat
 At longer horizons, however, quantiles below the median were liable to have poor coverage suggesting a bias towards over-predicting.
 
 Breaking down the relative weighted interval score by forecast interval we observe that the majority of the difference in overall scores is likely driven by differences in the outer intervals and in particular the tails of the forecast (Figure \@ref(fig:plot-coverage) b).
-This is true across forecast horizons but the magnitude of the difference increases. This implies that the surrogate and ensemble model produced comparably performing point forecasts and indeed if we consider the absolute error of the median forecast population weighted incidence we see that the median for the ensemble forecast[i] was `r overall_ae_median[model == "Ensemble", round(Median, digits = 1)]` whilst the median for the surrogate forecast was `r overall_ae_median[model == "Surrogate", round(Median, digits = 1)]`.
+This is true across forecast horizons but the magnitude of the difference increases. This implies that the surrogate and ensemble model produced comparably performing point forecasts and indeed if we consider the absolute error of the median forecast population weighted incidence we see that the median for the ensemble forecast was `r overall_ae_median[model == "Ensemble", round(Median, digits = 1)]` whilst the median for the surrogate forecast was `r overall_ae_median[model == "Surrogate", round(Median, digits = 1)]`.
 However, when we consider the mean absolute error of the median we find that the ensemble forecast outperformed the surrogate forecast (`r overall_ae_median[model == "Ensemble", round(Mean, digits = 1)]` vs. `r overall_ae_median[model == "Surrogate", round(Mean, digits = 1)]`) as noted elsewhere.
 This indicates a right skew in performance for the surrogate model point forecasts not observed for the ensemble forecast which matches that observed when evaluating the full predictive distributions of both forecasts.
 
@@ -556,10 +556,10 @@ We first defined a set of assumptions for how the surrogate model should behave 
 We aimed for a model that could be easily understood, that produced epidemiologically meaningful summary statistics, and that could be run with low compute resources.
 We further provide a fully reproducible workflow for running and evaluating this model using GitHub actions facilitating others to do the same. 
 
-Over the 6 months of the study period, we found that our surrogate model produced forecasts that were visually similar to those from the forecast hub ensemble on the log scale though with greater uncertainty.[j][k]
-In a subset of example locations, we observed some variation in performance across locations, that the ensemble appeared biased toward underprediction, and the surrogate model appeared slightly biased toward overprediction[l].
+Over the 6 months of the study period, we found that our surrogate model produced forecasts that were visually similar to those from the forecast hub ensemble on the log scale though with greater uncertainty.
+In a subset of example locations, we observed some variation in performance across locations, that the ensemble appeared biased toward underprediction, and the surrogate model appeared slightly biased toward overprediction.
 Evaluating the relative performance of the surrogate model compared to the European forecast hub ensemble we found that the mean performance was substantially worse, which was driven by a relatively small subset of forecasts.
-The median relative performance was only marginally[m] worse across forecast horizons with the distribution of relative scores having a heavy right tail.
+The median relative performance was only marginally worse across forecast horizons with the distribution of relative scores having a heavy right tail.
 Performance varied by location and forecast date with the surrogate model performing worse in the first part of 2022 which may have been linked to incidence rates peaking across forecast locations linked to the spread of BA.2.
 In general, the relative performance of the surrogate model was stable across forecast horizons, unlike our previous methods used for real-time forecasting [@Bosse2022-hm; @EuroHub; @EpiNow2] which rapidly became less performant, though the distribution of relative performance did have an increasingly heavy right tail as the forecast horizon increased indicating a greater share of forecasts performing very poorly in comparison to the hub ensemble.
 The forecast hub ensemble was poorly calibrated, particularly at longer forecast horizons and bigger prediction intervals whereas the surrogate model was substantially better calibrated for all targets though it tended to be overly uncertain at large intervals.
@@ -656,20 +656,3 @@ SA and SF were funded by a Wellcome senior fellowship to SF (), KS and HG were f
 We thank the ECDC for supporting the forecasting hub, and all forecasters who submitted forecasts for making this study possible. We thank the forecast hub team for publishing all data in an accessible format. We thank Molly for being a good Labrador.
 
 # References {-}
-
-[a]Rejected my suggested changes moving around text - instead, put the suggestions here: 
-
-https://docs.google.com/document/d/1GbAsu1ZZsnm6Wl0WQA0g6LbpRucrLs4gRjpg97DUAA8/edit
-[b]Ah, only just saw this - will port my suggestions over.
-[d]I think mention in the discussion as I would like to avoid recomputing.
-[e]From SF: Quantify the number of very poorly performing forecasts for the surrogate vs ensemble model.
-[f]From SF: what do we consider good / relatively good / poor performance in terms of calibration?
-[g]There are quite a few qualitative statements here (see individual comments below) - would be good to quantify with numbers, or otherwise state explicitly in the methods how we evaluate calibration.
-[h]Note I've closed out the other related comments in the following section just to be able to see the wood for the trees. 
-
-Personally, I would rather look at a figure but if you feel it would help the reader happy to put the numbers in the text.
-[i]would be good to break this down a bit more, too, at least by horizon
-[j]I'm not sure we need this statement as it comes down largely to how you plot things - e.g. Fig. 1b would look quite different on a natural scale.
-[k]added log scale. I think we want to make some statement about what we see when we visualise the forecasts but it may not be this one.
-[l]As Johannes mentioned a while ago: It is a priori unclear what the "correct" distribution of overprediction, underprediction and dispersion is. So I think it is technically not correct to talk about a bias towards over / underprediction. Adding here as a comment because it might be relevant throughout. We could look at the bias value from scoringutils.
-[m]See above - a bit hard to assess the scale of this and where we delineat substantial vs. marginal
