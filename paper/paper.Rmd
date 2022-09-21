@@ -304,7 +304,7 @@ These are calculated as follows:
 
 $T_s = 7$ is a parameter that defines the weekly timespan over which the summary metrics apply dependent on the time step of the data.
 
-## Forecast evaluation[c][d] {-}
+## Forecast evaluation[d] {-}
 
 To standardise forecasts across forecast locations we first normalised both weekly notified test positive cases and forecast test positive cases by the population in the forecast region scaled to be an incidence rate per 10,000 people.
 We then evaluated a subset of forecasts from the following countries Germany, Greece, Italy, Poland, Slovakia, and the United Kingdom visually by forecast horizon (1-4 weeks) for both the ensemble and surrogate model. 
@@ -572,6 +572,9 @@ Our study benefits from having been conducted using forecasts produced in real-t
 This means that we can be confident we have captured how our forecast methodology behaves in real-world usage, at least within our study period. 
 The downside of this approach is that it was not possible to update the surrogate model over time in response to initial evaluation or to explore other parameterisations that might be more successful of which there are likely several.
 However, as our study has been conducted with a focus on reproducibility and openness our findings can be replicated or extended by others regardless of compute availability (due to our use of GitHub actions as a compute platform which is freely available to researchers).
+An additional downside to this approach is that the hub ensemble includes forecasts from our surrogate model, increasing the similarity between the two approaches.
+This is difficult to avoid without retrospectively re-calculating the ensemble using the same approach as taken by the hub which would reduce the independence of the hub ensemble as a source of truth to compare our forecasts against.
+Given the number of forecasts submitted in most locations, and the Europeans forecast hubs practice of not calculating an ensemble when fewer than 3 independent forecasts were available, the bias on our results caused by this limitation should be relatively small.
 Importantly in this study, we focussed on replicating the forecast hub ensembles' observed behaviour rather than attempting to define an optimal forecast for forecast consumers.
 It is possible that if we had instead aimed to develop a forecast methodology that minimised the evaluation criteria we planned to use, especially if we relaxed our assumed compute resource constraints, we would have produced forecasts that performed better relative to the hub ensemble.
 However, if we start from the view that the forecast hub ensemble has traits that are desirable for use by policy-makers (i.e robustness and good average performance), which can be found widely in the literature [@Cramer2022-sp; @Bracher2021-wk; @Sherratt2022-ue], then our approach makes sense and may be optimal for producing a "good" forecast.
@@ -658,7 +661,6 @@ We thank the ECDC for supporting the forecasting hub, and all forecasters who su
 
 https://docs.google.com/document/d/1GbAsu1ZZsnm6Wl0WQA0g6LbpRucrLs4gRjpg97DUAA8/edit
 [b]Ah, only just saw this - will port my suggestions over.
-[c]shouldn't we exclude the surrogate model from the ensemble before comparing performance? Or else mention in the discussion that they aren't completely independent.
 [d]I think mention in the discussion as I would like to avoid recomputing.
 [e]From SF: Quantify the number of very poorly performing forecasts for the surrogate vs ensemble model.
 [f]From SF: what do we consider good / relatively good / poor performance in terms of calibration?
