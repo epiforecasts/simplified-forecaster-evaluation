@@ -4,7 +4,6 @@
 # Download hub forecasts of interest
 Rscript data-raw/get-hub-forecasts.R
 
-
 # Make hub metadata for study period
 Rscript data-raw/get-hub-metadata.R
 
@@ -13,6 +12,9 @@ Rscript data-raw/get-truth.R
 
 # Get population data
 Rscript data-raw/get-population.R
+
+# Get anomalies data
+Rscript data-raw/get-anomalies.R
 
 # Calculate per forecast and quantile scores
 Rscript data-raw/score-forecasts.R

@@ -20,8 +20,15 @@ forecasts_with_truth <- forecasts |>
   merge_forecasts_with_truth(truth) |>
   rescale_to_incidence_rate(population, scale = 1e4)
 
-# Score forecasts
-scores <- score(forecasts_with_truth)
+# Load anomalies data
+anomalies <- fread(here("data", "anomalies.csv"))
 
-# Save forecasts\
+# Filter out anomalies from evaluation set
+clean_forecasts_truth <- forecasts_with_truth |>
+  DT(!anomalies, on = c("location", "target_end_date"))
+
+# Score forecasts
+scores <- score(clean_forecasts_truth)
+
+# Save forecasts
 fwrite(scores, here("data", "scores.csv"))
