@@ -173,6 +173,8 @@ An ensemble was only produced for locations with at least 3 independent forecast
 Submitted forecasts and target observations are available from the European forecast hub GitHub repository [@EuroHubGitHub]. We provide code in the repository of this study to streamline access. 
 
 ```{r metadata}
+# Number of forecasts
+nforecasts <- uniqueN(metadata[,.(model, location, forecast_date)])
 # Number of locations
 locations <- metadata |>
   DT(, uniqueN(location))
