@@ -203,7 +203,7 @@ forecast_dates <- metadata |>
 
 # Models per forecast date
 models_per_forecast <- metadata |>
-  summarise_forecasts_by(by = "target_end_date")
+  summarise_forecasts_by(by = "forecast_date")
 
 # Models per location
 models_per_location <- metadata |>
@@ -215,20 +215,20 @@ locations_per_model <- metadata |>
 
 locs_per_model_single_date <- metadata |>
     summarise_forecasts_by(
-      var = "location", by = c("model", "target_end_date")
+      var = "location", by = c("model", "forecast_date")
     ) |>
     DT(, unique(.SD[n == max(n), .(n)]), by = "model")
 
 locs_per_model_date <- metadata |>
   summarise_forecasts_by(
-    var = "location", by = c("model", "target_end_date")
+    var = "location", by = c("model", "forecast_date")
   ) |>
   DT(locs_per_model_single_date[, .(model, max_n = n)], on = "model") |>
   DT(, n_per := n / max_n) |>
   DT(, .SD[!all(n == max_n)], by = "model")
 
 models_per_loc_date <- metadata |>
-  summarise_forecasts_by(var = "model", by = c("target_end_date", "location"))
+  summarise_forecasts_by(var = "model", by = c("forecast_date", "location"))
 
 # Single target models per location
 single_locs_models_per_loc <- metadata |>
