@@ -63,11 +63,11 @@ metadata <- metadata |>
   DT(, .(model, location, forecast_date, anomaly, target)) |>
   unique() |>
   DT(,
-   `:=`(anomaly = any(anomaly), n_anomaly = sum(anomaly)),
+   `:=`(anomaly = any(anomaly), n = .N, n_anomaly = sum(anomaly)),
    by = c("location", "forecast_date", "model")
   ) |>
   DT(target %in% "1 wk ahead inc case") |>
-  DT(, .(model, location, forecast_date, anomaly, n_anomaly)) |>
+  DT(, .(model, location, forecast_date, anomaly, n_anomaly, n)) |>
   unique()
 
 # Save metadata

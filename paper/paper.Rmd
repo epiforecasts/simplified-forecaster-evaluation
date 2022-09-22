@@ -173,8 +173,22 @@ An ensemble was only produced for locations with at least 3 independent forecast
 Submitted forecasts and target observations are available from the European forecast hub GitHub repository [@EuroHubGitHub]. We provide code in the repository of this study to streamline access. 
 
 ```{r metadata}
-# Number of forecasts
-nforecasts <- uniqueN(metadata[,.(model, location, forecast_date)])
+# Excluded forecast
+exclude_forecasts <- metadata |>
+  DT(, sum(n_anomaly))
+
+included_forecasts <- metadata |>
+  DT(, sum(n))
+
+per_excluded <- round(exclude_forecasts / included_forecasts * 100, 1)
+
+# Forecast dates + locations with anomalies
+exclusions <- metadata |>
+  DT(, .(forecast_date, location, anomaly)) |>
+  unique() |>
+  DT(, .(total = .N, exclude = sum(anomaly), include = .N - sum(anomaly))) |>
+  DT(, per := round(exclude / total * 100, 1))
+
 # Number of locations
 locations <- metadata |>
   DT(, uniqueN(location))
@@ -185,7 +199,7 @@ models <- metadata |>
 
 # Number of forecast dates
 forecast_dates <- metadata |>
-  DT(, uniqueN(target_end_date))
+  DT(, uniqueN(forecast_date))
 
 # Models per forecast date
 models_per_forecast <- metadata |>
@@ -414,6 +428,11 @@ Italy was also an outlier with `r single_locs_models_per_loc[location == "IT", n
 
 Across all forecast dates and locations the minimum number of independent forecasts was `r models_per_loc_date[, min(n)]` with the maximum being `r models_per_loc_date[, max(n)]`. The median number of independent forecasts per location and forecast date was `r models_per_loc_date[, median(n)]`. All locations received forecasts from at least `r models_per_location[, min(n)]` models with the median number of forecast models per location being `r models_per_location[, median(n)]`. Coverage of forecast dates varied across submitted models with `r forecast_dates_by_models[n_per == 1, .N]` models submitting for all dates, `r forecast_dates_by_models[n_per >= 0.9, .N]` models submitting for at least 90% of dates, and `r forecast_dates_by_models[n_per < 0.50, .N]` models submitting for fewer than 50% of forecast dates. In general, there was no clear difference in forecast date coverage between models that submitted for all locations vs a small subset but models with partial coverage of locations all also had partial coverage of forecast dates.
 
+`r nrow(anomalies)` observations, stratified by week and location, were defined to be anomalous within the study period by the European forecast hub [@EuroHub].
+Data anomalies were not randomly distributed with some locations being particlarly prone to data revisions including Lithuania (with `r anomalies[location == "LT", .N]` weeks with data anomalies), and Portugal (with `r anomalies[location == "PT", .N]` weeks with data anomalies).
+Anomalies  were also not evenly distributed over time with a higher proportion occurring earlier in the study period (potentially due to our choice to extract data from the 1st of September which effectively truncated anomalies).
+`r per_excluded`% of forecasts were excluded across all horizons due to anomalies in the observed data. Aggregated across horizons `r exclusions$per`% of forecasts included at least one week with anomalous data. 
+
 ## Forecast evaluation {-}
 
 ### Visualisation of forecasts by horizon {-}
@@ -607,6 +626,8 @@ Work on this is still ongoing but these more complex ensembling approaches were 
 No forecast hub has switched to these alternative ensemble designs for their operational forecast suggesting they do not think the evidence base is strong enough for them to be used by forecast consumers and hence the median of all submitted forecasts remains the community-suggested default ensemble option and a sensible target for our study. 
 Other studies have been published evaluating single forecast models in comparison to ensemble performance from the forecast hub but in general, these have not focussed on replicating ensemble behaviour but rather optimising the target evaluation metric. 
 Our previous work also highlighted the lack of calibration in an ensemble forecast from the Germany/Poland forecasting hub compared to forecasts from epidemiological models and noted the bias towards underprediction observed in the ensemble forecasts and not in our the model-based forecasts [@Bosse2022-hm; @Bracher2021-wk].
+Finally, our results are potentially sensitive to the definition used to define anonamous observations (which generally related to retrospective data revisions).
+Here we follow the practice of the European forecast hub [@EuroHub] of excluding forecasts for weeks with a data revision of more than 5% and forecasts made based on data that is subsequently revised by more than 5%.
 
 ## Further work {-}
 
@@ -622,6 +643,7 @@ As we have hypothesised that the use of absolute scoring measures is inappropria
 If new forecast ensemble methods are adopted as best practice by forecast hubs then follow-up work attempting to create surrogate forecast models should also use these approaches and this will likely alter the observed characteristics of the hub ensemble forecasts, for example, the tendency to be poorly calibrated.
 In September 2022, GitHub announced support for hosted GitHub Action runners with additional compute power [@GitHubActionsLargeRunners]. Whilst a paid feature this may allow more compute attensive models, with fewer potental performance trade-offs, to be easily democratised though only if funds are available to support the hosting costs.
 One potential research area is to explore forecasting methods that can be used with a range of compute resources though this would require extensive evaluation and documentation to make it clear to users what the trade-offs between compute usage and forecast performance are.
+More work is needed to understand the best practice treatment of data revisions when evaluating forecasts and the potential sources for bias these may cause.
 Lastly, here we have only explored a surrogate for an ensemble for a single disease, a limited set of locations, and a single target (incident cases), meaning our findings are difficult to generalise.
 Follow-up work should explore whether this behaviour holds across diseases, locations, and epidemiological targets where the behaviour of ensembles is notably different [@REF].
 However, this work is limited by the lack of large-scale forecast ensembling projects despite them showing obvious promise to improve the forecasts available to stakeholders.
