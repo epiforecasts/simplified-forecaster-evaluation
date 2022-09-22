@@ -7,9 +7,9 @@ target_forecasts <- fread(here("data", "forecasts.csv")) |>
   DT(, .(target_end_date, location)) |>
   unique()
 
-# Download European Hub anomalies list
+# Download European Hub anomalies list as present on the 1st September 2022
 anomalies <- fread(
-  "https://raw.githubusercontent.com/covid19-forecast-hub-europe/covid19-forecast-hub-europe/main/data-truth/anomalies/anomalies.csv"
+  "https://raw.githubusercontent.com/covid19-forecast-hub-europe/covid19-forecast-hub-europe/f6922c3e4bdcb055abcbba8e73472afacac4cf40/data-truth/anomalies/anomalies.csv" # nolint
 )
 
 # Restrict to just incident case targets

@@ -2,9 +2,9 @@
 library(data.table)
 library(here)
 
-# Download JHU data from the hub
+# Download JHU data from the hub - as available on the 1st of September 2022
 jhu <- fread(
-  "https://raw.githubusercontent.com/covid19-forecast-hub-europe/covid19-forecast-hub-europe/main/data-truth/JHU/truth_JHU-Incident%20Cases.csv" # nolint
+  "https://raw.githubusercontent.com/covid19-forecast-hub-europe/covid19-forecast-hub-europe/f6922c3e4bdcb055abcbba8e73472afacac4cf40/data-truth/JHU/truth_JHU-Incident%20Cases.csv" # nolint
 )
 
 # Format date
