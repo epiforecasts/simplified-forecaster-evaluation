@@ -256,7 +256,7 @@ varying_submissions <- locs_per_model_date |>
 
 # Models coverage of forecast dates
 forecast_dates_by_models <- metadata |>
-  summarise_forecasts_by(var = "target_end_date", by = "model") |>
+  summarise_forecasts_by(var = "forecast_date", by = "model") |>
   DT(order(n)) |>
   DT(, n_per := n / forecast_dates) |>
   DT(, type := fcase(
