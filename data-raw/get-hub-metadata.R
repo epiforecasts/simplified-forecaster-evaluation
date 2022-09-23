@@ -2,6 +2,7 @@
 library(data.table)
 library(here)
 library(gh)
+library(lubridate)
 
 # Load functions
 source(here("R", "get-hub-forecasts.R"))
@@ -40,7 +41,11 @@ anomalies <- fread(here("data", "anomalies.csv")) |>
 metadata <- anomalies |>
   copy() |>
   DT(hub_forecasts, on = c("location", "target_end_date")) |>
-  DT(, previous_end_date := forecast_date - 2)
+  DT(,
+    previous_end_date := ceiling_date(
+      forecast_date - 4, week_start = 6, unit = "week"
+    )
+  )
 
 metadata <- anomalies |>
   DT(metadata,
@@ -60,14 +65,19 @@ metadata <- metadata |>
     target %in% c("1 wk ahead inc case", "2 wk ahead inc case",
                   "3 wk ahead inc case", "4 wk ahead inc case")
   ) |>
-  DT(, .(model, location, forecast_date, anomaly, target)) |>
+  DT(, .(model, location, forecast_date, target_end_date, anomaly, target)) |>
   unique() |>
   DT(,
-   `:=`(anomaly = any(anomaly), n = .N, n_anomaly = sum(anomaly)),
+   `:=`(
+      anomaly = any(anomaly), n = .N, n_anomaly = sum(anomaly),
+      target_end_date = min(target_end_date)
+    ),
    by = c("location", "forecast_date", "model")
   ) |>
   DT(target %in% "1 wk ahead inc case") |>
-  DT(, .(model, location, forecast_date, anomaly, n_anomaly, n)) |>
+  DT(,
+    .(model, location, forecast_date, target_end_date, anomaly, n_anomaly, n)
+  ) |>
   unique()
 
 # Save metadata

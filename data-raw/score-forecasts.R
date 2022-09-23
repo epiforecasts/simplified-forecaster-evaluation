@@ -2,6 +2,7 @@
 library(data.table)
 library(scoringutils)
 library(here)
+library(lubridate)
 
 # Load functions
 source(here("R", "utils.R"))
@@ -28,7 +29,11 @@ anomalies <- fread(here("data", "anomalies.csv")) |>
 # Based on: https://github.com/covid19-forecast-hub-europe/covid19-forecast-hub-europe/blob/39823425e9ea5d66c3dc0e7a55fa7ba5433d7df2/code/evaluation/load_and_score_models.r#L29 # nolint
 clean_forecasts_w_truth <- forecasts_with_truth |>
   DT(!anomalies, on = c("location", "target_end_date")) |>
-  DT(, previous_end_date := forecast_date - 2) |>
+  DT(,
+    previous_end_date := ceiling_date(
+      forecast_date - 4, week_start = 6, unit = "week"
+    )
+  ) |>
   DT(!anomalies, on = c("previous_end_date" = "target_end_date", "location")) |>
   DT(, previous_end_date := NULL)
 

@@ -24,7 +24,7 @@ affiliation:
 abstract: > 
   Multi-model and multi-team ensembles have become increasingly popular as an approach to increase the robustness and performance of infectious disease forecasts, especially during the COVID-19 pandemic. However, these forecasts require a coordinated team to produce and are effectively black boxes. In other fields, resource usage has been reduced by training simplified models that reproduce some of the observed behaviour of more complex models. 
   Here we use observations of the behaviour of the European COVID-19 Forecast Hub ensemble combined with our own forecasting experience, to specify a series of model assumptions modelling incident reported cases of COVID-19. We then develop a forecast model using these assumptions and compare its performance to the European forecast hub ensemble in real-time from the 15th of January 2022 to the 19th of July 2022 over a four-week forecast horizon.
-  We found that this surrogate model performed visibly similarly to a subset of example locations though with increased uncertainty. Unsurprisingly, using the weighted interval score, we concluded that average performance was substantially worse but that median performance was more comparable. The majority of the difference in performance was linked to a few forecasts from a period of high incidence. We note that despite performing worse than the hub ensemble the majority of the time our surrogate model showed better calibration, and was less liable to underpredict. The central part of the surrogate model’s forecast distribution performed more similarly to the ensemble forecast’s distribution whilst the tails of the surrogate forecast distribution were responsible for the large majority of the difference in median forecast performance.
+  We found that this surrogate model performed visibly relatively similarly to a subset of example locations though with increased uncertainty. Unsurprisingly, using the weighted interval score, we concluded that average performance was substantially worse relative to the ensemble forecast but that median performance was more comparable. The majority of the difference in performance was linked to a few forecasts from a period of high incidence. We note that despite performing worse than the hub ensemble the majority of the time our surrogate model showed better calibration, and was less liable to underpredict. The central part of the surrogate model’s forecast distribution performed more similarly to the ensemble forecast’s distribution whilst the tails of the surrogate forecast distribution were responsible for the large majority of the difference in median forecast performance.
   We conclude that our simplified forecast model may have captured some of the dynamics of the hub ensemble. However more work needs to be done to understand the implicit epidemiological model that represents its behaviour and whether or not this is the optimal choice for stakeholders' requirements. We also conclude that our findings are largely driven by the choice of evaluation measure used by the forecast hub and that if this is misspecified then the forecast hub submissions may not be optimised to forecast users' expectations or requirements. Our work is potentially useful for forecast consumers as a tool for understanding the inherent assumptions of the forecasts they are making use of and to researchers aiming to develop forecast approaches that perform similarly, or better than, current multi-model and multi-team forecast ensembles that are trusted by stakeholders.
 bibliography: library.bib
 output:
@@ -49,7 +49,7 @@ knitr::opts_chunk$set(
 # Introduction {-}
 
 Multi-model and multi-team ensembles have become increasingly popular as an approach to increase the robustness and performance of infectious disease forecasts over the last decade [@Cramer2022-sp; @Bracher2021-wk; @Sherratt2022-ue].
-These approaches have drawn heavily on the experience of other domains, for example, climate modelling [@REF], where ensembles of both multiple models and from multiple teams have a long history of providing superior forecasts.
+These approaches have drawn heavily on the experience of other domains, for example, climate modelling [@IPCCreport], where ensembles of both multiple models and from multiple teams have a long history of providing superior forecasts and being trusted by policy-makers.
 
 At the same time, ensemble forecasts have a range of potential downsides.
 The most significant is their considerable cost to produce as they typically require contributions from multiple independent teams, the development of several models, and a centralised group to run the ensembling project.
@@ -58,7 +58,7 @@ Additional issues with multi-team collaborations include a lack of feedback to t
 Each of these may impact the long-term quality of the resulting ensemble forecasts. 
 
 Here, we focus on addressing the issues of resource cost, and interpretability.
-In climate forecasting [@Castelletti2012-bs; @Edwards2021-lv; @Williamson2013-qx], as well as in other fields such as astrophysic [@Vernon2014-ov], emulation approaches have been used to circumvent some of the resource requirement issues by training a simplified model, usually, a non-parametric statistical model, to replicate the behaviour of either the entire model or sub-components [@REF].
+In climate forecasting [@Castelletti2012-bs; @Edwards2021-lv; @Williamson2013-qx], as well as in other fields such as astrophysic [@Vernon2014-ov], emulation approaches have been used to circumvent some of the resource requirement issues by training a simplified model, usually, a non-parametric statistical model, to replicate the behaviour of either the entire model or sub-components.
 However, within epidemiological modelling, we often want to use our models for applications other than forecasting (such as learning about underlying disease dynamics or developing scenarios) and have fewer insights beyond forecast performance on which to base our mechanistic assumptions.
 This means that non-parametric emulation is less suitable for use in epidemiological forecasting (while noting that epidemiological scenario analysis in-sample emulation using non-parametric methods may have a role [@Iskauskas2022-fz]). 
 
@@ -199,7 +199,7 @@ models <- metadata |>
 
 # Number of forecast dates
 forecast_dates <- metadata |>
-  DT(, uniqueN(forecast_date))
+  DT(, unique(forecast_date))
 
 # Models per forecast date
 models_per_forecast <- metadata |>
@@ -419,7 +419,7 @@ In addition, ascertainment rates likely reduced over time in most locations due 
 This is in contrast to the early COVID-19 pandemic response for which most nations took similar actions at similar times.
 
 We extracted forecasts starting from the 15th of January until the 19th of July 2022 for all countries covered by the European forecasting hub (nations of the European Union, European Free Trade Agreement, and the United Kingdom, making `r locations` unique locations).
-In total `r nrow(metadata)` forecasts were made across all locations, `r forecast_dates` forecast dates from `r models` independent forecast models (including the European baseline model).
+In total `r nrow(metadata)` forecasts were made across all locations, with unique `r forecast_dates` forecast dates and `r models` independent forecast models (including the European hub baseline model).
 Of these models, `r length(global_models)` forecasted in at least 30 locations including our original submission  (referred to as `epiforecasts-EpiNow2` by the hub), and our surrogate model.
 Of the remaining models submitted `r length(local_models)` were submitted in only one location.
 Single location models were clustered in a few locations, particularly Germany and Poland (likely due to the folding of the German/Poland forecasting hub into the European forecasting hub project [@Sherratt2022-ue]).
