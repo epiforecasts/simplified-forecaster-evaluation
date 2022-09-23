@@ -58,9 +58,9 @@ Additional issues with multi-team collaborations include a lack of feedback to t
 Each of these may impact the long-term quality of the resulting ensemble forecasts. 
 
 Here, we focus on addressing the issues of resource cost, and interpretability.
-In climate forecasting, emulation approaches have been used to circumvent some of the resource requirement issues by training a simplified model, usually, a non-parametric statistical model, to replicate the behaviour of either the entire model or sub-components [@REF].
+In climate forecasting [@Castelletti2012-bs; @Edwards2021-lv; @Williamson2013-qx], as well as in other fields such as astrophysic [@Vernon2014-ov], emulation approaches have been used to circumvent some of the resource requirement issues by training a simplified model, usually, a non-parametric statistical model, to replicate the behaviour of either the entire model or sub-components [@REF].
 However, within epidemiological modelling, we often want to use our models for applications other than forecasting (such as learning about underlying disease dynamics or developing scenarios) and have fewer insights beyond forecast performance on which to base our mechanistic assumptions.
-This means that non-parametric emulation is less suitable for use in epidemiological forecasting (while noting that epidemiological scenario analysis in-sample emulation using non-parametric methods may have a role [@REFLSHTMTBEMULATOR]). 
+This means that non-parametric emulation is less suitable for use in epidemiological forecasting (while noting that epidemiological scenario analysis in-sample emulation using non-parametric methods may have a role [@Iskauskas2022-fz]). 
 
 In this work, we propose and evaluate a surrogate forecast model approach which seeks to emulate the observed behaviour of recent COVID-19 forecast ensembles using a minimal set of easily communicated assumptions, limited computational resources with an easily generalised implementation. 
 
