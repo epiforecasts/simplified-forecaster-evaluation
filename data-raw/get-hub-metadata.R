@@ -16,7 +16,7 @@ forecast_dates <- target_forecasts |>
   unique()
 
 # Use memoise
-start_using_memoise()
+start_using_memoise(path = ".cache")
 
 # Get forecasts for models of interest
 hub_forecasts <- get_hub_forecasts(

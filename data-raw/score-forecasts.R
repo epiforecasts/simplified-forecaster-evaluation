@@ -11,7 +11,8 @@ source(here("R", "utils.R"))
 truth <- fread(here("data", "truth.csv"))
 
 # Load population data
-population <- fread(here("data", "population.csv"))
+population <- fread(here("data", "population.csv")) |>
+  DT(, location_name := NULL)
 
 # Load forecasts
 forecasts <- fread(here("data", "forecasts.csv"))
@@ -37,8 +38,12 @@ clean_forecasts_w_truth <- forecasts_with_truth |>
   DT(!anomalies, on = c("previous_end_date" = "target_end_date", "location")) |>
   DT(, previous_end_date := NULL)
 
+# Check forecasts to be scored
+check_forecasts(clean_forecasts_w_truth)
+
 # Score forecasts
-scores <- score(clean_forecasts_w_truth)
+scores <- clean_forecasts_w_truth |>
+  score()
 
 # Save forecasts
 fwrite(scores, here("data", "scores.csv"))

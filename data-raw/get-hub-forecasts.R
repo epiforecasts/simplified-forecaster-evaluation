@@ -7,7 +7,7 @@ library(gh)
 source(here("R", "get-hub-forecasts.R"))
 
 # Use memoise
-start_using_memoise()
+start_using_memoise(path = ".cache")
 
 # Check out available forecasts models from the ECDC forecasting hub repo
 get_hub_forecast_paths(
