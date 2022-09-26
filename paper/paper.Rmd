@@ -48,8 +48,78 @@ knitr::opts_chunk$set(
 
 # Introduction {-}
 
-Multi-model and multi-team ensembles have become increasingly popular as an approach to increase the robustness and performance of infectious disease forecasts over the last decade [@Cramer2022-sp; @Bracher2021-wk; @Sherratt2022-ue].
-These approaches have drawn heavily on the experience of other domains, for example, climate modelling [@IPCCreport], where ensembles of both multiple models and from multiple teams have a long history of providing superior forecasts and being trusted by policy-makers.
+Multi-model and multi-team ensembles have become increasingly popular as an approach to increase the robustness and performance of infectious disease forecasts over the last decade [@Reich2022-jo].
+These approaches have been inspired by the experience of other domains, for example, climate modelling [@IPCCreport], where ensembles of both multiple models and from multiple teams have a long history of providng forecasts that are trusted by stakholders.
+The trend towards large-scale multi-team ensemble forecasting in infectious diseases has accelerated during the COVID-19 pandemic. Over 2020 and 2021, teams established COVID-19 Forecasting Hubs covering the US [@@Cramer2022-sp], Germany and Poland [@Bracher2021-wk], and Europe [@Sherratt2022-ue] (the latter two including authors of this study).
+These projects were motivated partially to meet an increased need from stakeholders for reliable forecast models, but also by the perceived low quality of many forecasts otherwise being produced and publicised.
+
+Whilst there is robust and consistent evidence that ensemble forecasts provide reliable and performant forecacasts across domains [@Reich2022-jo] they also have a range of downsides.
+The most significant is their considerable resource cost to produce as they typically require contributions from multiple independent teams, the development of several models, and a centralised group to run the ensembling project.
+Forecasts from these ensembles can also be hard to interpret as it is difficult to link them to the underlying model assumptions.
+Additional issues with multi-team collaborations include a lack of feedback to those contributing forecasts that would allow them to improve their forecast approaches, maintaining incentives for forecasters to continue to contribute [@Bosse2022-hm], and difficulty improving the quality of the ensemble [@Sherratt2022-ue].
+Each of these may impact the long-term quality of the resulting ensemble forecasts and have implications for end-users. 
+
+Here, we draw insights from ensemble forecasts produced and endorsed by the various COVID-19 forecast hubs, as well as our own forecasting work, to propose and evaluate a "surrogate" forecast model.
+This seeks to emulate the observed behaviour of recent COVID-19 ensembles forecasting reported cases, using a minimal set of easily communicated assumptions, and limited computational resources with an easily generalised implementation.
+The primary aim of this approach is to help highlight the behaviour, and potential mechanisms behind this behaviour, of ensemble forecast widely considered the gold standard for COVID-19 forecasting.
+In addition to this, we seek to provide a simple, and robust, forecasting system that can be easily resused by others, perhaps where a large scale forecast hub ensemble is not available, and be used as a platform for future research both into improving understanding of ensemble behaviour and increased forecast performance.
+
+In climate forecasting [@Castelletti2012-bs; @Edwards2021-lv; @Williamson2013-qx], as well as in other fields such as astrophysic [@Vernon2014-ov], emulation approaches have been used to circumvent some of the resource requirement issues by training a simplified model, usually, a non-parametric statistical model, to replicate the behaviour of either the entire model or sub-components.
+However, within epidemiological modelling, we often want to use our models for applications other than forecasting (such as learning about underlying disease dynamics or developing scenarios) and, for ensemble models in particular, have fewer insights beyond forecast performance on which to base our mechanistic assumptions.
+This means that, whilst non-parametric emulation has utility for allowing rapid exploration of the parameter space for epidemiological models [@Iskauskas2022-fz] utility, it may be less suitable for use in replicating epidemiological ensemble forecasts. 
+
+In each of the COVID-19 Forecast Hubs, multiple independent teams contribute forecasts of reported cases, along with potentially other metrics, for a given set of locations, which the Hub collates and uses to produce an ensemble forecast.
+Each Hub uses a similar approach focusing on forecasting by epidemiological week (i.e. Sunday to Saturday) over a time horizon of a few weeks horizon. In general, 4 main classes of forecast models are submitted.
+This includes statistical forecasting models such as ARIMA models [@REF], mechanistic forecasting models based on the compartmental modelling framework and its generalisations such as individual-based models [@REF], semi-mechanistic approaches that blend statistical and mechanistic approaches [@REF], and human insight based forecast models that may also include elements of other methods [@REF].
+Observed data are available and updated daily, and most submitted forecasts use this dataset, along with potentially other sources of real-time information, to produce daily forecasts.
+Real-time evaluation has shown that each of these classes of models may perform well depending on the context and specific implementation.
+
+We have contributed a range of forecasts to these collaborations involving statistical and semi-mechanistic models [@REF], and human insight-based forecasts [@REF].
+With our semi-mechanistic forecast modelling, we have focussed on trying to model the underlying delays from infection through to symptom onset, and test positivity using non-exponential probability distributions whilst also modelling the complexity of daily, within the week, reporting periodicity [@REF].
+With these models, we did not attempt to capture potential future interventions or known interventions not currently observed in the epidemiological data.
+Our model-based Bayesian forecast methodology requires significant computational resources, running for approximately aan hour on a 16-core machine when producing forecasts for the European forecasting hub.
+In contrast, our human insight models implicitly included unobserved interventions or other changes in the epidemiology and reporting process.
+The human insight models were…[@REF]. Resources for the human insight models required an initial investment in building interactive forecasting infrastructure, followed by ongoing weekly participation from multiple independent forecasters.
+
+Our forecast submissions have not clearly over- or under- performed other forecasts submitted to the forecasting hubs.
+A clear weakness of our previous work has been a lack of robustness to large outliers in reporting and to changes in reporting patterns which has driven extremely poor performance at times.
+We found that our human insight-based forecasts significantly outperformed our model-based forecasts on average and hypothesised that this may have been driven by including additional information not observed in the epidemiological data [@REF]. 
+
+Considering multi-model ensembles, the respective Hubs produce an ensemble forecast each week comprising at least 3 independent forecasts [@REF].
+To create the ensemble, as of September 2022, the US and European Hubs both used an unweighted median ensemble [@REF].
+Evaluations of each of the COVID-19 Forecast Hubs have shown that these ensemble forecasts outperform most individually contributed forecasts whilst remaining generally robust to outliers in reporting [@REF].
+Unlike our forecast submissions, the hub ensemble forecasts were typically robust to daily reporting artefacts. Similarly to our human insight forecasts, the ensembles also demonstrated some ability to forecast future changes in trends that were not present in the observed data.
+This could indicate the inclusion of either human insight models, or assumptions about future interventions.
+In general, the ensemble forecasts were more auto-correlated and less reactive to changes from stable or reducing case incidence to increasing incidence. On the other hand, this also meant that the ensemble was less likely to adopt short-term changes in incidence and hence produced better long-term forecasts. Finally, the ensemble forecast tended to produce sharper forecasts and have a tendency towards under-, versus over-, predicting.
+There is some suggestion that this was partially driven by the ensemble forecast having non-exponential uncertainty, unlike many infectious disease forecasting models. 
+
+Based on these insights from observing the performance of our forecast submissions and from the hub ensembles over time, here we define a model with similar, but simplified, epidemiological characteristics to our previous approaches to model-based forecasting [@Bosse2022-hm] with the aim of producing ensemble-like performance without sacrificing interpretability.
+The first simplification we make is to model only weekly data, rather than using daily data and then aggregating. This mitigates the impact of daily reporting artefacts. It also serves to increase the auto-correlation of the forecasting model as there is an increased lag before changes in daily observations gain significant weight in the model.
+This leads to the observed ensemble behaviour of being relatively auto-correlated and resistant to short-term changes in trend.
+
+The second simplification we make is to ignore the underlying latent infection process and focus only on the observed reported cases.
+This reduces computational requirements and removes the need for external information on the delay from infection to report which can potentially be misspecified leading to potentially reduced forecast performance. 
+However, this sacrifices some of the interpretability of the forecast model as any epidemiological summary statistics we now calculate will be based on reported cases and not latent infections.
+As discussed in [@Gostic2020-vw] this leads to varying amounts of bias depending on the epidemic phase. 
+
+The final simplification we make is to model the growth rate as a differenced auto-regressive process with order 1 rather than using a gaussian process-based method as we have done in other work [@Bosse2022-hm; @Abbott2020-iy; @EpiNow2].
+This represents a parsimonious approach in that we encode our expectation that the growth rate should vary over time and allow this to influence the forecast but we include only a single lag term, reducing the complexity, and computational overhead of the model. 
+To model potential unobserved interventions and more general changes in transmission, we include an additional growth rate modifier restricted to be between 0 and 1 that differs depending on if the growth rate is positive or negative (due to potential differing responses when cases are growing or increasing) and that acts in a multiplicative fashion (meaning that larger absolute growth rates are reduced to zero growth more rapidly).
+This reflects a simplified interpretation of how the ensemble appears to react to potential future changes by assuming a gradual return to stable incidence. 
+
+The only observation for which we do not make an adaptation is the apparent sharpness of the ensemble compared to our prior forecasting models choosing instead to make use of a negative binomial observation model allowing the inclusion of overdispersion.
+This choice is motivated by our belief that the underlying transmission process is an exponential one and therefore a count error model (where variance is linked to the mean) is a sensible choice.
+We suggest that part of the reason the hub ensembles exhibit this behaviour is due to the penalisation of overprediction compared to underprediction caused by the use of a generalised form of absolute error for the majority of forecast evaluations [@bracherEvaluatingEpidemicForecasts2021]. 
+
+In this study, we evaluate an initial attempt at a surrogate model to replicate the observed behaviour of current multi-team forecast ensembles whilst maintaining a set of clear assumptions.
+We submitted this model to the European Forecast Hub and here we evaluate its performance relative to the Hub ensemble.
+First, we define the model and summarise its implementation, with a focus on minimal resource use and reproducibility, as a GitHub Actions workflow.  We briefly outline some of the summary statistics it produces and their epidemiological relevance.
+We then evaluate its real-time performance in comparison to the European forecast hub ensemble by visualising forecasts, using the weighted interval score [@bracherEvaluatingEpidemicForecasts2021], a commonly used proper scoring rule, and quantifying the empirical coverage of the forecasts produced.
+We attempt to highlight settings where this model performs well as a surrogate to the ensemble forecast and areas where more work is needed.  Finally, we summarise our findings, discuss their implications, and highlight areas where more work is needed.
+We aim for this work to highlight some of the potential implicit assumptions of current COVID-19 forecast hub ensembles, provide a sensible, low-resource, surrogate model in settings where large-scale collaborative forecasting efforts are not possible, and provide inspiration for forecasters looking to make principled improvements to their models.
+
+
+## Old
 
 At the same time, ensemble forecasts have a range of potential downsides.
 The most significant is their considerable cost to produce as they typically require contributions from multiple independent teams, the development of several models, and a centralised group to run the ensembling project.
