@@ -113,6 +113,5 @@ plot_relative_summary <- function(relative_summary) {
     theme(legend.position = "bottom") +
     labs(
       y = "Relative score", x = "Forecast horizon (weeks)", col = "Metric"
-    ) +
-    lims(y = c(0, NA))
+    )
 }
