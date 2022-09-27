@@ -126,6 +126,7 @@ library(lubridate)
 library(forcats)
 library(ggplot2)
 library(ggridges)
+library(ggh4x)
 library(patchwork)
 library(scales)
 library(here)
@@ -394,7 +395,31 @@ relative_wis <- wis |>
 relative_wis_by_horizon <- scores |>
   summarise_scores(by = c("horizon", "model")) |>
   calc_relative_score(cols = c("horizon")) |>
-  DT(, ris := round(relative_interval_score, 2))
+  DT(, ris := round(relative_interval_score, 2)) |>
+  DT(, interval_score := NULL)
+setnames(
+  relative_wis_by_horizon, c("relative_interval_score"),
+  c("Weighted interval score")
+)
+
+relative_ae_by_horizon <- scores |>
+  summarise_scores(by = c("horizon", "model")) |>
+  DT(, interval_score := ae_median) |>
+  calc_relative_score(cols = c("horizon")) |>
+  DT(, ris := round(relative_interval_score, 2)) |>
+  DT(, interval_score := NULL)
+setnames(
+  relative_ae_by_horizon, c("relative_interval_score", "ris"),
+  c("Absolute error of the median", "raem")
+)
+
+relative_summary <- relative_wis_by_horizon |>
+  merge(
+    relative_ae_by_horizon, by = c("horizon", "model")
+  ) |>
+  melt(
+    measure.vars = c("Weighted interval score", "Absolute error of the median")
+  )
 
 relative_median_wis_by_horizon <- relative_wis |>
   DT(,
@@ -491,7 +516,7 @@ suppressWarnings(print(p))
 
 ### Relative forecast evaluation {-}
 
-Evaluating the ensemble and surrogate models using the WIS across all locations and forecast dates we found that the mean relative performance of the surrogate model was `r relative_wis_by_horizon[horizon == 1, ris]` at the one week horizon, `r relative_wis_by_horizon[horizon == 2, ris]` at the two week horizon, `r relative_wis_by_horizon[horizon == 3, ris]` at the three week horizon, and `r relative_wis_by_horizon[horizon == 4, ris]` at the four week horizon, indicating that the ensemble forecast outperformed the surrogate forecast for all horizons by at least 25% and that the relative performance of the surrogate model degraded as the forecast horizon increased.
+Evaluating the ensemble and surrogate models using the WIS across all locations and forecast dates we found that the mean relative performance of the surrogate model was `r relative_wis_by_horizon[horizon == 1, ris]` at the one week horizon, `r relative_wis_by_horizon[horizon == 2, ris]` at the two week horizon, `r relative_wis_by_horizon[horizon == 3, ris]` at the three week horizon, and `r relative_wis_by_horizon[horizon == 4, ris]` at the four week horizon, indicating that the ensemble forecast outperformed the surrogate forecast for all horizons by at least 25% and that the relative performance of the surrogate model degraded as the forecast horizon increased  (Figure \@ref(fig:assemble-eval) c).
 Much of this outperformance, especially at longer forecast horizons, was driven by a relatively small subset of forecasts with relative performance having a heavy tail (Figure \@ref(fig:assemble-eval) a). 
 If we instead consider median relative performance (note this is not a proper scoring rule) we find that, relative to the ensemble, the surrogate scored `r relative_median_wis_by_horizon[horizon == 1, ris]` at the one week horizon, `r relative_median_wis_by_horizon[horizon == 2, ris]` at the two week horizon, `r relative_median_wis_by_horizon[horizon == 3, ris]` at the three week horizon, and `r relative_median_wis_by_horizon[horizon == 4, ris]` at the four week horizon.
 This would suggest that an increasingly skewed score distribution as the forecast horizon increased is responsible for the increase in the mean relative score (Figure \@ref(fig:assemble-eval) a).
@@ -503,6 +528,8 @@ This variation in performance may have been linked to the BA.2 wave which peaked
 
 There was also substantial variation across forecast locations with the surrogate performing relatively well in some locations at some forecast horizons, for example, the four-week horizon in the United Kingdom, and badly in others, for example, the four-week forecast in Switzerland (Figure \@ref(fig:assemble-eval) c).
 In general, across locations, as observed overall, relative forecast performance degraded across horizons with a heavier right tail at longer horizons. Some locations showed less of this behaviour, for example, Spain, and in some, it was very dominant, for example, Switzerland. 
+
+If we consider only the median point forecast, using the absolute error, we see that the ensemble forecast outperformed the surrogate forecast (`r overall_ae_median[model == "Ensemble", round(Mean, digits = 1)]` vs. `r overall_ae_median[model == "Surrogate", round(Mean, digits = 1)]`) which is comparable on the relative scale to the difference in performance observed using WIS. As when using the weighted interval score if we instead consider the median of the absolute error we see that the difference in performance has reduced indicating a similar skewed score distribution for point forecasts as for the whole predictive distribution (`r overall_ae_median[model == "Ensemble", round(Mean, digits = 1)]` vs. `r overall_ae_median[model == "Surrogate", round(Mean, digits = 1)]`).
 
 ```{r make-rwis-plots}
 plot_rwis_horizon <- relative_wis |>
@@ -550,7 +577,11 @@ p <- (
     )  +
     plot_layout(heights = c(4, 5), guides = "collect")
   ) |
-  plot_rwis_location
+  (
+    plot_relative_summary(relative_summary) +
+    plot_rwis_location +
+    plot_layout(heights = c(1, 7), guides = "collect")
+  )
 ) +
   plot_layout(guides = "collect", widths = c(1, 1)) +
   plot_annotation(tag_levels = "a") &
@@ -577,9 +608,6 @@ At longer horizons, however, quantiles below the median became liable to have un
 
 Breaking down the relative weighted interval score by forecast interval we observe that the surrogate modeel produces forecasts that differ most from the ensemble in the outer intervals and in particular the tails of the forecast (Figure \@ref(fig:plot-coverage) b).
 This is true across forecast horizons but the magnitude of the difference increases.
-If we consider the absolute error of the median forecast population weighted incidence we see that the median for the ensemble forecast was `r overall_ae_median[model == "Ensemble", round(Median, digits = 1)]` whilst the median for the surrogate forecast was `r overall_ae_median[model == "Surrogate", round(Median, digits = 1)]`.
-When we consider the mean absolute error of the median we find that the ensemble forecast outperformed the surrogate forecast (`r overall_ae_median[model == "Ensemble", round(Mean, digits = 1)]` vs. `r overall_ae_median[model == "Surrogate", round(Mean, digits = 1)]`) which is comparable on the relative scale to the difference in performance observed using WIS.
-This implies a similarly skewed distribution for the relaive point forecasts from the surrogate model point forecasts compared to the ensemble forecast which again  matches that observed when evaluating the full predictive distributions of both forecasts.
 
 ```{r plot-coverage, fig.height = 12, fig.width = 18, out.width = "95%", fig.cap = "a.) Empirical coverage of the surrogate and ensemble forecasts at the 90\\%, 60\\%, and 30\\% prediction intervals stratified by forecast horizon. Ideally, a well-calibrated forecast should have empirical coverage for a given prediction interval that equals the range of that interval (i.e 90\\%). b.) Median relative weighted interval score by quantile and forecast horizon for the surrogate forecast compared to the ensemble forecast. c.) Empirical coverage by quantile for both the surrogate and ensemble forecasts. A well-calibrated forecast should have empirical quantiles that match the theoretical ones. The green area of this figure corresponds to conservative forecasts."}
 p <- (

@@ -100,3 +100,19 @@ plot_relative_wis <- function(relative_wis, alpha = 0.8,
     theme_scoringutils() +
     labs(x = "Relative weighted interval score")
 }
+
+plot_relative_summary <- function(relative_summary) {
+  relative_summary |>
+    ggplot() +
+    aes(x = horizon, y = value, col = variable) +
+    geom_hline(yintercept = 1, linetype = 2) +
+    geom_point() +
+    geom_line() +
+    scale_color_brewer(palette = "Dark2") +
+    theme_scoringutils() +
+    theme(legend.position = "bottom") +
+    labs(
+      y = "Relative score", x = "Forecast horizon (weeks)", col = "Metric"
+    ) +
+    lims(y = c(0, NA))
+}
