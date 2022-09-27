@@ -41,6 +41,9 @@ clean_forecasts_w_truth <- forecasts_with_truth |>
 # Check forecasts to be scored
 check_forecasts(clean_forecasts_w_truth)
 
+# Save forecasts to be scored
+fwrite(clean_forecasts_w_truth, here("data", "forecasts_ready_for_scoring.csv"))
+
 # Score forecasts
 scores <- clean_forecasts_w_truth |>
   score()

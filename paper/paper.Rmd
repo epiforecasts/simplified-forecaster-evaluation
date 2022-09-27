@@ -158,6 +158,11 @@ forecasts <- fread(here("data", "forecasts.csv")) |>
   rescale_to_incidence_rate(population, scale = 1e4) |>
   rename_models()
 
+# Load forecasts processed ready for scoring
+forecasts_ready_for_scoring <- fread(
+  here("data", "forecasts_ready_for_scoring.csv")
+)
+
 # Load forecast scores
 scores <- fread(here("data", "scores.csv")) |>
   rename_models()
