@@ -347,6 +347,13 @@
       "Repository": "CRAN",
       "Hash": "5b03512755c82140b90a950a5ca72594"
     },
+    "ggh4x": {
+      "Package": "ggh4x",
+      "Version": "0.2.2",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "fb5b8e93007b61655d641cb8f806b240"
+    },
     "ggplot2": {
       "Package": "ggplot2",
       "Version": "3.3.6",

@@ -6,25 +6,51 @@
 #'
 #' @param ranges A numeric vector of credible interval ranges to plot.
 #'
+#' @param log Logical, defaults to FALSE. Should a log scale be used on the y
+#' axis.
 #' @return A ggplot2 object.
 #' @importFrom scoringutils plot_predictions
 #' @import ggplot2
 #' @import data.table
-plot_forecasts <- function(forecasts, locs, ranges) {
-  forecasts[location_name %in% locs] |>
+plot_forecasts <- function(forecasts, locs, ranges, log = FALSE) {
+  plot <- forecasts[location_name %in% locs] |>
     DT(, date := target_end_date) |>
     plot_predictions(
       by = c("horizon", "location_name"), range = ranges
     ) +
-    facet_grid(
-      location_name ~ horizon, scales = "free_y"
+    ggh4x::facet_grid2(
+      location_name ~ horizon, scales = "free_y",
+      independent = "y"
     ) +
     aes(fill = model, col = model) +
-    scale_y_log10(labels = comma, oob = squish, limits = c(NA, NA)) +
     scale_fill_brewer(palette = "Dark2") +
     scale_color_brewer(palette = "Dark2") +
     labs(x = "Date", fill = "Model", col = "Model", ramp = "Range",
-          y = "Notified test positive cases per 10,000 population")
+         y = "Notified test positive cases per 10,000 population")
+  if (log) {
+    plot <- plot +
+      scale_y_continuous(
+        labels = ~ scales::comma(.x, accuracy = 1),
+        oob = squish, limits = c(NA, NA), trans = "log"
+      )
+  } else {
+    plot <- plot +
+      scale_y_continuous(
+        labels = ~ scales::comma(.x, accuracy = 1), oob = squish,
+        limits = c(NA, NA)
+      )
+  }
+  return(plot)
+}
+
+plot_forecast_custom <- function(forecasts, log) {
+  forecasts |>
+    DT(horizon == 1 | horizon == 4) |>
+    plot_forecasts(locs, ranges, log = log) +
+    guides(
+      fill = guide_none(), fill_ramp = guide_none(), col = guide_none()
+    ) +
+    theme(strip.text.y = element_blank())
 }
 
 plot_wis <- function(wis, locs) {
@@ -41,8 +67,10 @@ plot_wis <- function(wis, locs) {
     scale_color_brewer(palette = "Dark2") +
     theme_scoringutils() +
     theme(legend.position = "bottom") +
-    scale_y_log10() +
-    facet_wrap(vars(location_name), scales = "free_y", ncol = 1) +
+    scale_y_continuous(
+      labels = ~ scales::comma(.x, accuracy = 1), trans = "log"
+    ) +
+    facet_grid(rows = vars(location_name), scales = "free_y") +
     labs(
       x = "Date", y = "Weighted interval score",
       col = "Model", shape =  "Forecast horizon (weeks)",

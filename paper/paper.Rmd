@@ -468,14 +468,15 @@ Both models forecast large reductions in incidence in Poland during May that did
 In comparison to the ensemble model the surrogate model appeared less likely to place weight on unfeasibly large reductions in incidence during periods of declining incidence but on other hand was more likely to forecast continuing increases in incidence (for example in February in Slovakia and Poland).
 Italy and Germany, which had the highest number of submitted models of the example locations had little clear difference in performance between the ensemble and surrogate models compared to other example locations.
 
-```{r vis-forecasts, fig.cap = "a.) Weighted interval scores at the one-week and four-week forecast horizon by epidemiological week in Germany, Greece, Italy, Poland, Slovakia, and the United Kingdom. b.) Forecasts of notified test positive cases (per 10,000 population) by epidemiological week in Germany, Greece, Italy, Poland, Slovakia, and the United Kingdom,  by forecast horizon (one to four weeks). Incidence rates are shown on a log scale. 30\\%, 60\\%, and 90\\% prediction intervals are shown. The black line and points are the notified cases as of the date of data extraction rather than those available at the time.", out.width = "95%", fig.height = 12, fig.width = 18}
+```{r vis-forecasts, fig.cap = a.) Forecasts of notified test positive cases (per 10,000 population) by epidemiological week in Germany, Greece, Italy, Poland, Slovakia, and the United Kingdom,  by forecast horizon (one and four weeks). 30\\%, 60\\%, and 90\\% prediction intervals are shown. The black line and points are the notified cases as of the date of data extraction rather than those available at the time.
+b.) A replicate of a.) but with incidence rates on the log scale. c.) Weighted interval scores at the one-week and four-week forecast horizon by epidemiological week in Germany, Greece, Italy, Poland, Slovakia, and the United Kingdom on the log scale.", out.width = "95%", fig.height = 12, fig.width = 18}
 p <- (
-  plot_wis(wis, locs) +
-   theme(strip.text.x = element_blank()) |
-  plot_forecasts(forecasts, locs, ranges) +
-    guides(fill = guide_none(), fill_ramp = guide_none(), col = guide_none())
+  plot_forecast_custom(forecasts, log = FALSE) |
+  plot_forecast_custom(forecasts, log = TRUE) +
+  labs(y = "") |
+  plot_wis(wis, locs)
 ) +
-  plot_layout(widths = c(1, 4), guides = "collect") +
+  plot_layout(widths = c(2, 2, 1), guides = "collect") +
   plot_annotation(tag_levels = "a") &
   theme(
     legend.position = "bottom", legend.margin = margin(),
