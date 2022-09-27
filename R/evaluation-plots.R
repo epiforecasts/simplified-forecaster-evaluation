@@ -115,3 +115,18 @@ plot_relative_summary <- function(relative_summary) {
       y = "Relative score", x = "Forecast horizon (weeks)", col = "Metric"
     )
 }
+
+plot_bias <- function(bias) {
+  bias |>
+    ggplot() +
+    aes(x = horizon, y = bias, col = model) +
+    geom_hline(yintercept = 0, linetype = 2) +
+    geom_point() +
+    geom_line() +
+    scale_color_brewer(palette = "Dark2") +
+    theme_scoringutils() +
+    theme(legend.position = "bottom") +
+    labs(
+      y = "Bias", x = "Forecast horizon (weeks)", col = "Model"
+    )
+}
