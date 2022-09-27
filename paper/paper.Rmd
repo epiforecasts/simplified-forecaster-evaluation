@@ -350,7 +350,8 @@ To understand the relative performance of the surrogate model compared to the en
 To maintain the propriety of this score, we do this after first taking the means of scores for the relevant stratification.
 We explore relative performance by forecast horizon, by month and horizon, and by location and horizon. 
 
-In addition to presenting the WIS for a subset of locations and the relative WIS for all locations, we also calculate and visualise the empirical coverage, which is the percentage of observed values within a given interval or below a given quantile, of both the surrogate and ensemble model for the 30%, 60%, and 90% prediction intervals and by quantile. 
+In addition to presenting the WIS for a subset of locations and the relative WIS for all locations, we also calculate and visualise the empirical coverage, which is the percentage of observed values within a given interval or below a given quantile, of both the surrogate and ensemble model for the 30%, 60%, and 90% prediction intervals and by quantile [@scoringutils]. 
+We also calculate the bias [@Funk2019-vi] of both forecasting approaches, stratified by forecast horizon. This metric aims to capture the tendency for a forecast to under- or over-predict. It captures the average proportion of the mass of the forecast distribution that is above or below the true value (and so can range from -1 to 1) with an unbiased forecast having an average bias value of 0.
 Lastly, we calculate and visualise the relative weighted interval score by quantile, stratified by forecast horizon, to assess the relative difference in performance across the predictive distribution.
 
 ```{r eval-parameters}
