@@ -743,7 +743,7 @@ JB and SF, and KS have received funding to run forecast hub projects.
 SA conceived the study, developed the initial set of assumptions for the surrogate model, implemented the model into code, designed and conducted the forecast evaluation, and wrote the first draft of the manuscript.
 All other authors provided feedback on the manuscript and analyses and contributed to revisions.
 SF provided funding.
-HG reviewed the code and reproducibility of the analyses.
+HG and KS reviewed the code and reproducibility of the analyses.
 
 ## Data availability {-}
 
