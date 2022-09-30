@@ -24,7 +24,7 @@ affiliation:
 abstract: > 
   Multi-model and multi-team ensembles have become increasingly popular as an approach to increase the robustness and performance of infectious disease forecasts, especially during the COVID-19 pandemic. However, these forecasts require a coordinated team to produce and are effectively black boxes. In other fields, resource usage has been reduced by training simplified models that reproduce some of the observed behaviour of more complex models. 
   Here we use observations of the behaviour of the European COVID-19 Forecast Hub ensemble combined with our own forecasting experience, to specify a series of model assumptions modelling incident reported cases of COVID-19. We then develop a forecast model using these assumptions and compare its performance to the European forecast hub ensemble in real-time from the 15th of January 2022 to the 19th of July 2022 over a four-week forecast horizon using the weighted interval score.
-  We found that this surrogate model performed visibly relatively similarly to a subset of example locations though with increased uncertainty. Unsurprisingly, we concluded that average performance was substantially worse relative to the ensemble forecast but that median performance was more comparable. The majority of the difference in performance was linked to a subset of forecasts with worse performance early in 2022. We note that despite performing worse than the hub ensemble the majority of the time our surrogate model showed better calibration, and was less liable to underpredict. The central part of the surrogate model’s forecast distribution performed more similarly to the ensemble forecast’s distribution but maintained a right skewed performance distribution.
+  We found that this surrogate model performed visibly somewhat similarly to a subset of example locations though with increased uncertainty and poor performance at forecasting peak incidence. Unsurprisingly, we concluded that average performance was substantially worse relative to the ensemble forecast but that median performance was more comparable though still worse. The majority of the difference in performance was linked to a subset of forecasts with the majority of these being from early 2022. We note that despite performing worse than the hub ensemble the majority of the time our surrogate model showed better calibration, and was less liable to underpredict. The central part of the surrogate model’s forecast distribution performed more similarly to the ensemble forecast’s distribution but maintained a right skewed performance distribution.
   We conclude that our simplified forecast model may have captured some of the dynamics of the hub ensemble. However, more work needs to be done to understand the implicit epidemiological model that represents its behaviour and whether or not this is the optimal choice for stakeholders' requirements. We also conclude that our findings may be largely driven by the choice of evaluation measure used by the forecast hub and that if this is misspecified then the forecast hub submissions may not be optimised to forecast users' expectations or requirements. Our work is potentially useful for forecast consumers as a tool for understanding the inherent assumptions of the forecasts they are making use of and to researchers aiming to develop forecast approaches that perform similarly, or better than, current multi-model and multi-team forecast ensembles that are trusted by stakeholders.
 bibliography: library.bib
 output:
@@ -107,7 +107,7 @@ The only observation for which we do not make an adaptation is the apparent shar
 This choice is motivated by our belief that the underlying transmission process is an exponential discrete one and therefore a count error model with a log link function, where variance is linked to the mean, is a sensible choice. 
 We suggest that part of the reason the hub ensembles exhibit this behaviour is due to the penalisation of overprediction compared to underprediction caused by the use of a generalised form of absolute error for the majority of forecast evaluations [@bracherEvaluatingEpidemicForecasts2021]. 
 
-In this study, we evaluate an initial attempt at a surrogate model to replicate the observed behaviour of current multi-team forecast ensembles whilst maintaining a set of clear assumptions.
+In this study, we evaluate an initial attempt at a surrogate model to replicate the observed behaviour of current multi-team forecast ensembles based on a set of clear assumptions.
 We submitted this model to the European Forecast Hub and here we evaluate its performance relative to the Hub ensemble.
 First, we define the model and summarise its implementation, with a focus on minimal resource use and reproducibility, as a GitHub Actions workflow.  We briefly outline some of the summary statistics it produces and their epidemiological relevance.
 We then evaluate its real-time performance in comparison to the European forecast hub ensemble by visualising forecasts, using the weighted interval score [@bracherEvaluatingEpidemicForecasts2021], a commonly used proper scoring rule, and quantifying the empirical coverage of the forecasts produced.
@@ -176,7 +176,7 @@ We used the latest available observed data as of the 1st of September 2022 (comm
 Incidence was aggregated over the Morbidity and Mortality Weekly Report (MMWR) epidemiological week definition of Sunday through Saturday.
 As observations are subject to revisions this means that the data used to produce forecasts for a given date may not reflect the data used for evaluation.
 To account for this we followed the practice of the European forecasting hub project in excluding forecasts made using anomolous truth data in the week of the forecasts production and excluding forecasts for target weeks with anomolous data [@Sherratt2022-ue].
-We defined anomolous data based on the implementation used by the [@EuroHub] where a datapoint is considered anomolous if a future revision alters it by more than 5%.
+We defined anomolous data based on the implementation used by [@EuroHub] where a datapoint is considered anomolous if a future revision alters it by more than 5%.
 
 The European forecast hub requests forecasts for one to four-week forecast horizon and requires forecasts to use a pre-specified format with 23 quantiles of the predictive probability distribution.
 No restrictions were placed on who could submit forecasts and the hub team actively invited participation from research groups known to be involved with COVID-19 forecasting projects.
@@ -286,7 +286,7 @@ forecast_dates_by_models <- metadata |>
 
 ### Definition {-}
 
-We model the expectation ($\lambda_t$) of reported cases ($C_t$) as an order 1 autoregressive (AR(P)) process by epidemiological week ($t$).
+We model the expectation ($\lambda_t$) of reported cases ($C_t$) as an order 1 autoregressive (AR(p)) process by epidemiological week ($t$) on the log scale.
 The model is initialised by assuming that the initially reported cases are representative with a small amount of error (2.5%).
 We assume a negative binomial observation model with overdispersion $\phi$ for reported cases ($C_t$).
 
@@ -496,9 +496,9 @@ Anomalies  were also not evenly distributed over time with a higher proportion o
 
 In our example set of locations, the absolute performance of the ensemble and the surrogate model was visually similar on the log scale in all locations at short forecast horizons though this varied by location (Figure \@ref(fig:vis-forecasts) b).
 On the natural scale the difference in performance was more marked, specially for periods of high incidence and at longer horizons (Figure \@ref(fig:vis-forecasts) a).
-Performance was not homogeneous across our set of example locations with the surrogate model performing similarly to the ensemble in Slovakia whilst in the United Kingdom and Germany the surrogate model performed visibly substantially worse for some forecast dates (Figure \@ref(fig:vis-forecasts)).
-For both the ensemble and the surrogate, performance visibly decreased as the forecast horizon increased with this being particularly noticable for the surrogate model during periods of high incidence.
-In general, in the study period, the ensemble appeared to be more liable to underpredict and the surrogate model appeared more likely to over-predict. 
+Performance was not homogeneous across our set of example locations with the surrogate model performing similarly to the ensemble in Slovakia whilst in the United Kingdom and Germany the surrogate model performed substantially worse for some forecast dates (Figure \@ref(fig:vis-forecasts)).
+For both the ensemble and the surrogate, performance decreased as the forecast horizon increased with this being particularly noticable for the surrogate model during periods of high incidence.
+In general, in the study period the ensemble appeared to be better able to forecast peak incidence. 
 Both models forecast large reductions in incidence in Poland during May that did not occur whilst only the ensemble forecast spuriously forecast similar large reductions in Germany during June.
 In comparison to the ensemble model the surrogate model appeared less likely to place weight on unfeasibly large reductions in incidence during periods of declining incidence but on other hand was more likely to forecast continuing increases in incidence (for example in February in Slovakia and Poland).
 
@@ -610,11 +610,14 @@ This was not the case for the 90% prediction interval where the surrogate model 
 
 Stratifying calibration by quantile and forecast horizon the ensemble forecast was overly certain at all horizons for quantiles larger than the median whilst being comparably well calibrated for intervals below the median (Figure \@ref(fig:plot-coverage) b).
 This behaviour became more prominant as forecast horizon increased.
-In contrast, the surrogat forecast was generally equally well calibrated at across horizons with a tendency to over cover for intervals above the median.
-At longer horizons, however, quantiles below the median became liable to have under coverage.
+In contrast, the surrogate forecast was generally equally well calibrated across horizons with a tendency to over cover for intervals above the median.
+At longer horizons, however, quantiles below the median became liable to under cover.
 
 Breaking down the relative weighted interval score by forecast interval we observe that the surrogate modeel produces forecasts that differ most from the ensemble in the outer intervals and in particular the tails of the forecast (Figure \@ref(fig:plot-coverage) c).
 This is true across forecast horizons but the magnitude of the difference increases.
+
+Calculating the bias of the forecasts from each model we see that the (Figure \@ref(fig:plot-coverage) d) ensemble forecast is initially biased towards undprediction but this bias reduces as the forecast horizon increases.
+In comparison, the surrogate forecast model is biased towards over prection for all forecast horizons with the magnitude of this bias appearing to increase linearly with forecast horizon.
 
 ```{r plot-coverage, fig.height = 12, fig.width = 18, out.width = "95%", fig.cap = "a.) Empirical coverage of the surrogate and ensemble forecasts at the 90\\%, 60\\%, and 30\\% prediction intervals stratified by forecast horizon. Ideally, a well-calibrated forecast should have empirical coverage for a given prediction interval that equals the range of that interval (i.e 90\\%). b.) Empirical coverage by quantile for both the surrogate and ensemble forecasts. A well-calibrated forecast should have empirical quantiles that match the theoretical ones. The green area of this figure corresponds to conservativ. forecasts. c.) Median relative weighted interval score by quantile and forecast horizon for the surrogate forecast compared to the ensemble forecast. d.) Bias of the ensemble and surrogate forecasts stratified by horizon."}
 p <- (
@@ -644,19 +647,23 @@ suppressWarnings(print(p))
 ## Summary {-}
 
 In this study, we defined a surrogate model aiming to replicate some of the observed behaviour of the European forecast hub multi-team ensemble for forecasting test-positive reported COVID-19 cases in European nations.
-We first defined a set of assumptions for how the surrogate model should behave based on our observations of the European forecast hub ensemble, our experience submitting forecasts to various forecast hubs, and our observations of the performance of other models.
+We first defined a set of assumptions for how the surrogate model should behave based on our observations of the European forecast hub ensemble, our experience submitting forecasts to various forecast hubs.
 We aimed for a model that could be easily understood, that produced epidemiologically meaningful summary statistics, and that could be run with low compute resources.
 We further provide a fully reproducible workflow for running and evaluating this model using GitHub actions facilitating others to do the same. 
 
 Over the 6 months of the study period, we found that our surrogate model produced forecasts that were visually similar to those from the forecast hub ensemble on the log scale though with greater uncertainty.
 Visual differences were more marked on the natural scale with the surrogate model forecasting spuriously high peak incidence.
-In a subset of example locations, we observed some variation in performance across locations, that the ensemble appeared biased toward underprediction, and the surrogate model appeared slightly biased toward overprediction.
-Evaluating the relative performance of the surrogate model compared to the European forecast hub ensemble we found that the mean performance was substantially worse, which was driven by a relatively small subset of vey poorly performing forecasts.
+In a subset of example locations, we observed some variation in performance across locations, that the ensemble better captured peak incidence, and that the surrogate model appeared biased toward overprediction.
+Evaluating the relative performance of the surrogate model compared to the European forecast hub ensemble we found that the mean performance was substantially worse, and that relative performance decreased with forecast horizon.
 Median forecast performance of the surrogate model was also worse when compared to forecasts from the ensemble though the majority of surrogate forecasts were within 50% of the performance observed for the ensemble forecast.
+The difference in mean and median relative performance suggested a skewed distribution in scores, which we confirmed visually. 
+This means that a relatively small fraction of forecasts were responsible for a substantially portion for the difference in performance.
+Evaluating point forecast performance indicated a similar pattern of performance as that observed using the full predictive distribution though relative performance of the surrogate model generally improved.
 Performance varied by location and forecast date with the surrogate model performing worse in the first part of 2022 which may have been linked to incidence rates peaking across forecast locations linked to the spread of BA.2.
 In general, the relative performance of the surrogate model degraded as forecast horizons increas with the distribution of relative performance having an increasingly heavy right tail as the forecast horizon increased indicating a greater share of forecasts performing very poorly in comparison to the hub ensemble.
-The forecast hub ensemble was poorly calibrated, particularly at longer forecast horizons and bigger prediction intervals, compared to the surrogate model though the surrogate model tended to be overly uncertain at large intervals.
-Evaluating point forecast performance indicated a similar pattern of performance as that observed using the full predictive distribution though relative performance of the surrogate model generally improved.
+The forecast hub ensemble was poorly calibrated, particularly at longer forecast horizons and larger prediction intervals, compared to the surrogate model though the surrogate model tended to be overly uncertain at large intervals.
+The ensemble forecast was biased towards under prediction at short to medium forecast horizons but unbiased at longer horizons. 
+In comparison the surrogate model was biased towards over prediction and this biased increased linearly with forecast horizon.
 
 ## Limitations {-}
 
@@ -712,9 +719,9 @@ As we identified that the tails of our predictive distributions were responsible
 This seems likely to improve out-of-sample performance but does not help with the secondary aim of understanding the implicit assumptions driving the performance of multi-model, multi-team infectious disease forecast ensembles.
 As we have hypothesised that the use of absolute scoring measures is inappropriate and leads to performance characteristics that are unlikely to be favoured by forecast stakeholders more work should be done in this area.
 If new forecast ensemble methods are adopted as best practice by forecast hubs then follow-up work attempting to create surrogate forecast models should also use these approaches and this will likely alter the observed characteristics of the hub ensemble forecasts, for example, the tendency to be poorly calibrated.
-In September 2022, GitHub announced support for hosted GitHub Action runners with additional compute power [@GitHubActionsLargeRunners]. Whilst a paid feature this may allow more compute attensive models, with fewer potental performance trade-offs, to be easily democratised though only if funds are available to support the hosting costs.
+In September 2022, GitHub announced support for hosted GitHub Action runners with additional compute power [@GitHubActionsLargeRunners]. Whilst a paid feature this may allow more compute intensive models, with fewer potental performance trade-offs, to be easily democratised though only if funds are available to support the hosting costs.
 One potential research area is to explore forecasting methods that can be used with a range of compute resources though this would require extensive evaluation and documentation to make it clear to users what the trade-offs between compute usage and forecast performance are.
-More work is needed to understand the best practice treatment of data revisions when evaluating forecasts and the potential sources for bias these may cause.
+More work is needed to understand the best practice treatment of data revisions when evaluating forecasts and the potential bias these may cause.
 Lastly, here we have only explored a surrogate for an ensemble for a single disease, a limited set of locations, and a single target (incident cases), meaning our findings are difficult to generalise.
 Follow-up work should explore whether this behaviour holds across diseases, locations, and epidemiological targets where the behaviour of ensembles is notably different [@REF].
 However, this work is limited by the lack of large-scale forecast ensembling projects despite them showing obvious promise to improve the forecasts available to stakeholders.
@@ -746,10 +753,10 @@ https://github.com/epiforecasts/simplified-forecaster-evaluation
 
 ## Funding {-}
 
-SA and SF were funded by a Wellcome senior fellowship to SF (), KS and HG were funded by an ECDC grant to SF, and JB was funded by.
+SA and SF were funded by a Wellcome senior fellowship to SF (210758/Z/18/Z), KS and HG were funded by an ECDC grant to SF, and JB was funded by.
 
 # Acknowledgments {-}
 
-We thank the ECDC for supporting the forecasting hub, and all forecasters who submitted forecasts for making this study possible. We thank the forecast hub team for publishing all data in an accessible format. We thank Molly for being a good Labrador.
+We thank the ECDC for supporting the forecasting hub, and all forecasters who submitted forecasts for making this study possible. We thank the forecast hub team for publishing all data in an accessible format. We thank the Epiforecast group for a productive discussion of an early version of this analysis. We thank Molly for being a good Labrador.
 
 # References {-}
