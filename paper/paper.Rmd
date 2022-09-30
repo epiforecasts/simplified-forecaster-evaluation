@@ -585,7 +585,7 @@ p <- (
     (
       plot_relative_summary(relative_summary) +
       plot_layout(guides = "keep")
-    )
+    ) +
     plot_rwis_location +
     plot_layout(heights = c(1, 7), guides = "collect")
   )
