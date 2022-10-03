@@ -49,13 +49,16 @@ knitr::opts_chunk$set(
 # Introduction {-}
 
 Multi-model and multi-team ensembles have become increasingly popular as an approach to increase the robustness and performance of infectious disease forecasts over the last decade [@Reich2022-jo].
-These approaches have been inspired by the experience of other domains, for example, climate modelling [@IPCCreport], where ensembles of both multiple models and from multiple teams have a long history of providng forecasts that are trusted by stakeholders.
+These approaches have been inspired by the experience of other domains, for example, climate modelling [@IPCCreport], where ensembles of both multiple models and from multiple teams have a long history of providing forecasts that are trusted by stakeholders.
 
 Whilst there is robust and consistent evidence that multi-team ensemble forecasts provide reliable and performant forecasts across domains [@Reich2022-jo] they also have a range of downsides.
-The most significant is their considerable resource cost to produce as they typically require contributions from multiple independent teams, the development of several models, and a centralised group to run the ensembling project.
-Forecasts from these ensembles can also be hard to interpret as it is difficult to link them to the underlying model assumptions.
+The most significant is the difficulty in interpreting the underlying mechanisms for the forecasts they produce. 
+This impacts users' trust, how easily ensemble performance can be improved, and how easily contributor forecasts can be improved.
+Forecasts from these ensembles also require considerable resource cost to produce as they typically require contributions from multiple independent teams, the development of several models, and a centralised group to run the ensembling project.
 Additional issues with multi-team collaborations include a lack of feedback to those contributing forecasts that would allow them to improve their forecast approaches, maintaining incentives for forecasters to continue to contribute [@Bosse2022-hm], and difficulty improving the quality of the ensemble [@Sherratt2022-ue].
 Each of these issues may impact the long-term quality of the resulting ensemble forecasts and have implications for end-users. 
+There has been limited critical feedback on forecasting ensembling projects for infectious disease epidemiology with little evaluation of the effort required to produce them compared to their benefits for improving forecast performance.
+What evaluation there has been has mainly focussed on secondary data analysis.
 
 The trend towards large-scale multi-team ensemble forecasting in infectious diseases has accelerated during the COVID-19 pandemic due to a pressing need for reliable forecasts and a perception that many publicly available forecasts were low quality. Over 2020 and 2021, teams established COVID-19 Forecasting Hubs covering the US [@Cramer2022-sp], Germany and Poland [@Bracher2021-wk], and Europe [@Sherratt2022-ue] (the latter two including authors of this study). All of these collaborations ensembled contributions from multiple independent teams using a similar approach and have shown that their ensemble forecasts outperform most individually contributed forecasts whilst remaining generally robust to outliers in reporting.
 However, less progress has been made in mitigating the downsides of these projects and improving access to the high-quality and robust forecasts they seek to generate to geographies without coverage or for other infectious diseases.
@@ -63,7 +66,7 @@ However, less progress has been made in mitigating the downsides of these projec
 In this work, we draw insights from ensemble forecasts produced and endorsed by these forecast hubs, as well as our forecasting work, to propose and evaluate a "surrogate" forecast model.
 This seeks to mitigate some of the downsides of recent COVID-19 ensembles forecasts by emulating their observed behaviour, using a minimal set of easily communicated and epidemiologically justifiable assumptions, and limited computational resources with an easily generalised implementation.
 The primary aim of this approach is to help highlight the behaviour, and potential mechanisms behind this behaviour, of ensemble forecast widely considered the gold standard for COVID-19 forecasting.
-In addition to this, we seek to provide a simple, and robust, forecasting system that can be easily reused by others, perhaps where a forecast hub ensemble is not available, and be used as a platform for future research both into improving understanding of ensemble behaviour and increased forecast performance.
+In addition to this, we seek to provide a simple, and robust, forecasting system that others can easily reuse, perhaps where a forecast hub ensemble is not available, and be used as a platform for future research both into improving understanding of ensemble behaviour and increased forecast performance.
 
 In climate forecasting [@Castelletti2012-bs; @Edwards2021-lv; @Williamson2013-qx], as well as in other fields such as astrophysics [@Vernon2014-ov], emulation approaches have been used to circumvent resource requirement issues for complex models by training a simplified model, usually, a non-parametric statistical model, to replicate the behaviour of either the entire model or sub-components.
 However, within epidemiological modelling, we often want to use our models for applications other than forecasting (such as learning about underlying disease dynamics or developing scenarios) and, for ensemble models, in particular, have fewer insights beyond forecast performance on which to base our mechanistic assumptions.
@@ -94,11 +97,11 @@ The first simplification we make is to model only weekly data, rather than using
 This leads to the observed ensemble behaviour of being relatively auto-correlated and resistant to short-term changes in trend.
 
 The second simplification we make is to ignore the underlying latent infection process and focus only on the observed reported cases.
-This reduces removes the need for, potentially misspecified, external information on the delay from infection to report, and reduces computational requirements due to a reduction in model complexity. 
+This removes the need for, potentially misspecified, external information on the delay from infection to report, and reduces computational requirements due to a reduction in model complexity. 
 However, this sacrifices some of the interpretability of the forecast model as any epidemiological summary statistics we now calculate will be based on reported cases and not latent infections.
 As discussed in [@Gostic2020-vw] this leads to varying amounts of bias depending on the epidemic phase. 
 
-The final simplification we make is to model the growth rate as a differenced auto-regressive process with order 1 rather than using a gaussian process-based method as we have done in other work [@Bosse2022-hm; @Abbott2020-iy; @EpiNow2].
+The final simplification is to model the growth rate as a differenced auto-regressive process with order 1 rather than using a gaussian process-based method as we have done in other work [@Bosse2022-hm; @Abbott2020-iy; @EpiNow2].
 This represents a parsimonious approach in that we encode our expectation that the growth rate should vary over time and allow this to influence the forecast but we include only a single lag term, reducing the computational overhead of the model. 
 To model potential unobserved interventions and more general changes in transmission, we include an additional growth rate modifier restricted to be between 0 and 1 that differs depending on if the growth rate is positive or negative (due to potential differing responses when cases are growing or increasing) and that acts in a multiplicative fashion (meaning that larger absolute growth rates are reduced to zero growth more rapidly).
 This reflects a simplified interpretation of how the ensemble appears to react to potential future changes by assuming a gradual return to stable incidence. 
@@ -468,7 +471,7 @@ Versions archived on Zenodo are available [@REF] and [@REF].
 
 ## Data summary {-}
 
-In our study period, incidence rates across European nations and in the UK were primarily driven by the spread of novel subvariants of concern related to the Omicron variant and changes in population susceptibility. Many nations, such as the UK, saw large BA.1 waves in January that then resulted in declining incidence rates through February (Figure \@ref(fig:vis-forecasts)).
+In our study period, incidence rates across European nations and in the UK were primarily driven by the spread of novel subvariants of concern related to the Omicron variant and changes in population susceptibility. Many countries, such as the UK, saw large BA.1 waves in January that then resulted in declining incidence rates through February (Figure \@ref(fig:vis-forecasts)).
 From late February, through to the end of May, most nations then saw another wave, typically with lower reported incidence rates, driven by BA.2. This wave was typically characterised by a lower peak than the BA.1 wave with a more gradual decrease in incidence.
 The end of our study period was characterised by the gradual take-over of the BA.4/BA.5 subvariants that again had a lower peak and lower absolute growth rates. Unlike earlier periods in the pandemic, our study period did not see the use of new non-pharmaceutical interventions (NPIs) in response to increasing COVID-19 incidence in most locations.
 In addition, ascertainment rates likely reduced over time in most locations due to reductions in routine testing, and reductions in test availability. Whilst both the reduced use of NPIs and testing generally occurred across nations our study period also marked an increase in the heterogeneity of the response to the COVID-19 pandemic with nations changing policy at different times and to different degrees.
