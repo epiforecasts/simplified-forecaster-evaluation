@@ -302,8 +302,9 @@ We assume a negative binomial observation model with overdispersion $\phi$ for r
   \lambda_t &= C_{t-1} e^{r_t},\ t > 0  \\
   C_{t} \mid \lambda_{t} &\sim \text{NB}\left(\lambda_t, \phi\right)
 \end{align*}
-
-where $r_t$ can be interpreted as the weekly growth rate. $r_t$ is then modelled as a piecewise constant differenced AR(1) process modified such that the dependence of $r_{t-1}$ is multiplied by a decay factor ($\xi_{+,-}$) that varies dynamically according to the sign of $r_{t-1}$.
+where the mean and variance of the negative binomial are defined as \[ \mathbb{E}[n] = \mu \ \ \
+\text{ and } \ \ \ \text{Var}[n] = \mu + \frac{\mu^2}{\phi}. \]
+Here $r_t$ can be interpreted as the weekly growth rate. $r_t$ is then modelled as a piecewise constant differenced AR(1) process modified such that the dependence of $r_{t-1}$ is multiplied by a decay factor ($\xi_{+,-}$) that varies dynamically according to the sign of $r_{t-1}$.
 This assumes that the growth rate is non-stationary with a trend that is independent of the current growth rate (the differenced AR(1) process), the additional decay factor encodes the belief that larger absolute growth rates will tend more quickly towards no growth and that this process may work differently for positive or negative growth rates.
 This process can be defined as follows, 
 
@@ -346,7 +347,7 @@ To maintain the propriety of this score, we do this after first taking the means
 We explore relative performance by forecast horizon, by month and horizon, and by location and horizon. 
 
 In addition to presenting the WIS for a subset of locations and the relative WIS for all locations, we also calculate and visualise the empirical coverage, which is the percentage of observed values within a given interval or below a given quantile, of both the surrogate and ensemble model for the 30%, 60%, and 90% prediction intervals and by quantile [@scoringutils]. 
-We also calculate the bias [@Funk2019-vi] of both forecasting approaches, stratified by forecast horizon. This metric aims to capture the tendency for a forecast to under or over-predict. It captures the average proportion of the mass of the forecast distribution that is above or below the true value (and so can range from -1 to 1) with an unbiased forecast having an average bias value of 0.
+We also calculate the bias (see [@scoringutils] and [@Funk2019-vi] for a more detailed definition) of both forecasting approaches, stratified by forecast horizon. This metric aims to capture the tendency for a forecast to under or over-predict. It captures the average proportion of the mass of the forecast distribution that is above or below the true value (and so can range from -1 to 1) with an unbiased forecast having an average bias value of 0.
 Lastly, we calculate and visualise the relative weighted interval score by quantile, stratified by forecast horizon, to assess the relative difference in performance across the predictive distribution.
 
 ```{r eval-parameters}
@@ -461,7 +462,7 @@ Versions archived on Zenodo are available [@REF] and [@REF].
 
 # Results {-}
 
-## Data summary {-}
+##  Summary of the European COVID-19 Forecast Hub Setting {-}
 
 In our study period, incidence rates across European nations and in the UK were primarily driven by the spread of novel subvariants of concern related to the Omicron variant and changes in population susceptibility. Many countries, such as the UK, saw large BA.1 waves in January that then resulted in declining incidence rates through February (Figure \@ref(fig:vis-forecasts)).
 From late February, through to the end of May, most nations then saw another wave, typically with lower reported incidence rates, driven by BA.2. This wave was typically characterised by a lower peak than the BA.1 wave with a more gradual decrease in incidence.
@@ -508,7 +509,8 @@ p <- (
   plot_annotation(tag_levels = "a") &
   theme(
     legend.position = "bottom", legend.margin = margin(),
-    legend.justification = "centre", axis.title = element_text(size = 15)
+    legend.justification = "centre", axis.title = element_text(size = 18),
+    legend.text = element_text(size = 18)
   )
 suppressWarnings(print(p))
 ```
@@ -521,7 +523,7 @@ If we instead consider median relative performance (note this is not a proper sc
 This would suggest that an increasingly skewed score distribution as the forecast horizon increased is responsible for the increase in the mean relative score (Figure \@ref(fig:assemble-eval) a).
 `r relative_wis_thresholds[, better_than]` of individual surrogate forecasts scored better than the comparable ensemble forecast, `r relative_wis_thresholds[, fifty_percent]` performed within 50% of the comparable ensemble forecast, and `r relative_wis_thresholds[, more_than_100_percent]` had a more than 100% worse WIS than the comparable ensemble forecast.
 
-If we consider only the median point forecast, using the absolute error, we see that the ensemble forecast again outperformed the surrogate forecast (`r overall_ae_median[model == "Ensemble", round(Mean, digits = 1)]` vs. `r overall_ae_median[model == "Surrogate", round(Mean, digits = 1)]`). When using the weighted interval score if we instead consider the median of the absolute error we see that the difference in performance has reduced indicating a similar skewed score distribution for point forecasts as for the whole predictive distribution (`r overall_ae_median[model == "Ensemble", round(Median, digits = 1)]` vs. `r overall_ae_median[model == "Surrogate", round(Median, digits = 1)]`). Across forecast horizons the same pattern of outperformance holds. However, the difference in relative performance was less than when the full probability distribution was accounted for with this becoming more marked as the forecast horizon increased (Figure \@ref(fig:assemble-eval) c).
+If we consider only the median point forecast, using the absolute error, we see that the ensemble forecast again outperformed the surrogate forecast (rAE for the surrogate compared to the ensemble `r overall_ae_median[model == "Surrogate", Mean] / overall_ae_median[model == "Ensemble", Mean] |> round(digits = 2)`). When using the weighted interval score if we instead consider the median of the absolute error we see that the difference in performance has reduced indicating a similar skewed score distribution for point forecasts as for the whole predictive distribution (rAE `r overall_ae_median[model == "Surrogate", Median] / overall_ae_median[model == "Ensemble", Median] |> round(digits = 2)`). Across forecast horizons the same pattern of outperformance holds. However, the difference in relative performance was less than when the full probability distribution was accounted for with this becoming more marked as the forecast horizon increased (Figure \@ref(fig:assemble-eval) c).
 
 The surrogate model's relative performance varied over time with substantially worse performance from January to March compared to later in the year across all forecast horizons based on changes in the relative score distribution and its summary statistics (Figure \@ref(fig:assemble-eval) b).
 The majority of the difference in performance appeared to be driven by a thicker right tail with this being a particular feature of forecasts at longer horizons. Forecast performance in March had a bimodal distribution at the four-week horizon with a substantial fraction of surrogate forecasts outperforming the ensemble and a substantial fraction substantially underperforming.
@@ -589,7 +591,8 @@ p <- (
   plot_annotation(tag_levels = "a") &
   theme(
     legend.position = "bottom", legend.margin = margin(),
-    legend.justification = "centre", axis.title = element_text(size = 15)
+    legend.justification = "centre", axis.title = element_text(size = 18),
+    legend.text = element_text(size = 18)
   )
 suppressWarnings(print(p))
 ```
@@ -603,7 +606,7 @@ In comparison, the surrogate forecast was less well calibrated than the ensemble
 At longer horizons and narrower prediction intervals, the surrogate forecast became better calibrated though with a tendency to under cover.
 This was not the case for the 90% prediction interval where the surrogate model covered more than the expected interval, for all horizons, indicating forecasts were overly uncertain for this interval regardless of the horizon. 
 
-Stratifying calibration by quantile and forecast horizon the ensemble forecast was overly certain at all horizons for quantiles larger than the median whilst being comparably well calibrated for intervals below the median (Figure \@ref(fig:plot-coverage) b).
+Stratifying calibration by quantile and forecast horizon the ensemble forecast was conservative at all horizons for quantiles larger than the median whilst being comparably well calibrated for intervals below the median (Figure \@ref(fig:plot-coverage) b).
 This behaviour became more prominent as the forecast horizon increased.
 In contrast, the surrogate forecast was generally equally well calibrated across horizons with a tendency to over cover for intervals above the median.
 At longer horizons, however, quantiles below the median became liable to under cover.
@@ -632,7 +635,8 @@ p <- (
   plot_annotation(tag_levels = "a") &
   theme(
     legend.position = "bottom", legend.margin = margin(),
-    legend.justification = "centre", axis.title = element_text(size = 15)
+    legend.justification = "centre", axis.title = element_text(size = 18),
+    legend.text = element_text(size = 18)
   )
 suppressWarnings(print(p))
 ```
