@@ -30,18 +30,7 @@ output:
     extra_dependencies: ["float"]
 ---
 
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
-  eval = TRUE,
-  echo = FALSE,
-  message = FALSE,
-  cache = TRUE,
-  messages = FALSE,
-  warnings = FALSE
-)
-```
+
 
 # Introduction {-}
 
@@ -81,56 +70,11 @@ We aim for this work to highlight some of the potential implicit assumptions of 
 
 ## Setting of the European COVID-19 Forecast Hub {-}
 
-```{r packages, cache = FALSE}
-library(data.table)
-library(purrr)
-library(scoringutils)
-library(lubridate)
-library(forcats)
-library(ggplot2)
-library(ggridges)
-library(ggh4x)
-library(patchwork)
-library(scales)
-library(here)
-```
 
-```{r load-functions}
-source(here("R", "utils.R"))
-source(here("R", "evaluate.R"))
-source(here("R", "evaluation-plots.R"))
-source(here("R", "coverage-plots.R"))
-```
 
-```{r data}
-# Load JHU frozen truth data. See data-raw/get-truth.R for munging
-truth <- fread(here("data", "truth.csv"))
 
-# Load observations defined as anomalies
-anomalies <- fread(here("data", "anomalies.csv"))
 
-# Load population data
-population <- fread(here("data", "population.csv"))
 
-# Load forecast metedata. See data-raw/get-hub-metadata.R for munging
-metadata <- fread(here("data", "metadata.csv"))
-
-# Load European forecasts. See data-raw/get-hub-forecasts.R for munging
-# Merge with truth and rescale to incidence rate per 100,000
-forecasts <- fread(here("data", "forecasts.csv")) |>
-  merge_forecasts_with_truth(truth) |>
-  rescale_to_incidence_rate(population, scale = 1e4) |>
-  rename_models()
-
-# Load forecasts processed ready for scoring
-forecasts_ready_for_scoring <- fread(
-  here("data", "forecasts_ready_for_scoring.csv")
-)
-
-# Load forecast scores
-scores <- fread(here("data", "scores.csv")) |>
-  rename_models()
-```
   
 We extracted forecasts and data on notified weekly COVID-19 cases from the European forecasting hub [@Sherratt2022-ue; @EuroHub] from the 15th of January 2022 to the 19th of July 2022 for the ensemble model (referred to as the `EuroCOVIDhub-ensemble` by the hub team) and the surrogate model (submitted as `epiforecasts-weeklygrowth`).
 We included all locations covered by the European forecasting hub which were 32 European countries, including all countries of the European Union and European Free Trade Area, and the United Kingdom.
@@ -149,132 +93,20 @@ The ensemble forecast was constructed by taking the median of all predictive qua
 An ensemble was only produced for locations with at least 3 independent forecast models including the hub baseline model.
 Submitted forecasts and target observations are available from the European Forecast Hub GitHub repository [@EuroHubGitHub]. We provide code in the repository of this study to streamline access. 
 
-```{r metadata}
-# Excluded forecast
-exclude_forecasts <- metadata |>
-  DT(, sum(n_anomaly))
 
-included_forecasts <- metadata |>
-  DT(, sum(n))
-
-per_excluded <- round(exclude_forecasts / included_forecasts * 100, 1)
-
-# Forecast dates + locations with anomalies
-exclusions <- metadata |>
-  DT(, .(target_end_date, location, anomaly)) |>
-  unique() |>
-  DT(, .(total = .N, exclude = sum(anomaly), include = .N - sum(anomaly))) |>
-  DT(, per := round(exclude / total * 100, 1))
-
-# Number of locations
-locations <- metadata |>
-  DT(, uniqueN(location))
-
-# Number of models overall
-models <- metadata |>
-  DT(, uniqueN(model))
-
-# Number of forecast dates
-forecast_dates <- metadata |>
-  DT(, uniqueN(target_end_date))
-
-# Models per forecast date
-models_per_forecast <- metadata |>
-  summarise_forecasts_by(by = "target_end_date")
-
-# Models per location
-models_per_location <- metadata |>
-  summarise_forecasts_by(by = "location")
-
-# Models with a location target
-locations_per_model <- metadata |>
-    summarise_forecasts_by(var = "location", by = "model")
-
-locs_per_model_single_date <- metadata |>
-    summarise_forecasts_by(
-      var = "location", by = c("model", "target_end_date")
-    ) |>
-    DT(, unique(.SD[n == max(n), .(n)]), by = "model")
-
-locs_per_model_date <- metadata |>
-  summarise_forecasts_by(
-    var = "location", by = c("model", "target_end_date")
-  ) |>
-  DT(locs_per_model_single_date[, .(model, max_n = n)], on = "model") |>
-  DT(, n_per := n / max_n) |>
-  DT(, .SD[!all(n == max_n)], by = "model")
-
-models_per_loc_date <- metadata |>
-  summarise_forecasts_by(var = "model", by = c("target_end_date", "location"))
-
-# Single target models per location
-single_locs_models_per_loc <- metadata |>
-  DT(locations_per_model[n == 1], on = "model") |>
-  summarise_forecasts_by(by = "location")
-
-# Local models
-local_models <- locations_per_model |>
-  DT(n == 1) |>
-  DT(, model)
-
-# Global models
-global_models <- locations_per_model |>
-  DT(n > 30) |>
-  DT(, model)
-
-# Partial coverage models
-partial_models <- locations_per_model |>
-  DT(n > 2) |>
-  DT(n <= 30)
-
-# Varying submissions
-varying_submissions <- locs_per_model_date |>
-  DT(partial_models[, .(model)], on = "model")
-
-# Models coverage of forecast dates
-forecast_dates_by_models <- metadata |>
-  summarise_forecasts_by(var = "target_end_date", by = "model") |>
-  DT(order(n)) |>
-  DT(, n_per := n / forecast_dates) |>
-  DT(, type := fcase(
-      model %in% global_models, "global",
-      model %in% local_models, "local",
-      model %in% partial_models[, model], "partial",
-      default = "other"
-    )
-  )
-```
 
 ## Model {-}
 
 ### Motivation {-}
 
-```{r}
-observations <- data.table(
-  No. = 1:5,
-  Observation = c(
-    "Robust to daily reporting artefacts",
-    "Some ability to forecast future trend changes",
-    "Less reactive to apparent observed changes in trend",
-    "Sharper forecasts",
-    "A tendency towards under prediction"
-  )
-)
 
-assumptions <- data.table(
-  Assumption = c(
-    "Reported cases can be modelled using weekly data and a generative process discretised by week", # nolint
-    "Reported cases can be modelled as if they represented infections",
-    "The growth rate of infections can be represented as an auto-regressive process with an order of 1 week", # nolint
-    "Unobserved interventions and more general changes in transmission towards a stable state can be represented using a multiplicative decay parameter" # nolint
-  ),
-  Observation = c("1, and 2", "-", "3 and 4", "2, and 5")
-)
-knitr::kables(
-  list(observations, assumptions),
-  caption = "(\\#tab:observations)"
-) |>
-  print()
+```
+#> \begin{table}
+#> \caption{(\#tab:unnamed-chunk-2)(\#tab:observations)}
+#> 1:5
+#> c("Robust to daily reporting artefacts", "Some ability to forecast future trend changes", "Less reactive to apparent observed changes in trend", "Sharper forecasts", "A tendency towards under prediction")c("Reported cases can be modelled using weekly data and a generative process discretised by week", "Reported cases can be modelled as if they represented infections", "The growth rate of infections can be represented as an auto-regressive process with an order of 1 week", "Unobserved interventions and more general changes in transmission towards a stable state can be represented using a multiplicative decay parameter")
+#> c("1, and 2", "-", "3 and 4", "2, and 5")
+#> \end{table}
 ```
 
 To understand the behaviour of the Forecast Hub ensembles we need to first explore the structure of the COVID-19 Forecast Hubs [@Cramer2022-sp; @Bracher2021-wk; @Sherratt2022-ue].
@@ -377,95 +209,11 @@ In addition to presenting the WIS for a subset of locations and the relative WIS
 We also calculate the bias (see [@scoringutils] and [@Funk2019-vi] for a more detailed definition) of both forecasting approaches, stratified by forecast horizon. This metric aims to capture the tendency for a forecast to under or over-predict. It captures the average proportion of the mass of the forecast distribution that is above or below the true value (and so can range from -1 to 1) with an unbiased forecast having an average bias value of 0.
 Lastly, we calculate and visualise the relative weighted interval score by quantile, stratified by forecast horizon, to assess the relative difference in performance across the predictive distribution.
 
-```{r eval-parameters}
-locs <- c("United Kingdom", "Germany", "Slovakia", "Italy", "Poland", "Greece")
-ranges <- c(30, 60, 90)
-```
 
-```{r coverage}
-coverage <- calc_coverage(scores)
 
-overall_coverage <- coverage |>
- DT(, .(coverage = round(mean(coverage) * 100, 1)), by = c("model", "range")) |>
- dcast(range ~ model, value.var = "coverage") |>
- DT(, target := c(30, 60, 90)) |>
- DT(, rel_ensemble := round(Ensemble / target * 100, 1) - 100) |>
- DT(, rel_surrogate := round(Surrogate / target * 100, 1) - 100)
 
-overall_coverage_by_horizon <- coverage |>
- DT(,
-    .(coverage = round(mean(coverage) * 100, 1)),
-    by = c("model", "range", "horizon")
-  ) |>
- dcast(range + horizon ~ model, value.var = "coverage")
-```
 
-```{r relative-interval-score}
-summary_performance <- scores |>
-  summarise_scores(by = c("model", "horizon"))
 
-relative_interval_score <- scores |>
-  calc_relative_score(
-    cols = c("location", "target_end_date", "horizon", "range")
-  )
-
-overall_ae_median <- scores |>
-  DT(, as.list(summary(ae_median)), by = "model")
-
-wis <- scores |>
-  summarise_scores(
-    by = c("location_name", "target_end_date", "horizon", "model")
-  )
-relative_wis <- wis |>
-  calc_relative_score(cols = c("location_name", "target_end_date", "horizon"))
-
-relative_wis_by_horizon <- scores |>
-  summarise_scores(by = c("horizon", "model")) |>
-  calc_relative_score(cols = c("horizon")) |>
-  DT(, ris := round(relative_interval_score, 2)) |>
-  DT(, interval_score := NULL)
-setnames(
-  relative_wis_by_horizon, c("relative_interval_score"),
-  c("Weighted interval score")
-)
-
-relative_ae_by_horizon <- scores |>
-  summarise_scores(by = c("horizon", "model")) |>
-  DT(, interval_score := ae_median) |>
-  calc_relative_score(cols = c("horizon")) |>
-  DT(, ris := round(relative_interval_score, 2)) |>
-  DT(, interval_score := NULL)
-setnames(
-  relative_ae_by_horizon, c("relative_interval_score", "ris"),
-  c("Absolute error of the median", "raem")
-)
-
-relative_summary <- relative_wis_by_horizon |>
-  merge(
-    relative_ae_by_horizon, by = c("horizon", "model")
-  ) |>
-  melt(
-    measure.vars = c("Weighted interval score", "Absolute error of the median")
-  )
-
-relative_median_wis_by_horizon <- relative_wis |>
-  DT(,
-     .(relative_interval_score = median(relative_interval_score)),
-     by = horizon
-  ) |>
-  DT(, ris := round(relative_interval_score, 2))
-
-relative_wis_thresholds <- relative_wis |>
-  DT(,
-    .(
-      better_than = sum(relative_interval_score < 1) / .N,
-      fifty_percent = sum(relative_interval_score < 1.5) / .N,
-      more_than_100_percent = sum(relative_interval_score > 2) / .N
-    )
-  ) |>
-  DT(, map(.SD, ~ round(. * 100, digits = 0))) |>
-  DT(, map(.SD, ~ paste0(., "%")))
-```
 
 ## Implementation {-}
 
@@ -497,21 +245,21 @@ The end of our study period was characterised by the gradual take-over of the BA
 In addition, ascertainment rates likely reduced over time in most locations due to reductions in routine testing, and reductions in test availability. Whilst both the reduced use of NPIs and testing generally occurred across nations our study period also marked an increase in the heterogeneity of the response to the COVID-19 pandemic with nations changing policy at different times and to different degrees.
 This is in contrast to the early COVID-19 pandemic response for which most nations took similar actions at similar times.
 
-We extracted forecasts starting from the 15th of January until the 19th of July 2022 for all countries covered by the European forecasting hub (nations of the European Union, the European Free Trade Agreement, and the United Kingdom, making `r locations` unique locations).
-In total `r nrow(metadata)` forecasts were made across all locations, with `r forecast_dates` unique forecast dates and `r models` independent forecast models (including the European hub baseline model).
-Of these models, `r length(global_models)` forecasted in at least 30 locations including our original submission  (referred to as `epiforecasts-EpiNow2` by the hub), and our surrogate model.
-Of the remaining models submitted `r length(local_models)` were submitted in only one location.
+We extracted forecasts starting from the 15th of January until the 19th of July 2022 for all countries covered by the European forecasting hub (nations of the European Union, the European Free Trade Agreement, and the United Kingdom, making 32 unique locations).
+In total 8846 forecasts were made across all locations, with 27 unique forecast dates and 32 independent forecast models (including the European hub baseline model).
+Of these models, 10 forecasted in at least 30 locations including our original submission  (referred to as `epiforecasts-EpiNow2` by the hub), and our surrogate model.
+Of the remaining models submitted 16 were submitted in only one location.
 Single location models were clustered in a few locations, particularly in Germany and Poland (likely due to the folding of the German/Poland forecasting hub into the European forecasting hub project [@Sherratt2022-ue]).
-Italy was also an outlier with `r single_locs_models_per_loc[location == "IT", n]` models that submitted nowhere else.
-`r nrow(partial_models)` models were submitted for between 3 and 30 locations and all these models varied the number of locations they submitted forecasts for over time, potentially indicating manual curation or models targeted at specific conditions.
+Italy was also an outlier with 4 models that submitted nowhere else.
+4 models were submitted for between 3 and 30 locations and all these models varied the number of locations they submitted forecasts for over time, potentially indicating manual curation or models targeted at specific conditions.
 
-Across all forecast dates and locations the minimum number of independent forecasts was `r models_per_loc_date[, min(n)]` with the maximum being `r models_per_loc_date[, max(n)]`. The median number of independent forecasts per location and forecast date was `r models_per_loc_date[, median(n)]`. All locations received forecasts from at least `r models_per_location[, min(n)]` models with the median number of forecast models per location being `r models_per_location[, median(n)]`. Coverage of forecast dates varied across submitted models with `r forecast_dates_by_models[n_per == 1, .N]` models submitting for all dates, `r forecast_dates_by_models[n_per >= 0.9, .N]` models submitting for at least 90% of dates, and `r forecast_dates_by_models[n_per < 0.50, .N]` models submitting for fewer than 50% of forecast dates. In general, there was no clear difference in forecast date coverage between models that submitted for all locations vs a small subset but models with partial coverage of locations all also had partial coverage of forecast dates.
+Across all forecast dates and locations the minimum number of independent forecasts was 4 with the maximum being 20. The median number of independent forecasts per location and forecast date was 10. All locations received forecasts from at least 10 models with the median number of forecast models per location being 12. Coverage of forecast dates varied across submitted models with 8 models submitting for all dates, 16 models submitting for at least 90% of dates, and 6 models submitting for fewer than 50% of forecast dates. In general, there was no clear difference in forecast date coverage between models that submitted for all locations vs a small subset but models with partial coverage of locations all also had partial coverage of forecast dates.
 
-`r nrow(anomalies)` observations, stratified by week and location, were defined to be anomalous within the study period by the European Forecast Hub [@EuroHub]. 
+63 observations, stratified by week and location, were defined to be anomalous within the study period by the European Forecast Hub [@EuroHub]. 
 Forecasts for these observations were excluded as were forecasts for forecast weeks where they were the latest available data.
-Data anomalies were not randomly distributed with some locations being particularly prone to data revisions including Lithuania (with `r anomalies[location == "LT", .N]` weeks with data anomalies), and Portugal (with `r anomalies[location == "PT", .N]` weeks with data anomalies).
+Data anomalies were not randomly distributed with some locations being particularly prone to data revisions including Lithuania (with 23 weeks with data anomalies), and Portugal (with 13 weeks with data anomalies).
 Anomalies were also not evenly distributed over time with a higher proportion occurring earlier in the study period (potentially due to our choice to extract data from the 1st of September which effectively truncated anomalies).
-`r per_excluded`% of forecasts were excluded across all horizons due to anomalies in the observed data. Aggregated across horizons `r exclusions$per`% of forecasts included at least one week with anomalous data. 
+7.3% of forecasts were excluded across all horizons due to anomalies in the observed data. Aggregated across horizons 10.3% of forecasts included at least one week with anomalous data. 
 
 ## Forecast evaluation {-}
 
@@ -525,31 +273,19 @@ In general, in the study period, the ensemble appeared to be better able to fore
 Both models forecast large reductions in incidence in Poland during May that did not occur whilst only the ensemble forecast spuriously forecast similar large reductions in Germany during June.
 In comparison to the ensemble model the surrogate model appeared less likely to place weight on unfeasibly large reductions in incidence during periods of declining incidence but on other hand was more likely to forecast continuing increases in incidence (for example in February in Slovakia and Poland).
 
-```{r vis-forecasts, fig.cap = "a.) Forecasts of notified test positive cases (per 10,000 population) by epidemiological week in Germany, Greece, Italy, Poland, Slovakia, and the United Kingdom, by forecast horizon (one and four weeks) for the surrogate model (orange) and forecast ensemble (green). 30\\%, 60\\%, and 90\\% prediction intervals are shown. The black line and points are the notified cases as of the date of data extraction rather than those available at the time. b.) A replicate of a.) but with incidence rates on the log scale. c.) Weighted interval scores at the one-week and four-week forecast horizon by epidemiological week in Germany, Greece, Italy, Poland, Slovakia, and the United Kingdom on the log scale.", out.width = "95%", fig.height = 12, fig.width = 18}
-p <- (
-  plot_forecast_custom(forecasts, log = FALSE) |
-  plot_forecast_custom(forecasts, log = TRUE) +
-  labs(y = "") |
-  plot_wis(wis, locs)
-) +
-  plot_layout(widths = c(2, 2, 1), guides = "collect") +
-  plot_annotation(tag_levels = "a") &
-  theme(
-    legend.position = "bottom", legend.margin = margin(),
-    legend.justification = "centre", axis.title = element_text(size = 16)
-  )
-suppressWarnings(print(p))
-```
+\begin{figure}
+\includegraphics[width=0.95\linewidth]{paper_files/figure-latex/vis-forecasts-1} \caption{a.) Forecasts of notified test positive cases (per 10,000 population) by epidemiological week in Germany, Greece, Italy, Poland, Slovakia, and the United Kingdom, by forecast horizon (one and four weeks) for the surrogate model (orange) and forecast ensemble (green). 30\%, 60\%, and 90\% prediction intervals are shown. The black line and points are the notified cases as of the date of data extraction rather than those available at the time. b.) A replicate of a.) but with incidence rates on the log scale. c.) Weighted interval scores at the one-week and four-week forecast horizon by epidemiological week in Germany, Greece, Italy, Poland, Slovakia, and the United Kingdom on the log scale.}(\#fig:vis-forecasts)
+\end{figure}
 
 ### Relative forecast evaluation {-}
 
-Evaluating the ensemble and surrogate models using the WIS across all locations and forecast dates we found that the mean relative performance of the surrogate model was `r relative_wis_by_horizon[horizon == 1, ris]` at the one-week horizon, `r relative_wis_by_horizon[horizon == 2, ris]` at the two-week horizon, `r relative_wis_by_horizon[horizon == 3, ris]` at the three-week horizon, and `r relative_wis_by_horizon[horizon == 4, ris]` at the four-week horizon, indicating that the ensemble forecast outperformed the surrogate forecast for all horizons by at least 25% and that the relative performance of the surrogate model degraded as the forecast horizon increased  (Figure \@ref(fig:assemble-eval) c).
+Evaluating the ensemble and surrogate models using the WIS across all locations and forecast dates we found that the mean relative performance of the surrogate model was 1.27 at the one-week horizon, 1.28 at the two-week horizon, 1.4 at the three-week horizon, and 1.69 at the four-week horizon, indicating that the ensemble forecast outperformed the surrogate forecast for all horizons by at least 25% and that the relative performance of the surrogate model degraded as the forecast horizon increased  (Figure \@ref(fig:assemble-eval) c).
 Much of this outperformance, especially at longer forecast horizons, was driven by a small subset of forecasts with relative performance having a heavy tail (Figure \@ref(fig:assemble-eval) a). 
-If we instead consider median relative performance (note this is not a proper scoring rule and should not be used to choose between models) we find that, relative to the ensemble, the surrogate scored `r relative_median_wis_by_horizon[horizon == 1, ris]` at the one week horizon, `r relative_median_wis_by_horizon[horizon == 2, ris]` at the two week horizon, `r relative_median_wis_by_horizon[horizon == 3, ris]` at the three week horizon, and `r relative_median_wis_by_horizon[horizon == 4, ris]` at the four week horizon.
+If we instead consider median relative performance (note this is not a proper scoring rule and should not be used to choose between models) we find that, relative to the ensemble, the surrogate scored 1.21 at the one week horizon, 1.14 at the two week horizon, 1.2 at the three week horizon, and 1.28 at the four week horizon.
 This would suggest that an increasingly skewed score distribution as the forecast horizon increased is responsible for the increase in the mean relative score (Figure \@ref(fig:assemble-eval) a).
-`r relative_wis_thresholds[, better_than]` of individual surrogate forecasts scored better than the comparable ensemble forecast, `r relative_wis_thresholds[, fifty_percent]` performed within 50% of the comparable ensemble forecast, and `r relative_wis_thresholds[, more_than_100_percent]` had a more than 100% worse WIS than the comparable ensemble forecast.
+31% of individual surrogate forecasts scored better than the comparable ensemble forecast, 68% performed within 50% of the comparable ensemble forecast, and 17% had a more than 100% worse WIS than the comparable ensemble forecast.
 
-If we consider only the median point forecast, using the absolute error, we see that the ensemble forecast again outperformed the surrogate forecast (rAE for the surrogate compared to the ensemble `r overall_ae_median[model == "Surrogate", Mean] / overall_ae_median[model == "Ensemble", Mean] |> round(digits = 2)`). When using the weighted interval score if we instead consider the median of the absolute error we see that the difference in performance has reduced indicating a similar skewed score distribution for point forecasts as for the whole predictive distribution (rAE `r overall_ae_median[model == "Surrogate", Median] / overall_ae_median[model == "Ensemble", Median] |> round(digits = 2)`). Across forecast horizons the same pattern of outperformance holds. However, the difference in relative performance was less than when the full probability distribution was accounted for with this becoming more marked as the forecast horizon increased (Figure \@ref(fig:assemble-eval) c).
+If we consider only the median point forecast, using the absolute error, we see that the ensemble forecast again outperformed the surrogate forecast (rAE for the surrogate compared to the ensemble 1.3409089). When using the weighted interval score if we instead consider the median of the absolute error we see that the difference in performance has reduced indicating a similar skewed score distribution for point forecasts as for the whole predictive distribution (rAE 1.1057023). Across forecast horizons the same pattern of outperformance holds. However, the difference in relative performance was less than when the full probability distribution was accounted for with this becoming more marked as the forecast horizon increased (Figure \@ref(fig:assemble-eval) c).
 
 The surrogate model's relative performance varied over time with substantially worse performance from January to March compared to later in the year across all forecast horizons based on changes in the relative score distribution and its summary statistics (Figure \@ref(fig:assemble-eval) b).
 The majority of the difference in performance appeared to be driven by a thicker right tail with this being a particular feature of forecasts at longer horizons. Forecast performance in March had a bimodal distribution at the four-week horizon with a substantial fraction of surrogate forecasts outperforming the ensemble and a substantial fraction substantially underperforming.
@@ -558,74 +294,16 @@ This variation in performance may have been linked to the BA.2 wave which peaked
 There was also substantial variation across forecast locations with the surrogate performing relatively well in some locations at some forecast horizons, for example, the four-week horizon in the United Kingdom, and badly in others, for example, the four-week forecast in Switzerland (Figure \@ref(fig:assemble-eval) c).
 In general, across locations, as observed overall, relative forecast performance degraded across horizons with a heavier right tail at longer horizons. Some locations showed less of this behaviour, for example, Spain, and in some, it was very dominant, for example, Switzerland. 
 
-```{r make-rwis-plots}
-plot_rwis_horizon <- relative_wis |>
-  copy() |>
-  DT(, horizon := fct_rev(as.factor(horizon))) |>
-  plot_relative_wis(
-    y = horizon, fill = horizon,
-  ) +
-  scale_fill_brewer(palette = "Dark2") +
-  scale_color_brewer(palette = "Dark2") +
-  labs(y = "Forecast horizon (weeks)") +
-  guides(fill = guide_none(), point_color = guide_none(), point = guide_none())
 
-plot_rwis_location <- relative_wis |>
-  DT(horizon == 1 | horizon == 4) |>
-  plot_relative_wis(
-    y = location_name, fill = as.factor(horizon), alpha = 0.3,
-    jittered_points = FALSE, quantiles = NULL,  point_color = horizon
-  ) +
-  scale_fill_brewer(palette = "Dark2") +
-  scale_color_brewer(palette = "Dark2") +
-  labs(
-    y = "Forecast location", fill = "Forecast horizon (weeks)",
-    point_color = "Forecast horizon (weeks)"
-  )
 
-plot_rwis_by_month <- relative_wis |>
-  DT(horizon == 1 | horizon == 4) |>
-  DT(, target_month := month(target_end_date, label = TRUE)) |>
-  DT(, target_month := fct_rev(target_month)) |>
-  plot_relative_wis(
-    y = target_month, fill = as.factor(horizon), alpha = 0.3,
-    jittered_points = TRUE, quantiles = NULL
-  ) +
-  scale_fill_brewer(palette = "Dark2") +
-  labs(y = "Target forecast month", fill = "Forecast horizon (weeks)") +
-  guides(fill = guide_none())
-```
-
-```{r assemble-eval, fig.height = 12, fig.width = 12, out.width = "95%", fig.cap = "Relative weighted interval score by location, horizon, and forecast date for the surrogate forecast model compared to the ensemble forecast model on the log scale. a.) The density of the relative score by horizon. Horizontal black lines give the 5\\%, 35\\%, 65\\%, and 95\\% quantiles. b.) The density of the relative score by month for a given forecast horizon stratified by the one and four-week forecast horizon. c.) The average relative weighted interval score and absolute error for the surrogate model compared to the ensemble forecast by forecast horizon. d.) The density of the relative score by forecast location stratified by the one and four-week forecast horizon. The dashed line on all plots indicates when the ensemble forecast is equivalent to the surrogate forecast. The vertical black lines on the y-axis give individual relative scores."}
-p <- (
-  (
-    (
-      plot_rwis_horizon / plot_rwis_by_month
-    )  +
-    plot_layout(heights = c(4, 5), guides = "collect")
-  ) |
-  (
-    (
-      plot_relative_summary(relative_summary) +
-      plot_layout(guides = "keep")
-    ) +
-    plot_rwis_location +
-    plot_layout(heights = c(1, 7), guides = "collect")
-  )
-) +
-  plot_layout(guides = "collect", widths = c(1, 1)) +
-  plot_annotation(tag_levels = "a") &
-  theme(
-    legend.position = "bottom", legend.margin = margin(),
-    legend.justification = "centre", axis.title = element_text(size = 16)
-  )
-suppressWarnings(print(p))
-```
+\begin{figure}
+\includegraphics[width=0.95\linewidth]{paper_files/figure-latex/assemble-eval-1} \caption{Relative weighted interval score by location, horizon, and forecast date for the surrogate forecast model compared to the ensemble forecast model on the log scale. a.) The density of the relative score by horizon. Horizontal black lines give the 5\%, 35\%, 65\%, and 95\% quantiles. b.) The density of the relative score by month for a given forecast horizon stratified by the one and four-week forecast horizon. c.) The average relative weighted interval score and absolute error for the surrogate model compared to the ensemble forecast by forecast horizon. d.) The density of the relative score by forecast location stratified by the one and four-week forecast horizon. The dashed line on all plots indicates when the ensemble forecast is equivalent to the surrogate forecast. The vertical black lines on the y-axis give individual relative scores.}(\#fig:assemble-eval)
+\end{figure}
 
 ### Forecast calibration {-}
 
-Overall the surrogate model was relatively well calibrated at the 30%, 60% and 90% prediction interval, though with a tendency to over cover, with empirical coverage of `r overall_coverage[range %in% "30% interval", Surrogate]`%, `r overall_coverage[range %in% "60% interval", Surrogate]`%, `r overall_coverage[range %in% "90% interval", Surrogate]`% respectively.
-The ensemble model was less well calibrated, with a tendency to under cover with empirical coverage of `r overall_coverage[range %in% "30% interval", Ensemble]`%, `r overall_coverage[range %in% "60% interval", Ensemble]`%, `r overall_coverage[range %in% "90% interval", Ensemble]`% respectively (Figure \@ref(fig:plot-coverage) a).
+Overall the surrogate model was relatively well calibrated at the 30%, 60% and 90% prediction interval, though with a tendency to over cover, with empirical coverage of 30.5%, 62.5%, 92.3% respectively.
+The ensemble model was less well calibrated, with a tendency to under cover with empirical coverage of 24.8%, 51%, 79% respectively (Figure \@ref(fig:plot-coverage) a).
 When stratified by forecast horizon the ensemble forecast was best calibrated at the one-week forecast horizon, and then became progressively less well calibrated as the forecast horizon increased (Figure \@ref(fig:plot-coverage) a). 
 In comparison, the surrogate forecast was less well calibrated than the ensemble forecast at the one-week forecast horizon with a tendency to have a larger empirical coverage than required  (Figure \@ref(fig:plot-coverage) a).
 At longer horizons and narrower prediction intervals, the surrogate forecast became better calibrated though with a tendency to under cover.
@@ -642,28 +320,9 @@ This is true across forecast horizons but the magnitude of the difference increa
 Calculating the bias of the forecasts from each model we see that the (Figure \@ref(fig:plot-coverage) d) ensemble forecast is initially biased towards underprediction but this bias reduces as the forecast horizon increases.
 In comparison, the surrogate forecast model is biased towards overprediction for all forecast horizons with the magnitude of this bias appearing to increase linearly with the forecast horizon.
 
-```{r plot-coverage, fig.height = 12, fig.width = 18, out.width = "95%", fig.cap = "a.) Empirical coverage of the surrogate (orange) and ensemble (green) forecasts at the 90\\%, 60\\%, and 30\\% prediction intervals stratified by forecast horizon. Ideally, a well-calibrated forecast should have empirical coverage for a given prediction interval that equals the nominal level of the interval (i.e., 30\\%, 60\\% and 90\\%, respectively). b.) Empirical coverage by quantile for both the surrogate and ensemble forecasts. A well-calibrated forecast should have empirical quantiles that match the theoretical ones. The green area of this figure corresponds to conservative forecasts. c.) Median relative weighted interval score by quantile and forecast horizon for the surrogate forecast compared to the ensemble forecast. d.) Bias of the ensemble and surrogate forecasts stratified by horizon."}
-p <- (
-  (
-    (
-      plot_coverage_range(coverage, ranges)
-    )
-  ) | (
-    plot_coverage_quantiles(scores) + (
-      plot_rel_score_by_quantile(relative_interval_score) +
-      plot_bias(summary_performance)
-    ) +
-    plot_layout(heights = c(2, 1), guides = "collect")
-  )
-) +
-  plot_layout(widths = c(1, 2), guides = "collect") +
-  plot_annotation(tag_levels = "a") &
-  theme(
-    legend.position = "bottom", legend.margin = margin(),
-    legend.justification = "centre", axis.title = element_text(size = 16)
-  )
-suppressWarnings(print(p))
-```
+\begin{figure}
+\includegraphics[width=0.95\linewidth]{paper_files/figure-latex/plot-coverage-1} \caption{a.) Empirical coverage of the surrogate (orange) and ensemble (green) forecasts at the 90\%, 60\%, and 30\% prediction intervals stratified by forecast horizon. Ideally, a well-calibrated forecast should have empirical coverage for a given prediction interval that equals the nominal level of the interval (i.e., 30\%, 60\% and 90\%, respectively). b.) Empirical coverage by quantile for both the surrogate and ensemble forecasts. A well-calibrated forecast should have empirical quantiles that match the theoretical ones. The green area of this figure corresponds to conservative forecasts. c.) Median relative weighted interval score by quantile and forecast horizon for the surrogate forecast compared to the ensemble forecast. d.) Bias of the ensemble and surrogate forecasts stratified by horizon.}(\#fig:plot-coverage)
+\end{figure}
 
 # Discussion {-}
 
