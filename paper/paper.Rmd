@@ -256,7 +256,7 @@ Typically, the ensemble forecast produced each week comprises at least 3 indepen
 Observed data are available and updated daily, and most submitted forecasts use this dataset, along with potentially other sources of real-time information, to produce forecasts.
 Here, we focus on reported cases and primarily on the European Forecast Hub but our observations hold, in our view, across COVID-19 Forecast Hubs and to a lesser degree targets.
 We focus on reported cases as these represent the most common forecast target for COVID-19 forecast models [@Nixon2022-zv], they are often of the most direct interest due to being a leading indicator, and they are generally the most challenging to predict.
-In general, 5 main classes of forecast models are submitted [@Bracher2022-ug; @Cramer2022-sp], statistical forecasting models such as ARIMA models [@REF], mechanistic forecasting models based on the compartmental modelling framework and its generalisations [@REF], semi-mechanistic approaches that blend both of these approaches [@REF; @Bosse2022-hm], agent-based simulation models [@Rakowski2010-ft; @Adamik2020-if], and human insight based forecast models that may also include elements of other methods [@Bosse2022-hm].
+In general, 5 main classes of forecast models are submitted [@Bracher2022-ug; @Cramer2022-sp], statistical forecasting models such as ARIMA models, mechanistic forecasting models based on the compartmental modelling framework and its generalisations [@Srivastava2020-qv; @Li2021-cj], semi-mechanistic approaches that blend both of these approaches [@Castro2021-lj; @Bosse2022-hm], agent-based simulation models [@Rakowski2010-jn; @Adamik2020-if], and human insight based forecast models that may also include elements of other methods [@Karlen2020-pt; @Bosse2022-hm].
 Real-time evaluation has shown that each of these classes of models may perform well depending on the context and specific implementation of the forecast model [@Bosse2022-hm].
 
 We have contributed a range of forecasts to these forecast collaborations, generally focused on semi-mechanistic statistical methods and human insight-based forecasts.
@@ -718,7 +718,7 @@ In September 2022, GitHub announced support for hosted GitHub Action runners wit
 One potential research area is to explore forecasting methods that can be used with a range of computing resources though this would require extensive evaluation and documentation to make it clear to users what the trade-offs between compute usage and forecast performance are.
 More work is needed to understand the best practice treatment of data revisions when evaluating forecasts and the potential bias these may cause.
 Lastly, here we have only explored a surrogate for an ensemble for a single disease, a limited set of locations, and a single target (incident cases), meaning our findings are difficult to generalise.
-Follow-up work should explore whether this behaviour holds across diseases, locations, and epidemiological targets where the behaviour of ensembles is notably different [@REF].
+Follow-up work should explore whether this behaviour holds across diseases, locations, and epidemiological targets where the behaviour of ensembles is notably different.
 However, this work is limited by the lack of large-scale forecast ensembling projects despite them showing obvious promise to improve the forecasts available to stakeholders.
 
 ## Conclusions {-}
