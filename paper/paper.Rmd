@@ -271,10 +271,9 @@ assumptions <- data.table(
   Observation = c("1, and 2", "-", "3 and 4", "2, and 5")
 )
 knitr::kables(
-  list(observations, assumptions),
-  caption = "(\\#tab:observations)"
-) |>
-  print()
+  list(knitr::kable(observations), knitr::kable(assumptions)),
+  caption = "(\\#tab:observations) Observations on the relative performance of the Forecast Hub ensemble compared to our forecast submissions and assumptions/simplifications based on these observations." # nolint
+)
 ```
 
 To understand the behaviour of the Forecast Hub ensembles we need to first explore the structure of the COVID-19 Forecast Hubs [@Cramer2022-sp; @Bracher2021-wk; @Sherratt2022-ue].
@@ -300,7 +299,7 @@ We hypothesised that this may have been driven by including additional informati
 Unlike our epidemiologically motivated forecast submissions, the hub ensemble forecasts were typically robust to daily reporting artefacts. They also demonstrated some ability to forecast future changes in trends that were not present in the observed data similarly to our human insight forecasts indicating the likely inclusion of either human insight, or assumptions about future interventions. 
 In comparison to our submitted forecasts, the ensemble forecasts were less reactive to changes in trend such as from stable or reducing case incidence to increasing incidence. On the other hand, this also meant that the ensemble was less likely to adopt short-term changes in incidence and hence produced better long-term forecasts. Finally, the ensemble forecast tended to produce sharper forecasts and have a tendency toward under vs over predicting. There is some suggestion that this was partially driven by the ensemble forecast having non-exponential uncertainty, unlike many infectious disease forecasting models
 
-Based on these insights, here we define a model with similar, but simplified, epidemiological characteristics to our previous approaches to model-based forecasting [@Bosse2022-hm] to produce an ensemble-like performance without sacrificing interpretability.
+Based on these insights (summarised in Table \@ref(tab:observations)), here we define a model with similar, but simplified, epidemiological characteristics to our previous approaches to model-based forecasting [@Bosse2022-hm] to produce an ensemble-like performance without sacrificing interpretability.
 The first simplification we make is to model only weekly data, rather than using daily data and then aggregating. This mitigates the impact of daily reporting artefacts. It also serves to increase the auto-correlation of the forecasting model as there is an increased lag before changes in daily observations gain significant weight in the model.
 This leads to the observed ensemble behaviour of being relatively auto-correlated and resistant to short-term changes in trend.
 
@@ -316,7 +315,7 @@ This reflects a simplified interpretation of how the ensemble appears to react t
 
 The only observation for which we do not make an adaptation is the apparent sharpness of the ensemble compared to our prior forecasting models choosing instead to make use of a negative binomial observation model allowing the inclusion of overdispersion.
 This choice is motivated by our belief that the underlying transmission process is an exponential discrete one and therefore a count error model with a log link function, where variance is linked to the mean, is a sensible choice. 
-We suggest that part of the reason the hub ensembles exhibit this behaviour is due to the penalisation of overprediction compared to underprediction caused by the use of a generalised form of absolute error for the majority of forecast evaluations [@bracherEvaluatingEpidemicForecasts2021]. 
+We suggest that part of the reason the hub ensembles exhibit this behaviour is due to the penalisation of overprediction compared to underprediction caused by the use of a generalised form of absolute error for the majority of forecast evaluations [@bracherEvaluatingEpidemicForecasts2021]. Our derived set of assumptions and simplifications is summarised in Table \@ref(tab:observations).
 
 ### Definition {-}
 

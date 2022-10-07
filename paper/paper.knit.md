@@ -103,9 +103,35 @@ Submitted forecasts and target observations are available from the European Fore
 ```
 #> \begin{table}
 #> \caption{(\#tab:unnamed-chunk-2)(\#tab:observations)}
-#> 1:5
-#> c("Robust to daily reporting artefacts", "Some ability to forecast future trend changes", "Less reactive to apparent observed changes in trend", "Sharper forecasts", "A tendency towards under prediction")c("Reported cases can be modelled using weekly data and a generative process discretised by week", "Reported cases can be modelled as if they represented infections", "The growth rate of infections can be represented as an auto-regressive process with an order of 1 week", "Unobserved interventions and more general changes in transmission towards a stable state can be represented using a multiplicative decay parameter")
-#> c("1, and 2", "-", "3 and 4", "2, and 5")
+#> 
+#> \begin{tabular}{r|l}
+#> \hline
+#> No. & Observation\\
+#> \hline
+#> 1 & Robust to daily reporting artefacts\\
+#> \hline
+#> 2 & Some ability to forecast future trend changes\\
+#> \hline
+#> 3 & Less reactive to apparent observed changes in trend\\
+#> \hline
+#> 4 & Sharper forecasts\\
+#> \hline
+#> 5 & A tendency towards under prediction\\
+#> \hline
+#> \end{tabular}
+#> \begin{tabular}{l|l}
+#> \hline
+#> Assumption & Observation\\
+#> \hline
+#> Reported cases can be modelled using weekly data and a generative process discretised by week & 1, and 2\\
+#> \hline
+#> Reported cases can be modelled as if they represented infections & -\\
+#> \hline
+#> The growth rate of infections can be represented as an auto-regressive process with an order of 1 week & 3 and 4\\
+#> \hline
+#> Unobserved interventions and more general changes in transmission towards a stable state can be represented using a multiplicative decay parameter & 2, and 5\\
+#> \hline
+#> \end{tabular}
 #> \end{table}
 ```
 
