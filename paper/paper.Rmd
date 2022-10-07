@@ -68,7 +68,7 @@ In addition to this, we seek to provide a simple, and robust, forecasting system
 
 In climate forecasting [@Castelletti2012-bs; @Edwards2021-lv; @Williamson2013-qx], as well as in other fields such as astrophysics [@Vernon2014-ov], emulation approaches have been used to circumvent resource requirement issues for complex models by training a simplified model, usually, a non-parametric statistical model, to replicate the behaviour of either the entire model or sub-components.
 However, within epidemiological modelling, we often want to use our models for applications other than forecasting (such as learning about underlying disease dynamics or developing scenarios) and, for ensemble models, in particular, have fewer insights beyond forecast performance on which to base our mechanistic assumptions.
-This means that, whilst non-parametric emulation has utility for allowing rapid exploration of the parameter space for epidemiological models [@Iskauskas2022-fz; @charles2022-ds], it may be less suitable for use in replicating epidemiological ensemble forecasts than the surrogate assumption driven framework we propose. 
+This means that, whilst non-parametric emulation has utility for allowing rapid exploration of the parameter space for epidemiological models [@Iskauskas2022-fz; @Charles2022-ds], it may be less suitable for use in replicating epidemiological ensemble forecasts than the surrogate assumption driven framework we propose. 
 
 In this study, we evaluate an initial attempt at a surrogate model to replicate the observed behaviour of current multi-team forecast ensembles based on a set of clear assumptions.
 We submitted this model to the European Forecast Hub and here we evaluate its performance relative to the Hub ensemble.
@@ -256,7 +256,7 @@ Typically, the ensemble forecast produced each week comprises at least 3 indepen
 Observed data are available and updated daily, and most submitted forecasts use this dataset, along with potentially other sources of real-time information, to produce forecasts.
 Here, we focus on reported cases and primarily on the European Forecast Hub but our observations hold, in our view, across COVID-19 Forecast Hubs and to a lesser degree targets.
 We focus on reported cases as these represent the most common forecast target for COVID-19 forecast models [@Nixon2022-zv], they are often of the most direct interest due to being a leading indicator, and they are generally the most challenging to predict.
-In general, 5 main classes of forecast models are submitted [@Bracher2022-ug; @Cramer2022-sp], statistical forecasting models such as ARIMA models [@REF], mechanistic forecasting models based on the compartmental modelling framework and its generalisations [@REF], semi-mechanistic approaches that blend both of these approaches [@REF; @Bosse2022-hm], agent-based simulation models [@Rakowski2010-ft; @Adam2020-if], and human insight based forecast models that may also include elements of other methods [@Bosse2022-hm].
+In general, 5 main classes of forecast models are submitted [@Bracher2022-ug; @Cramer2022-sp], statistical forecasting models such as ARIMA models [@REF], mechanistic forecasting models based on the compartmental modelling framework and its generalisations [@REF], semi-mechanistic approaches that blend both of these approaches [@REF; @Bosse2022-hm], agent-based simulation models [@Rakowski2010-ft; @Adamik2020-if], and human insight based forecast models that may also include elements of other methods [@Bosse2022-hm].
 Real-time evaluation has shown that each of these classes of models may perform well depending on the context and specific implementation of the forecast model [@Bosse2022-hm].
 
 We have contributed a range of forecasts to these forecast collaborations, generally focused on semi-mechanistic statistical methods and human insight-based forecasts.
@@ -301,8 +301,8 @@ We assume a negative binomial observation model with overdispersion $\phi$ for r
   \lambda_t &= C_{t-1} e^{r_t},\ t > 0  \\
   C_{t} \mid \lambda_{t} &\sim \text{NB}\left(\lambda_t, \phi\right)
 \end{align*}
-where the mean and variance of the negative binomial are defined as \[ \mathbb{E}[n] = \mu \ \ \
-\text{ and } \ \ \ \text{Var}[n] = \mu + \frac{\mu^2}{\phi}. \]
+where the mean and variance of the negative binomial are defined as \[ \mathbb{E}[n] = \lambda_t \ \ \
+\text{ and } \ \ \ \text{Var}[n] = \lambda_t + \frac{\lambda_t^2}{\phi}. \]
 Here $r_t$ can be interpreted as the weekly growth rate. $r_t$ is then modelled as a piecewise constant differenced AR(1) process modified such that the dependence of $r_{t-1}$ is multiplied by a decay factor ($\xi_{+,-}$) that varies dynamically according to the sign of $r_{t-1}$.
 This assumes that the growth rate is non-stationary with a trend that is independent of the current growth rate (the differenced AR(1) process), the additional decay factor encodes the belief that larger absolute growth rates will tend more quickly towards no growth and that this process may work differently for positive or negative growth rates.
 This process can be defined as follows, 
