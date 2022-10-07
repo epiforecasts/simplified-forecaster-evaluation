@@ -249,33 +249,6 @@ forecast_dates_by_models <- metadata |>
 
 ### Motivation {-}
 
-```{r}
-observations <- data.table(
-  No. = 1:5,
-  Observation = c(
-    "Robust to daily reporting artefacts",
-    "Some ability to forecast future trend changes",
-    "Less reactive to apparent observed changes in trend",
-    "Sharper forecasts",
-    "A tendency towards under prediction"
-  )
-)
-
-assumptions <- data.table(
-  Assumption = c(
-    "Reported cases can be modelled using weekly data and a generative process discretised by week", # nolint
-    "Reported cases can be modelled as if they represented infections",
-    "The growth rate of infections can be represented as an auto-regressive process with an order of 1 week", # nolint
-    "Unobserved interventions and more general changes in transmission towards a stable state can be represented using a multiplicative decay parameter" # nolint
-  ),
-  Observation = c("1, and 2", "-", "3 and 4", "2, and 5")
-)
-knitr::kables(
-  list(knitr::kable(observations), knitr::kable(assumptions)),
-  caption = "(\\#tab:observations) Observations on the relative performance of the Forecast Hub ensemble compared to our forecast submissions and assumptions/simplifications based on these observations." # nolint
-)
-```
-
 To understand the behaviour of the Forecast Hub ensembles we need to first explore the structure of the COVID-19 Forecast Hubs [@Cramer2022-sp; @Bracher2021-wk; @Sherratt2022-ue].
 These collaborations share a similar design with a central team running the hub, vetting forecasts, and producing the ensemble forecast as well as teams of independent forecast contributors who design their forecast models and then use them to produce a weekly forecast that they then submit to the central hub team. 
 Each hub targets a range of metrics including test-positive reported cases, reported deaths, and hospitalisations has a specific geographic focus and asks for weekly forecasts (using epidemiological weeks i.e. Sunday to Saturday) over a time horizon of a few weeks.
@@ -316,6 +289,33 @@ This reflects a simplified interpretation of how the ensemble appears to react t
 The only observation for which we do not make an adaptation is the apparent sharpness of the ensemble compared to our prior forecasting models choosing instead to make use of a negative binomial observation model allowing the inclusion of overdispersion.
 This choice is motivated by our belief that the underlying transmission process is an exponential discrete one and therefore a count error model with a log link function, where variance is linked to the mean, is a sensible choice. 
 We suggest that part of the reason the hub ensembles exhibit this behaviour is due to the penalisation of overprediction compared to underprediction caused by the use of a generalised form of absolute error for the majority of forecast evaluations [@bracherEvaluatingEpidemicForecasts2021]. Our derived set of assumptions and simplifications is summarised in Table \@ref(tab:observations).
+
+```{r}
+observations <- data.table(
+  No. = 1:5,
+  Observation = c(
+    "Robust to daily reporting artefacts",
+    "Some ability to forecast future trend changes",
+    "Less reactive to apparent observed changes in trend",
+    "Sharper forecasts",
+    "A tendency towards under prediction"
+  )
+)
+
+assumptions <- data.table(
+  Assumption = c(
+    "Reported cases can be modelled using weekly data and a generative process discretised by week", # nolint
+    "Reported cases can be modelled as if they represented infections",
+    "The growth rate of infections can be represented as an auto-regressive process with an order of 1 week", # nolint
+    "Unobserved interventions and more general changes in transmission towards a stable state can be represented using a multiplicative decay parameter" # nolint
+  ),
+  Observation = c("1, and 2", "-", "3 and 4", "2, and 5")
+)
+knitr::kables(
+  list(knitr::kable(observations), knitr::kable(assumptions)),
+  caption = "(\\#tab:observations) Observations on the relative performance of the Forecast Hub ensemble compared to our forecast submissions and assumptions/simplifications based on these observations." # nolint
+)
+```
 
 ### Definition {-}
 
