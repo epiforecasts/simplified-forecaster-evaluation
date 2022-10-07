@@ -50,7 +50,8 @@ plot_forecast_custom <- function(forecasts, log) {
     guides(
       fill = guide_none(), fill_ramp = guide_none(), col = guide_none()
     ) +
-    theme(strip.text.y = element_blank())
+    theme(strip.text.y = element_blank()) +
+    scale_x_date(date_breaks = "1 month", date_labels = "%b")
 }
 
 plot_wis <- function(wis, locs) {
@@ -70,6 +71,7 @@ plot_wis <- function(wis, locs) {
     scale_y_continuous(
       labels = ~ scales::comma(.x, accuracy = 1), trans = "log"
     ) +
+    scale_x_date(date_breaks = "1 month", date_labels = "%b") +
     facet_grid(rows = vars(location_name), scales = "free_y") +
     labs(
       x = "Date", y = "Weighted interval score",
