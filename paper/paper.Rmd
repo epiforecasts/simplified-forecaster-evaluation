@@ -466,7 +466,7 @@ relative_summary <- relative_wis_by_horizon |>
     relative_ae_by_horizon, by = c("horizon", "model")
   ) |>
   melt(
-    measure.vars = c("Weighted interval score", "Absolute error of the median")
+    measure.vars = c("Weighted interval score", "Absolute error")
   )
 
 relative_median_wis_by_horizon <- relative_wis |>
