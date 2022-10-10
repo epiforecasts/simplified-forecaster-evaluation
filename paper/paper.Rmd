@@ -94,6 +94,8 @@ library(ggridges)
 library(ggh4x)
 library(patchwork)
 library(scales)
+library(knitr)
+library(kableExtra)
 library(here)
 ```
 
@@ -286,9 +288,12 @@ observations <- data.table(
   )
 )
 
-knitr::kable(observations,
-  caption = "(\\#tab:observations) Observations on the relative performance of the Forecast Hub ensemble compared to our forecast submissions." # nolint
-)
+observations |>
+  kable(
+  caption = "(\\#tab:observations) Observations on the relative performance of the Forecast Hub ensemble compared to our forecast submissions.", # nolint
+  booktabs = TRUE
+  ) |>
+  kable_styling()
 ```
 
 ## Model {-}
@@ -325,9 +330,13 @@ assumptions <- data.table(
   ),
   Observation = c("1, and 2", "-", "3 and 4", "2, and 5")
 )
-knitr::kable(assumptions,
-  caption = "(\\#tab:assumptions) Assumptions/simplifications based on observations of the relative performance of Forecast Hub ensembles compared to our forecast submissions." # nolint
-)
+
+assumptions |>
+  kable(
+  caption = "(\\#tab:assumptions) Assumptions/simplifications based on observations of the relative performance of Forecast Hub ensembles compared to our forecast submissions.", # nolint
+  booktabs = TRUE
+  ) |>
+  kable_styling()
 ```
 
 ### Definition {-}
@@ -525,7 +534,7 @@ Data anomalies were not randomly distributed with some locations being particula
 Anomalies were also not evenly distributed over time with a higher proportion occurring earlier in the study period (potentially due to our choice to extract data from the 1st of September which effectively truncated anomalies).
 `r per_excluded`% of forecasts were excluded across all horizons due to anomalies in the observed data. Aggregated across horizons `r exclusions$per`% of forecasts included at least one week with anomalous data. 
 
-```{r vis-forecasts, fig.cap = "a.) Forecasts of notified test positive cases (per 10,000 population) by epidemiological week in Germany, Greece, Italy, Poland, Slovakia, and the United Kingdom, by forecast horizon (one and four weeks) for the surrogate model (orange) and forecast ensemble (green). 30\\%, 60\\%, and 90\\% prediction intervals are shown. The black line and points are the notified cases as of the date of data extraction rather than those available at the time. b.) A replicate of a.) but with incidence rates on the log scale. c.) Weighted interval scores at the one-week and four-week forecast horizon by epidemiological week in Germany, Greece, Italy, Poland, Slovakia, and the United Kingdom on the log scale.", out.width = "95%", fig.height = 8, fig.width = 12}
+```{r vis-forecasts, fig.cap = "a.) Forecasts of notified test positive cases (per 10,000 population) by epidemiological week in Germany, Greece, Italy, Poland, Slovakia, and the United Kingdom, by forecast horizon (one and four weeks) for the surrogate model (orange) and forecast ensemble (green). 30\\%, 60\\%, and 90\\% prediction intervals are shown. The black line and points are the notified cases as of the date of data extraction rather than those available at the time. b.) A replicate of a.) but with incidence rates on the log scale. c.) Weighted interval scores at the one-week and four-week forecast horizon by epidemiological week in Germany, Greece, Italy, Poland, Slovakia, and the United Kingdom on the log scale.", out.width = "95%", fig.height = 10, fig.width = 10}
 p <- (
   plot_forecast_custom(forecasts, log = FALSE) |
   plot_forecast_custom(forecasts, log = TRUE) +
@@ -536,7 +545,7 @@ p <- (
   plot_annotation(tag_levels = "a") &
   theme(
     legend.position = "bottom", legend.margin = margin(),
-    legend.justification = "centre", axis.title = element_text(size = 16)
+    legend.justification = "centre"
   )
 suppressWarnings(print(p))
 ```
@@ -608,7 +617,7 @@ plot_rwis_by_month <- relative_wis |>
   guides(fill = guide_none())
 ```
 
-```{r assemble-eval, fig.height = 10, fig.width = 10, out.width = "95%", fig.cap = "Relative weighted interval score by location, horizon, and forecast date for the surrogate forecast model compared to the ensemble forecast model on the log scale. a.) The density of the relative score by horizon. Horizontal black lines give the 5\\%, 35\\%, 65\\%, and 95\\% quantiles. b.) The density of the relative score by month for a given forecast horizon stratified by the one and four-week forecast horizon. c.) The average relative weighted interval score and absolute error for the surrogate model compared to the ensemble forecast by forecast horizon. d.) The density of the relative score by forecast location stratified by the one and four-week forecast horizon. The dashed line on all plots indicates when the ensemble forecast is equivalent to the surrogate forecast. The vertical black lines on the y-axis give individual relative scores."}
+```{r assemble-eval, fig.height = 8, fig.width = 8, out.width = "95%", fig.cap = "Relative weighted interval score by location, horizon, and forecast date for the surrogate forecast model compared to the ensemble forecast model on the log scale. a.) The density of the relative score by horizon. Horizontal black lines give the 5\\%, 35\\%, 65\\%, and 95\\% quantiles. b.) The density of the relative score by month for a given forecast horizon stratified by the one and four-week forecast horizon. c.) The average relative weighted interval score and absolute error for the surrogate model compared to the ensemble forecast by forecast horizon. d.) The density of the relative score by forecast location stratified by the one and four-week forecast horizon. The dashed line on all plots indicates when the ensemble forecast is equivalent to the surrogate forecast. The vertical black lines on the y-axis give individual relative scores."}
 p <- (
   (
     (
@@ -629,7 +638,7 @@ p <- (
   plot_annotation(tag_levels = "a") &
   theme(
     legend.position = "bottom", legend.margin = margin(),
-    legend.justification = "centre", axis.title = element_text(size = 16)
+    legend.justification = "centre"
   )
 suppressWarnings(print(p))
 ```
@@ -672,7 +681,7 @@ p <- (
   plot_annotation(tag_levels = "a") &
   theme(
     legend.position = "bottom", legend.margin = margin(),
-    legend.justification = "centre", axis.title = element_text(size = 16)
+    legend.justification = "centre"
   )
 suppressWarnings(print(p))
 ```

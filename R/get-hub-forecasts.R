@@ -85,7 +85,7 @@ download_forecast <- function(repo, path, branch, ...) {
 
 # Extract forecast model names from queried path
 # This function relies on forecasts being at 1 folder
-# deep in a hub repository and so is not fully robust to 
+# deep in a hub repository and so is not fully robust to
 # organisational changes
 extract_forecast_models <- function(paths) {
   paths <- paths[,
