@@ -20,10 +20,11 @@ plot_coverage_range <- function(coverage, ranges) {
       x = horizon, y = coverage, colour = model,
       group = interaction(range, model)
     ) +
-    geom_line() +
-    geom_point() +
+    geom_line(show.legend = FALSE) +
+    geom_point(show.legend = FALSE) +
     geom_hline(
-      data = hlines, aes(yintercept = nominal, x = NULL), linetype = "dashed"
+      data = hlines, aes(yintercept = nominal, x = NULL), linetype = "dashed",
+      show.legend = FALSE
     ) +
     scale_colour_brewer(palette = "Dark2") +
     scale_y_continuous(labels = percent) +
