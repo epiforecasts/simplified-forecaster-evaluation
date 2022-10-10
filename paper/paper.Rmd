@@ -286,7 +286,7 @@ observations <- data.table(
   )
 )
 
-knitr::kable(observations
+knitr::kable(observations,
   caption = "(\\#tab:observations) Observations on the relative performance of the Forecast Hub ensemble compared to our forecast submissions." # nolint
 )
 ```
