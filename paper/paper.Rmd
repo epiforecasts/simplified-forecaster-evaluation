@@ -545,7 +545,7 @@ p <- (
   plot_annotation(tag_levels = "a") &
   theme(
     legend.position = "bottom", legend.margin = margin(),
-    legend.justification = "centre"
+    legend.justification = "centre", legend.justification = "vertical"
   )
 suppressWarnings(print(p))
 ```
@@ -638,7 +638,7 @@ p <- (
   plot_annotation(tag_levels = "a") &
   theme(
     legend.position = "bottom", legend.margin = margin(),
-    legend.justification = "centre"
+    legend.justification = "centre", legend.justification = "vertical"
   )
 suppressWarnings(print(p))
 ```
@@ -681,7 +681,7 @@ p <- (
   plot_annotation(tag_levels = "a") &
   theme(
     legend.position = "bottom", legend.margin = margin(),
-    legend.justification = "centre"
+    legend.justification = "centre", legend.justification = "vertical"
   )
 suppressWarnings(print(p))
 ```
