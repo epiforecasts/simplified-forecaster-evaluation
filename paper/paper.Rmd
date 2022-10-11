@@ -20,9 +20,9 @@ affiliation:
   - code: 1
     address: London School of Hygiene and Tropical Medicine, London, UK
   - code: 2
-    address: Chair of Statistics and Econometrics, Karlsruhe Institute of Technology (KIT), Karlsruhe, Germany
+    address: Chair of Statistical Methods and Econometrics, Karlsruhe Institute of Technology (KIT), Karlsruhe, Germany
 abstract: > 
-  Multi-model and multi-team ensemble forecasts have become widely used to generate reliable short-term predictions of infectious disease spread. Notably, various public health agencies have used them to leverage academic disease modelling during the COVID-19 pandemic. However, ensemble forecasts are difficult to interpret and require extensive effort from numerous participating groups as well as a coordination team. In other fields, resource usage has been reduced by training simplified models that reproduce some of the observed behaviour of more complex models. Here we used observations of the behaviour of the European COVID-19 Forecast Hub ensemble combined with our own forecasting experience to identify a set of properties present in current ensemble forecasts. We then developed a parsimonious forecast model intending to mirror these properties. We assess forecasts generated from this model in real time over six months (the 15th of January 2022 to the 19th of July 2022) and for multiple European countries. We focused on forecasts of cases one to four weeks ahead and compared them to those by the European forecast hub ensemble. We find that the surrogate model behaves qualitatively similarly to the ensemble in many instances, though with increased uncertainty and poorer performance around periods of peak incidence as measured by the Weighted Interval Score. The performance differences, however, seem to be partially driven by a subset of time points, and the proposed model appears better probabilistically calibrated than the ensemble. We conclude that our simplified forecast model may have captured some of the dynamics of the hub ensemble, but more work is needed to understand the implicit epidemiological model that it represents. 
+  Multi-model and multi-team ensemble forecasts have become widely used to generate reliable short-term predictions of infectious disease spread. Notably, various public health agencies have used them to leverage academic disease modelling during the COVID-19 pandemic. However, ensemble forecasts are difficult to interpret and require extensive effort from numerous participating groups as well as a coordination team. In other fields, resource usage has been reduced by training simplified models that reproduce some of the observed behaviour of more complex models. Here we used observations of the behaviour of the European COVID-19 Forecast Hub ensemble combined with our own forecasting experience to identify a set of properties present in current ensemble forecasts. We then developed a parsimonious forecast model intending to mirror these properties. We assess forecasts generated from this model in real time over six months (the 15th of January 2022 to the 19th of July 2022) and for multiple European countries. We focused on forecasts of cases one to four weeks ahead and compared them to those by the European forecast hub ensemble. We find that the surrogate model behaves qualitatively similarly to the ensemble in many instances, though with increased uncertainty and poorer performance around periods of peak incidence (as measured by the Weighted Interval Score). The performance differences, however, seem to be partially due to a subset of time points, and the proposed model appears better probabilistically calibrated than the ensemble. We conclude that our simplified forecast model may have captured some of the dynamics of the hub ensemble, but more work is needed to understand the implicit epidemiological model that it represents. 
 bibliography: library.bib
 link-citations: true
 output:
@@ -48,10 +48,8 @@ knitr::opts_chunk$set(
 # Introduction {-}
 
 Multi-model and multi-team ensembles have become increasingly popular as an approach to increase the robustness and performance of infectious disease forecasts over the last decade [@Reich2022-jo].
-The experience of other domains has inspired these approaches, for example, climate modelling [@IPCCreport], where ensembles of both multiple models and from multiple teams have a long history of providing forecasts that stakeholders trust.
-
-The trend towards large-scale multi-team ensemble forecasting in infectious diseases has accelerated during the COVID-19 pandemic due to a pressing need for reliable forecasts and a perception that many publicly available forecasts were low quality. Over 2020 and 2021, teams established COVID-19 Forecasting Hubs covering the US [@Cramer2022-sp], Germany and Poland [@Bracher2021-wk], and Europe [@Sherratt2022-ue] (all three including authors of this study). All of these collaborations ensembled contributions from multiple independent teams using a similar approach and have shown that their ensemble forecasts outperform most individually contributed forecasts whilst remaining generally robust to outliers in reporting.
-Both the US and European Forecast Hubs were supported and received funding from public health agencies (the Center for Disease Control (CDC) and European Center for Disease Prevention and Control (ECDC) respectively) with their forecasts being adopted into the official output from these agencies.
+The experience of other domains has inspired these approaches, for example, climate modelling [@IPCCreport], where ensembles of both multiple models and from multiple teams have a long history of providing forecasts that stakeholders trust. The trend towards large-scale multi-team ensemble forecasting in infectious diseases has accelerated during the COVID-19 pandemic due to a pressing need for reliable forecasts and a perception that many publicly available forecasts were low quality. Over 2020 and 2021, teams established COVID-19 Forecasting Hubs covering the US [@Cramer2022-sp], Germany and Poland [@Bracher2021-wk], and Europe [@Sherratt2022-ue] (all three including authors of this study). All of these collaborations ensembled contributions from multiple independent teams using a similar approach and have shown that their ensemble forecasts outperform most individually contributed forecasts whilst remaining generally robust to outliers in reporting.
+Both the US and European Forecast Hubs were supported and received funding from public health agencies (the Center for Disease Control, CDC, and European Center for Disease Prevention and Control, ECDC, respectively) with their forecasts used in official communications by these agencies.
 
 Whilst there is robust and consistent evidence that multi-team ensemble forecasts provide reliable and performant forecasts across domains [@Reich2022-jo] they also have a range of downsides.
 The most significant is the difficulty in interpreting them. This relates both to the underlying mechanisms for the forecasts they produce and to understanding if and when their behaviour is desirable. 
@@ -71,7 +69,7 @@ However, as an approach, it may be less useful for resolving some of the issues 
 In this work, we draw insights from ensemble forecasts produced and endorsed by the COVID-19 Forecast Hubs, as well as our forecasting work, to propose and evaluate a "surrogate" forecast model.
 This seeks to reproduce ensemble performance by mimicking its behaviour based on a minimal set of easily communicated and epidemiologically justifiable assumptions, and limited computational resources with an easily generalised implementation.
 The primary aim of this approach is to help highlight the behaviour, and potential mechanisms behind this behaviour, of ensemble forecasts widely considered the gold standard for COVID-19 forecasting.
-In addition to this, we seek to provide a simple and robust forecasting system that others can easily reuse, perhaps where a Forecast Hub ensemble is not available, and be used as a platform for future research both into improving understanding of ensemble behaviour and increased forecast performance.
+In addition to this, we seek to provide a simple and robust forecasting system that others can easily reuse, perhaps where a Forecast Hub ensemble is not available, and be used as a platform for future research both into improving understanding of ensemble behaviour and improved forecast performance.
 
 To achieve these aims, we evaluate an initial attempt at developing a surrogate model to replicate the observed behaviour of current multi-team forecast ensembles based on a set of clear assumptions.
 We submitted this model to the European Forecast Hub and here we evaluate its performance relative to the Hub ensemble.
@@ -140,7 +138,7 @@ scores <- fread(here("data", "scores.csv")) |>
 
 To understand the behaviour of the Forecast Hub ensembles we need to first explore the structure of the COVID-19 Forecast Hubs [@Cramer2022-sp; @Bracher2021-wk; @Sherratt2022-ue].
 These collaborations share a similar design with a central team running the hub, vetting forecasts, and producing the ensemble forecast as well as teams of independent forecast contributors who design their forecast models and then use them to produce a weekly forecast that they then submit to the central hub team. 
-Each hub targets a range of metrics, including test-positive reported cases, reported deaths, and hospitalisations; has a specific geographic focus, and asks for weekly forecasts (using epidemiological weeks i.e. Sunday to Saturday) over a time horizon of a few weeks.
+Each hub targets a range of metrics, including test-positive reported cases, reported deaths, and hospitalisations; has a specific geographic focus, and asks for weekly forecasts (using MMWR epidemiological weeks i.e. Sunday to Saturday) over a time horizon of a few weeks.
 Observed data are available and updated daily, and most submitted forecasts use this dataset, along with potentially other sources of real-time information, to produce forecasts.
 Here, we focus on reported cases and primarily on the European Forecast Hub but our observations hold, in our view, across COVID-19 Forecast Hubs and to a lesser degree targets.
 We focus on reported cases as these represent the most common forecast target for COVID-19 forecast models [@Nixon2022-zv], they are often of the most direct interest due to being a leading indicator for other metrics such as hospitalisations [@Meakin2022-hw], and they are generally the most challenging to predict [@Sherratt2022-ue].
@@ -159,7 +157,7 @@ We defined anomalous data based on the implementation used by [@EuroHub] where a
 The European Forecast Hub requests forecasts for one to four-week forecast horizon and requires forecasts to use a pre-specified format with 23 quantiles of the predictive probability distribution.
 No restrictions were placed on who could submit forecasts and the hub team actively invited participation from research groups known to be involved with COVID-19 forecasting projects.
 Teams submitted forecasts at the latest two days after the complete dataset for the forecast week became available and were allowed to use all data available at the time of submission (i.e including up to two days of data for the current week). 
-The ensemble forecast was constructed by taking the median of all predictive quantiles without the exclusion of any validly submitted forecast (where validity was defined as passing minimal formatting checks by the hub team and timely submission) [@Sherratt2022-ue]. 
+The ensemble forecast was constructed by taking the median of all forecasts for each predictive quantile without the exclusion of any validly submitted forecast (where validity was defined as passing minimal formatting checks by the hub team and timely submission) [@Sherratt2022-ue]. 
 An ensemble was only produced for locations with at least 3 independent forecast models including the hub baseline model.
 Submitted forecasts and target observations are available from the European Forecast Hub GitHub repository [@EuroHubGitHub]. We provide code in the repository of this study to streamline access. 
 
@@ -352,8 +350,8 @@ We assume a negative binomial observation model with overdispersion $\phi$ for r
   \lambda_t &= C_{t-1} e^{r_t},\ t > 0  \\
   C_{t} \mid \lambda_{t} &\sim \text{NB}\left(\lambda_t, \phi\right)
 \end{align*}
-where the mean and variance of the negative binomial are defined as \[ \mathbb{E}[C_t] = \lambda_t \ \ \
-\text{ and } \ \ \ \text{Var}[C_t] = \lambda_t + \frac{\lambda_t^2}{\phi}. \]
+where the mean and variance of the negative binomial are given by \[ \mathbb{E}[C_{t} \mid \lambda_{t}] = \lambda_t \ \ \
+\text{ and } \ \ \ \text{Var}[C_{t} \mid \lambda_{t}] = \lambda_t + \frac{\lambda_t^2}{\phi}. \]
 Here $r_t$ can be interpreted as the weekly growth rate. $r_t$ is then modelled as a piecewise constant differenced AR(1) process modified such that the dependence of $r_{t-1}$ is multiplied by a decay factor ($\xi_{+,-}$) that varies dynamically according to the sign of $r_{t-1}$.
 This assumes that the growth rate is non-stationary with a trend that is independent of the current growth rate (the differenced AR(1) process), the additional decay factor encodes the belief that larger absolute growth rates will tend more quickly towards no growth and that this process may work differently for positive or negative growth rates.
 This process can be defined as follows, 
@@ -383,7 +381,8 @@ $\sigma$ has also been made weakly informative under the assumption that the pot
 
 ## Forecast evaluation {-}
 
-We standardised the magnitude of observations and forecasts across forecast locations by scaling both weekly notified test positive cases and forecast test positive cases by the population in the forecast region to an incidence rate per 10,000 people.
+We standardised the magnitude of observations and forecasts across forecast locations, in order to facilitate comparison, by scaling both weekly notified test positive cases and forecast test positive cases by the population in the forecast region to an incidence rate per 10,000 people.
+This differs from the approach typically taken by the Forecast Hubs where no population standardisation is used [@Cramer2022-sp; @Bracher2021-wk; @Sherratt2022-ue].
 We then visually evaluated forecasts from a subset of locations by forecast horizon (1 and 4 weeks) on both the natural and log scales.
 The countries in this subset were Germany, Greece, Italy, Poland, Slovakia, and the United Kingdom.
 These countries were selected to include forecasts based on different numbers and types of submitted forecast models, to be at least partially representative of the full sample of forecast locations, and to include nations for which the authors had a good understanding of local data and transmission dynamics in the study period. 
@@ -632,13 +631,12 @@ p <- (
   (
     (
       plot_relative_summary(relative_summary) +
-      plot_layout(guides = "keep")
+      plot_rwis_location 
     ) +
-    plot_rwis_location +
     plot_layout(heights = c(1, 7), guides = "collect")
   )
 ) +
-  plot_layout(guides = "collect", widths = c(1, 1)) +
+  plot_layout(guides = "collect") +
   plot_annotation(tag_levels = "a") &
   theme(
     legend.position = "bottom", legend.margin = margin(),
@@ -737,8 +735,8 @@ Other examples where additional transient information is available to forecaster
 
 Our focus on replicating the performance of the hub ensemble is also useful as the surrogate model may highlight some of the emergent behaviour of the ensemble captured in our assumptions, such as auto-correlation across time points, and the growth rate tending towards zero as the forecast horizon increases.
 It also highlights some of the differences between our surrogate forecast model and the ensemble that may lead to new insights into the mechanisms leading to the ensemble's behaviour, such as the generally poor coverage of the ensemble that could not be explained by the assumptions we used in developing our surrogate methodology.
-Whilst we normalised reported cases to be population-adjusted incidence rates our results are conditional on the use of the weighted interval score as an evaluation metric.
-As this proper scoring rule measures absolute performance this means that forecasts during periods of higher incidence are given more weight than forecasts from periods of low incidence.
+Whilst we normalised reported cases to be population-adjusted incidence rates, and so can more easily compare across locations than using the approach commonly implemented by the Forecast Hubs [@Cramer2022-sp; @Bracher2021-wk; @Sherratt2022-ue], our results are still conditional on the use of the weighted interval score as an evaluation metric.
+As this proper scoring rule scales with the order of magnitude of the predicted quantity this means that forecasts during periods of higher incidence are given more weight than forecasts from periods of low incidence.
 It also means that overprediction is penalised more than underprediction as incidence rates are bounded at zero but relatively weakly bounded by populations at the upper bound (as incidence rates are typically only a small fraction of the overall population).
 This bias could explain the relatively poor performance of the surrogate model, compared to the ensemble, despite the surrogate model being comparably well-calibrated.
 We considered alternative methods of forecast evaluation that would be robust to this potential source of bias but choose to stick relatively closely to the methodology used by the European Forecast Hub [@Sherratt2022-ue], aside from the use of population weighting to facilitate comparison between forecast locations, as these choices inform the development of submitted models and so are key to our findings.
@@ -768,7 +766,7 @@ Here we follow the practice of the European Forecast Hub [@EuroHub] of excluding
 
 ## Further work {-}
 
-Whilst we derived our surrogate model from a range of assumptions based on observing ensemble forecasts behaviour and the behaviour and structure of submitted models this was by no means as structured or complete a process as it could have been.
+Whilst we derived our surrogate model from a range of assumptions based on observing ensemble forecasts behaviour and the behaviour and structure of submitted models avenues for future improvement remain in terms of improving the approach used to elicit these observations.
 In follow-up work, a more rigorous approach to this could be taken to further refine this set of assumptions, in particular using the input of a wider pool of researchers. 
 The findings from our study may also be useful for informing this improved set of assumptions. 
 A particular focus should be on understanding why our surrogate model was liable to overestimate peak incidence and what simple additional assumptions may be used to mitigate this.
@@ -784,7 +782,8 @@ One potential research area is to explore forecasting methods that can be used w
 More work is needed to understand the best practice treatment of data revisions when evaluating forecasts and the potential bias these may cause.
 Lastly, here we have only explored a surrogate for an ensemble for a single disease, a limited set of locations, and a single target (incident cases), meaning our findings are difficult to generalise.
 Follow-up work should explore whether this behaviour holds across diseases, locations, and epidemiological targets where the behaviour of ensembles is notably different.
-However, this work is limited by the lack of large-scale forecast ensembling projects despite them showing obvious promise to improve the forecasts available to stakeholders.
+However, this is limited to infectious diseases with similar large-scale forecast ensembling projects.
+These projects remain relatively rare despite them showing obvious promise to improve the forecasts available to stakeholders.
 
 ## Conclusions {-}
 
