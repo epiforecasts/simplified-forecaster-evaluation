@@ -459,7 +459,7 @@ relative_ae_by_horizon <- scores |>
   DT(, interval_score := NULL)
 setnames(
   relative_ae_by_horizon, c("relative_interval_score", "ris"),
-  c("Absolute error of the median", "raem")
+  c("Absolute error", "raem")
 )
 
 relative_summary <- relative_wis_by_horizon |>
