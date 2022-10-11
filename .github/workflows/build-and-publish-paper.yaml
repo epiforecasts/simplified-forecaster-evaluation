@@ -22,10 +22,17 @@ jobs:
         with:
           cache-version: 2
       - uses: r-lib/actions/setup-tinytex@v2
-      - name: Render
+      - name: Render PDF
         run: |
           renv::load()
           rmarkdown::render("paper/paper.Rmd", output_dir = "paper")
+      - name: Render HTML
+        run: |
+          renv::load()
+          rmarkdown::render(
+            "paper/paper.Rmd", output_dir = "paper",
+            output_format = "bookdown::html_document2"
+          )
         shell: Rscript {0}
       - name: Upload
         uses: actions/upload-pages-artifact@v1

@@ -29,6 +29,7 @@ output:
   bookdown::pdf_book:
     base_format: rticles::peerj_article
     extra_dependencies: ["float"]
+    keep_tex: true
 ---
 
 ```{r, include = FALSE}
