@@ -26,6 +26,7 @@ jobs:
         run: |
           renv::load()
           rmarkdown::render("paper/paper.Rmd", output_dir = "paper")
+        shell: Rscript {0}
       - name: Render HTML
         run: |
           renv::load()
