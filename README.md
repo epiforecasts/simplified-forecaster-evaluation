@@ -1,4 +1,4 @@
-# Evaluating a simplified forecast model in comparison to the European forecasting hub ensemble
+# Evaluating an epidemiologically motivated surrogate model of a multi-model ensemble
 
 This repository contains the documentation, results, and code of a project evaluating a simplified forecasting model in comparison the European forecasting hub ensemble. See the documentation for further details. 
 
