@@ -115,7 +115,8 @@ plot_relative_summary <- function(relative_summary) {
     theme(legend.position = "bottom") +
     labs(
       y = "Relative score", x = "Forecast horizon (weeks)", col = "Metric"
-    )
+    ) +
+    guides(colour = guide_legend(nrow = 2))
 }
 
 plot_bias <- function(bias) {
