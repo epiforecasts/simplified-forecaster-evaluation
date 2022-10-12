@@ -283,7 +283,7 @@ Finally, the ensemble forecast tended to produce sharper forecasts and have a te
 
 ```{r observations}
 observations <- data.table(
-  No. = 1:5,
+  No. = 1:6,
   Observation = c(
     "Robust to daily reporting artefacts",
     "Some ability to forecast future trend changes",
