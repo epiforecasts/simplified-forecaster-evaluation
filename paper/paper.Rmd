@@ -1,7 +1,7 @@
 ---
 title: Evaluating a simplified forecast model in comparison to the European forecasting hub ensemble
 params:
- preprint: TRUE
+  preprint: TRUE
 preprint: `r params$preprint`
 author: 
   - name: Sam Abbott
