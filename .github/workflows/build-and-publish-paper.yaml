@@ -27,14 +27,6 @@ jobs:
           renv::load()
           rmarkdown::render("paper/paper.Rmd", output_dir = "paper")
         shell: Rscript {0}
-      - name: Render PDF for submission
-        run: |
-          renv::load()
-          rmarkdown::render(
-            "paper/paper.Rmd", output_dir = "paper/submission",
-            params = list(preprint = FALSE)
-          )
-        shell: Rscript {0}
       - name: Render HTML
         run: |
           renv::load()

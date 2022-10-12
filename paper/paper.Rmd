@@ -9,7 +9,7 @@ output:
     keep_toc: true   
 params:
   preprint: TRUE  
-preprint: params$preprint
+preprint: TRUE
 author: 
   - name: Sam Abbott
     affiliation: 1, 2
