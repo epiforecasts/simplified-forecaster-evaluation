@@ -289,7 +289,7 @@ observations <- data.table(
     "Some ability to forecast future trend changes",
     "Less reactive to apparent observed changes in trend",
     "Sharper forecasts",
-    "A tendency towards underprediction"
+    "A tendency towards underprediction",
     "Modelling the reporting process appears to have little impact"
   )
 )
@@ -342,7 +342,8 @@ assumptions |>
   caption = "(\\#tab:assumptions) Assumptions/simplifications based on observations of the relative performance of Forecast Hub ensembles compared to our forecast submissions.", # nolint
   booktabs = TRUE
   ) |>
-  kable_styling(full_width = TRUE)
+  kable_styling(full_width = FALSE) |>
+  column_spec(1, width = "3in")
 ```
 
 ### Definition {-}
