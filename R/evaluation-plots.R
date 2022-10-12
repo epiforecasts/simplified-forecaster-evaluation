@@ -43,10 +43,10 @@ plot_forecasts <- function(forecasts, locs, ranges, log = FALSE) {
   return(plot)
 }
 
-plot_forecast_custom <- function(forecasts, log) {
+plot_forecast_custom <- function(forecasts, log, ranges) {
   forecasts |>
     DT(horizon == 1 | horizon == 4) |>
-    plot_forecasts(locs, ranges, log = log) +
+    plot_forecasts(locs, ranges = ranges, log = log) +
     guides(
       fill = guide_none(), fill_ramp = guide_none(), col = guide_none()
     ) +
