@@ -1,25 +1,29 @@
 ---
 title: Evaluating a simplified forecast model in comparison to the European forecasting hub ensemble
-preprint: true
+params:
+ preprint: TRUE
+preprint: `r params$preprint`
 author: 
   - name: Sam Abbott
-    affiliation: 1
+    affiliation: 1, 2
     corresponding: true
     email: sam.abbott@lshtm.ac.uk
   - name: Katharine Sherratt
-    affiliation: 1
+    affiliation: 1, 2
   - name: Nikos Bosse
-    affiliation: 1
+    affiliation: 1, 2
   - name: Hugo Gruson
-    affiliation: 1
+    affiliation: 1, 2 
   - name:  Johannes Bracher
-    affiliation: 2
+    affiliation: 3
   - name: Sebastian Funk
-    affiliation: 1
+    affiliation: 1, 2
 affiliation:
   - code: 1
-    address: London School of Hygiene and Tropical Medicine, London, UK
+    address: The Centre for Mathematical Modelling of Infectious Diseases, London School of Hygiene & Tropical Medicine, London, UK
   - code: 2
+    address: Department of Infectious Disease Epidemiology, London School of Hygiene & Tropical Medicine, London, UK
+  - code: 3
     address: Chair of Statistical Methods and Econometrics, Karlsruhe Institute of Technology (KIT), Karlsruhe, Germany
 abstract: > 
   Multi-model and multi-team ensemble forecasts have become widely used to generate reliable short-term predictions of infectious disease spread. Notably, various public health agencies have used them to leverage academic disease modelling during the COVID-19 pandemic. However, ensemble forecasts are difficult to interpret and require extensive effort from numerous participating groups as well as a coordination team. In other fields, resource usage has been reduced by training simplified models that reproduce some of the observed behaviour of more complex models. Here we used observations of the behaviour of the European COVID-19 Forecast Hub ensemble combined with our own forecasting experience to identify a set of properties present in current ensemble forecasts. We then developed a parsimonious forecast model intending to mirror these properties. We assess forecasts generated from this model in real time over six months (the 15th of January 2022 to the 19th of July 2022) and for multiple European countries. We focused on forecasts of cases one to four weeks ahead and compared them to those by the European forecast hub ensemble. We find that the surrogate model behaves qualitatively similarly to the ensemble in many instances, though with increased uncertainty and poorer performance around periods of peak incidence (as measured by the Weighted Interval Score). The performance differences, however, seem to be partially due to a subset of time points, and the proposed model appears better probabilistically calibrated than the ensemble. We conclude that our simplified forecast model may have captured some of the dynamics of the hub ensemble, but more work is needed to understand the implicit epidemiological model that it represents. 
@@ -30,6 +34,8 @@ output:
     base_format: rticles::peerj_article
     extra_dependencies: ["float"]
     keep_tex: true
+   bookdown::html_document2:
+    keep_toc: true        
 ---
 
 ```{r, include = FALSE}
@@ -63,13 +69,12 @@ There has also been limited critical feedback on the structure of forecasting en
 In climate forecasting [@Castelletti2012-bs; @Edwards2021-lv; @Williamson2013-qx], as well as in other fields such as astrophysics [@Vernon2014-ov], emulation approaches have been used to circumvent resource requirement issues for complex models by training a simplified model, usually, a non-parametric statistical model, to replicate the behaviour of either the entire model or sub-components.
 These approaches generally take the same inputs as the models they seek to emulate and then are trained based on the output from those models.
 In the context of epidemiological models, non-parametric emulation has been used to allow the rapid exploration of the parameter space of complex models that would otherwise be resource-prohibitive [@Iskauskas2022-fz; @Charles2022-ds].
-Replicating forecasts from resource-intensive models may also be a promising avenue of future research. 
-However, as an approach, it may be less useful for resolving some of the issues of multi-team and multi-model forecasts as it does not provide interpretability, key for stakeholder take-up. Additionally, it is not clear how the methods commonly used perform out of sample, and emulating a quantile-based forecast is an unaddressed methodological challenge as far as we are aware.
+These methods may be less useful for resolving some of the issues of multi-team and multi-model forecasts as they do not provide interpretability, key for stakeholder take-up. Additionally, it is not clear how these methods perform out of sample, or how they would be applied to a quantile-based forecast.
 
 In this work, we draw insights from ensemble forecasts produced and endorsed by the COVID-19 Forecast Hubs, as well as our forecasting work, to propose and evaluate a "surrogate" forecast model.
 This seeks to reproduce ensemble performance by mimicking its behaviour based on a minimal set of easily communicated and epidemiologically justifiable assumptions, and limited computational resources with an easily generalised implementation.
 The primary aim of this approach is to help highlight the behaviour, and potential mechanisms behind this behaviour, of ensemble forecasts widely considered the gold standard for COVID-19 forecasting.
-In addition to this, we seek to provide a simple and robust forecasting system that others can easily reuse, perhaps where a Forecast Hub ensemble is not available, and be used as a platform for future research both into improving understanding of ensemble behaviour and improved forecast performance.
+Our secondary aim is to provide the basis for a robust forecasting system that others can easily reuse both in operational contexts and as a platform for future research.
 
 To achieve these aims, we evaluate an initial attempt at developing a surrogate model to replicate the observed behaviour of current multi-team forecast ensembles based on a set of clear assumptions.
 We submitted this model to the European Forecast Hub and here we evaluate its performance relative to the Hub ensemble.
@@ -274,7 +279,7 @@ Unlike our epidemiologically motivated forecast submissions, the hub ensemble fo
 They also demonstrated some ability to forecast future changes in trends that were not present in the observed data similarly to our human insight forecasts indicating the likely inclusion of either human insight, or assumptions about future interventions. 
 In comparison to our submitted forecasts, the ensemble forecasts were less reactive to changes in trend such as from stable or reducing case incidence to increasing incidence.
 On the other hand, this also meant that the ensemble was less likely to adopt short-term changes in incidence and hence produced better long-term forecasts.
-Finally, the ensemble forecast tended to produce sharper forecasts and have a tendency toward under vs over predicting. Our observations are summarised in Table \@ref(tab:observations).
+Finally, the ensemble forecast tended to produce sharper forecasts and have a tendency toward under- vs overpredicting. Our observations are summarised in Table \@ref(tab:observations).
 
 ```{r observations}
 observations <- data.table(
@@ -284,7 +289,7 @@ observations <- data.table(
     "Some ability to forecast future trend changes",
     "Less reactive to apparent observed changes in trend",
     "Sharper forecasts",
-    "A tendency towards under prediction"
+    "A tendency towards underprediction"
   )
 )
 
@@ -377,7 +382,7 @@ The following priors are used,
 Where $\sigma$, and $\frac{1}{\sqrt{\phi}}$ are truncated to be greater than 0 and $\beta$ is truncated to be between -1 and 1.
 The Beta priors for $\xi_{+,-}$ have been chosen to be weakly informative that the reduction towards 0 growth is relatively slow.
 Similarly the prior for $\beta$ has been chosen to be weakly informative that there is weak auto-correlation in differenced growth rates.
-$\sigma$ has also been made weakly informative under the assumption that the potential change in growth rates in a single timestep should be relatively small.
+$\sigma$ has also been made weakly informative under the assumption that the potential change in growth rates in a single time-step should be relatively small.
 
 ## Forecast evaluation {-}
 
@@ -508,7 +513,8 @@ Weekly forecasts were made using `renv` and based on GitHub Actions free tier as
 The free GitHub Actions runner we used for all forecasts was Ubuntu `20.04` based with 2 cores (x86_64), 7 GB of RAM, and 14 GB of SSD space.
 The code for this analysis can be found here: https://github.com/epiforecasts/simplified-forecaster-evaluation
 The code for the forecasting model defined above along with the infrastructure required to forecast using GitHub Actions can be found here: https://github.com/seabbs/ecdc-weekly-growth-forecasts
-Versions archived on Zenodo are available [@REF] and [@REF].
+Versions archived on Zenodo are available [@AnalysisCode
+] and [@ModelCode].
 
 # Results {-}
 
@@ -647,17 +653,17 @@ suppressWarnings(print(p))
 
 ### Forecast calibration {-}
 
-Overall the surrogate model was relatively well calibrated at the 30%, 60% and 90% prediction interval, though with a tendency to slightly over cover, with empirical coverage of `r overall_coverage[range %in% "30% interval", Surrogate]`%, `r overall_coverage[range %in% "60% interval", Surrogate]`%, `r overall_coverage[range %in% "90% interval", Surrogate]`% respectively.
-The ensemble model was less well calibrated, with a tendency to under cover with empirical coverage of `r overall_coverage[range %in% "30% interval", Ensemble]`%, `r overall_coverage[range %in% "60% interval", Ensemble]`%, `r overall_coverage[range %in% "90% interval", Ensemble]`% respectively (Figure \@ref(fig:plot-coverage) a).
+Overall the surrogate model was relatively well calibrated at the 30%, 60% and 90% prediction interval, though with a tendency to be slightly underconfident, with empirical coverage of `r overall_coverage[range %in% "30% interval", Surrogate]`%, `r overall_coverage[range %in% "60% interval", Surrogate]`%, `r overall_coverage[range %in% "90% interval", Surrogate]`% respectively.
+The ensemble model was less well calibrated, with a tendency to be overconfident with empirical coverage of `r overall_coverage[range %in% "30% interval", Ensemble]`%, `r overall_coverage[range %in% "60% interval", Ensemble]`%, `r overall_coverage[range %in% "90% interval", Ensemble]`% respectively (Figure \@ref(fig:plot-coverage) a).
 When stratified by forecast horizon the ensemble forecast was best calibrated at the one-week forecast horizon, and then became progressively less well calibrated as the forecast horizon increased (Figure \@ref(fig:plot-coverage) a). 
 In comparison, the surrogate forecast was less well calibrated than the ensemble forecast at the one-week forecast horizon with a tendency to have a larger empirical coverage than required  (Figure \@ref(fig:plot-coverage) a).
-At longer horizons and narrower prediction intervals, the surrogate forecast became better calibrated though with a tendency to under cover.
+At longer horizons and narrower prediction intervals, the surrogate forecast became better calibrated though with a tendency to be overconfident.
 This was not the case for the 90% prediction interval where the surrogate model covered more than the expected interval, for all horizons, indicating forecasts were overly uncertain for this interval regardless of the horizon. 
 
 Stratifying calibration by quantile and forecast horizon the ensemble forecast was conservative at all horizons for quantiles larger than the median whilst being comparably well calibrated for intervals below the median (Figure \@ref(fig:plot-coverage) b).
 This behaviour became more prominent as the forecast horizon increased.
-In contrast, the surrogate forecast was generally equally well calibrated across horizons with a tendency to over cover for intervals above the median.
-At longer horizons, however, quantiles below the median became liable to under cover.
+In contrast, the surrogate forecast was generally equally well calibrated across horizons with a tendency to be under confident for intervals above the median.
+At longer horizons, however, quantiles below the median were over confident.
 
 Breaking down the relative weighted interval score by forecast interval we observe that the surrogate model produces forecasts that differ most from the ensemble in the outer intervals and in particular the tails of the forecast (Figure \@ref(fig:plot-coverage) c).
 This is true across forecast horizons but the magnitude of the difference increases.
@@ -712,7 +718,7 @@ Performance varied by location and forecast date with the surrogate model perfor
 In general, the relative performance of the surrogate model degraded as forecast horizons increased with the distribution of relative performance having an increasingly heavy right tail as the forecast horizon increased indicating a greater share of forecasts performing very poorly in comparison to the hub ensemble.
 The Forecast Hub ensemble was poorly calibrated, particularly at longer forecast horizons and larger prediction intervals, compared to the surrogate model though the surrogate model tended to be overly uncertain at large intervals.
 The ensemble forecast was biased towards under-prediction at short to medium forecast horizons but unbiased at longer horizons. 
-In comparison, the surrogate model was biased towards over prediction and this bias increased linearly with the forecast horizon.
+In comparison, the surrogate model was biased towards overprediction and this bias increased linearly with the forecast horizon.
 
 ## Strengths and Weaknesses {-}
 
@@ -785,11 +791,15 @@ Follow-up work should explore whether this behaviour holds across diseases, loca
 However, this is limited to infectious diseases with similar large-scale forecast ensembling projects.
 These projects remain relatively rare despite them showing obvious promise to improve the forecasts available to stakeholders.
 
-## Conclusions {-}
+# Conclusions {-}
 
 We conclude that our simplified forecast model may have captured some of the dynamics of the hub ensemble but that more work needs to be done to understand the epidemiological model that represents its behaviour and whether or not this is the optimal choice for stakeholders' requirements.
 We also conclude that our findings may be largely driven by the choice of evaluation measure used by the Forecast Hub. While this measure has desirable mathematical properties and is routinely used in a similar form e.g., in weather forecasting, it is subject to debate whether it appropriately reflects forecast users' requirements and perceptions as to what makes a good forecast.
 Our work is useful for forecast users to understand the inherent assumptions of the forecasts they are making use of and to researchers thinking about how to develop forecasts that perform similarly to current multi-model and multi-team forecast ensembles that are trusted by stakeholders.
+
+# Acknowledgments {-}
+
+We thank the ECDC for supporting the forecasting hub, and all forecasters who submitted forecasts for making this study possible. We thank the Forecast Hub team for publishing all data in an accessible format. We thank the Epiforecast group for a productive discussion of an early version of this analysis. We thank Molly for being a good Labrador.
 
 # Additional Information and Declarations {-}
 
@@ -809,12 +819,14 @@ All data and code are available here:
 
 https://github.com/epiforecasts/simplified-forecaster-evaluation
 
+And are archived here: 
+
+https://doi.org/10.5281/zenodo.7189308, https://doi.org/10.5281/zenodo.7189620
+
+
+
 ## Funding {-}
 
 SA,SF, KS and HG were funded by a Wellcome senior fellowship to SF (210758/Z/18/Z), KS and HG were further funded by an ECDC grant to SF. JB acknowledges support from the Helmholtz Foundation via the SIM-610 CARD Information and Data Science Pilot Project.
-
-# Acknowledgments {-}
-
-We thank the ECDC for supporting the forecasting hub, and all forecasters who submitted forecasts for making this study possible. We thank the Forecast Hub team for publishing all data in an accessible format. We thank the Epiforecast group for a productive discussion of an early version of this analysis. We thank Molly for being a good Labrador.
 
 # References {-}
