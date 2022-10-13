@@ -4,7 +4,21 @@ This repository contains the documentation, results, and code of a project evalu
 
 ## Citation
 
-*Not yet available.* 
+Please cite this using the following:
+
+> Abbott, Sherratt, Bosse, Gruson, Bracher, and Funk. 2022 “Evaluating an Epidemiologically Motivated Surrogate Model of a Multi-Model Ensemble.” medRxiv. https://doi.org/10.1101/2022.10.12.22280917.
+
+```
+@UNPUBLISHED{Abbott_undated-tu,
+  title   = "Evaluating an epidemiologically motivated surrogate model of a
+             multi-model ensemble",
+  author  = "{Abbott} and {Sherratt} and {Bosse} and {Gruson} and {Bracher} and
+             {Funk}",
+  journal = "medRxiv",
+  year    = 2022,
+  doi     = "10.1101/2022.10.12.22280917"
+}
+```
 
 ## Project structure
 
