@@ -146,17 +146,17 @@ These collaborations share a similar design with a central team running the hub,
 Each hub targets a range of metrics, including test-positive reported cases, reported deaths, and hospitalisations; has a specific geographic focus, and asks for weekly forecasts (using MMWR epidemiological weeks i.e. Sunday to Saturday [@MMWRweek]) over a time horizon of a few weeks.
 Observed data are available and updated daily, and most submitted forecasts use this dataset, along with potentially other sources of real-time information, to produce forecasts.
 Here, we focus on reported cases and primarily on the European Forecast Hub but our observations hold, in our view, across COVID-19 Forecast Hubs and to a lesser degree targets.
-We focus on reported cases as these represent the most common forecast target for COVID-19 forecast models [@Nixon2022-zv], they are often of the most direct interest due to being a leading indicator for other metrics such as hospitalisations [@Meakin2022-hw], and they are generally the most challenging to predict [@Sherratt2022-ue].
+We focus on reported cases as these represent the most common forecast target for COVID-19 forecast models [@Nixon2022-zv], they are often of the most direct interest due to being a leading indicator for other metrics such as hospitalisations [@Meakin2022-hw], and they are generally the most challenging to predict as they do not have a clear leading indicator [@Sherratt2022-ue].
 In general, 5 main classes of forecast models are submitted [@Bracher2022-ug; @Cramer2022-sp], statistical forecasting models such as ARIMA models, mechanistic forecasting models based on the compartmental modelling framework and its generalisations [@Srivastava2020-qv; @Li2021-cj], semi-mechanistic approaches that blend both of these approaches [@Castro2021-lj; @Bosse2022-hm], agent-based simulation models [@Rakowski2010-jn; @Adamik2020-if], and human insight based forecast models that may also include elements of other methods [@Karlen2020-pt; @Bosse2022-hm].
 Real-time evaluation has shown that each of these classes of models may perform well depending on the context and specific implementation of the forecast model [@Bosse2022-hm].  
 
-We extracted forecasts and data on notified weekly COVID-19 cases from the European forecasting hub [@Sherratt2022-ue; @EuroHub] from the 15th of January 2022 to the 19th of July 2022 for the ensemble model (referred to as the `EuroCOVIDhub-ensemble` by the hub team) and the surrogate model (submitted as `epiforecasts-weeklygrowth` and defined in the following section).
-We included all locations covered by the European forecasting hub which were 32 European countries, including all countries of the European Union and European Free Trade Area, and the United Kingdom.
-Data on notified weekly cases was originally sourced from the Johns Hopkins University (JHU) curated data repository [@JHU].
+We extracted forecasts and data on notified weekly COVID-19 cases from the European Forecasting Hub [@Sherratt2022-ue; @EuroHub] from the 15th of January 2022 to the 19th of July 2022 for the ensemble model (referred to as the `EuroCOVIDhub-ensemble` by the hub team) and the surrogate model (submitted as `epiforecasts-weeklygrowth` and defined in the following section).
+We included all locations covered by the European Forecasting Hub, which were 32 European countries, including all countries of the European Union and European Free Trade Area, and the United Kingdom.
+Data on notified weekly cases were originally sourced from the Johns Hopkins University (JHU) curated data repository [@JHU].
 We used the latest available observed data as of the 1st of September 2022 (commit `f6922c3e4bdcb055abcbba8e73472afacac4cf40` from [@EuroHubGitHub]).
 Incidence was aggregated by epidemiological week (i.e. Sunday through Saturday).
 As observations are subject to revisions this means that the data used to produce forecasts for a given date may not reflect the data used for evaluation.
-To account for this we followed the practice of the European forecasting hub project in excluding forecasts made using anomalous truth data in the week of the forecasts production and excluding forecasts for target weeks with anomalous data [@Sherratt2022-ue].
+To account for this we followed the practice of the European Forecasting Hub project in excluding forecasts made using anomalous truth data in the week of the forecasts production and excluding forecasts for target weeks with anomalous data [@Sherratt2022-ue].
 We defined anomalous data based on the implementation used by [@EuroHub] where a data point is considered anomalous if a future revision alters it by more than 5%.
 
 The European Forecast Hub requests forecasts for one to four-week forecast horizon and requires forecasts to use a pre-specified format with 23 quantiles of the predictive probability distribution.
@@ -268,7 +268,7 @@ We have contributed a range of forecasts to COVID-19 forecast collaborations, ge
 Our forecast submissions have not systematically over- or under-performed other forecasts submitted to the forecasting hubs (see `epiforecast` tagged models at [@EuroHub] and [@Bosse2022-hm; @Cramer2022-sp; @Bracher2021-wk; @Sherratt2022-ue]).
 The model-based forecasts we have contributed have focussed on trying to carefully model the underlying infectious disease dynamics from infection through to symptom onset, and test positivity using non-exponential delay distributions whilst also attempting to model the complexity of daily, within the week, reporting periodicity [@Bosse2022-hm; @Abbott2020-iy; @EpiNow2].
 Based on our observations our forecasts have generally captured the current trend relatively well but have not been robust to reporting issues such as large outliers in reporting and changes to reporting patterns. 
-Our previous methodology also requires significant computational resources, running for an hour on a Azure D v5-series 16-core machine, when producing forecasts for the European forecasting hub [@AzurePricing]. 
+Our previous methodology also requires significant computational resources, running for an hour on a Azure D v5-series 16-core machine, when producing forecasts for the European Forecasting Hub [@AzurePricing]. 
 This resource usage is likely beyond the capacity of many interested in having access to state-of-the-art short-term forecasts of infectious diseases.
 In our model-based forecasts, we did not attempt to capture potential future interventions or known interventions not currently observed in the epidemiological data whereas in our human insight models these were implicitly included.
 We found that our human insight-based forecasts outperformed our model-based forecasts on average. 
@@ -506,7 +506,7 @@ The `cmdstanr` R package (`0.5.2`) [@cmdstanr] is used for model fitting with 2 
 Here we take a conservative approach, as the model fit is not manually inspected during real-time usage and due to the expected complexity of the posterior [@betancourt_2017], and set the adapt delta setting to 0.99, and the maximum tree depth setting to 15. 
 For real-time usage, convergence was not assessed, but during model development, the Rhat diagnostic was used alongside feedback from `cmdstanr` about the number of divergent transitions and exceedance of the maximum tree depth [@cmdstanr]. During development, posterior predictions were also visually compared to observed data.
 
-To download and manipulate forecasts from the European forecasting hub [@EuroHub] we use the `data.table` (`1.14.2`) [@data.table] and `gh` (`1.3.0`) [@gh] R packages.
+To download and manipulate forecasts from the European Forecasting Hub [@EuroHub] we use the `data.table` (`1.14.2`) [@data.table] and `gh` (`1.3.0`) [@gh] R packages.
 We make use of further functionality from the `forecast.vocs` R package [@forecast.vocs] to prepare data for forecasting, visualise forecasts and summary measures, and summarise forecasts.
 Forecast evaluation is implemented using the `scoringutils` R package (1.0.0) [@scoringutils], and the `scoringRules` R package (1.0.1) [@scoringRules].
 
@@ -529,11 +529,11 @@ The end of our study period was dominated by the gradual take-over of the BA.4/B
 In addition, ascertainment rates likely reduced over time in most locations due to reductions in routine testing and test availability. Whilst both the reduced use of NPIs and testing generally occurred across nations our study period also marked an increase in the heterogeneity of the response to the COVID-19 pandemic with nations changing policy at different times and to different degrees.
 This is in contrast to the early COVID-19 pandemic response for which most nations took similar actions at similar times.
 
-We extracted forecasts starting from the 15th of January until the 19th of July 2022 for all countries covered by the European forecasting hub (nations of the European Union, the European Free Trade Agreement, and the United Kingdom, making `r locations` unique locations).
+We extracted forecasts starting from the 15th of January until the 19th of July 2022 for all countries covered by the European Forecasting Hub (nations of the European Union, the European Free Trade Agreement, and the United Kingdom, making `r locations` unique locations).
 In total `r nrow(metadata)` forecasts were made across all locations, with `r forecast_dates` unique forecast dates and `r models` independent forecast models (including the European hub baseline model).
 Of these models, `r length(global_models)` forecasted in at least 30 locations including our original submission  (referred to as `epiforecasts-EpiNow2` by the hub), and our surrogate model.
 Of the remaining models submitted `r length(local_models)` were submitted in only one location.
-Single-location models were clustered in a few locations, particularly in Germany and Poland (likely due to the folding of the German/Poland forecasting hub into the European forecasting hub project [@Sherratt2022-ue]).
+Single-location models were clustered in a few locations, particularly in Germany and Poland (likely due to the folding of the German/Poland forecasting hub into the European Forecasting Hub project [@Sherratt2022-ue]).
 Italy was also an outlier with `r single_locs_models_per_loc[location == "IT", n]` models that submitted nowhere else.
 `r nrow(partial_models)` models were submitted for between 3 and 30 locations and all these models varied the number of locations they submitted forecasts for over time, potentially indicating manual curation or models targeted at specific conditions.
 
@@ -764,7 +764,7 @@ Similarly, the Germany and Poland forecasting hubs were able to identify forecas
 All comparable Forecast Hub projects found that their ensemble was often the best choice, had desirable characteristics such as robustness - though this was rarely fully defined - and should be the output used by forecast consumers [@Cramer2022-sp; @Bracher2021-wk; @Sherratt2022-ue].
 In general, during the study period, all projects used the same unweighted median ensemble forecast of all submissions. 
 The US [@Ray2022-zq], and European [@Sherratt2022-ue], forecasting hub also evaluated a range of other ensemble approaches, such as inverse weighted interval score weighting, unweighted ensembles of a selection of models based on recent performance, and mean ensembling.
-Work on this is still ongoing but these more complex ensembling approaches were shown to outperform the median of all submitted forecasts in many cases in the case of the US forecasting hub and did not outperform in the case of the European forecasting hub.
+Work on this is still ongoing but these more complex ensembling approaches were shown to outperform the median of all submitted forecasts in many cases in the case of the US forecasting hub and did not outperform in the case of the European Forecasting Hub.
 No Forecast Hub has switched to these alternative ensemble designs for their operational forecast of reported cases, though the US hub has switched to a trained ensemble for death forecasts. This suggests that the hub teams do not think the evidence base is strong enough for trained ensembles to be used by forecast consumers for reported cases and hence the median of all submitted forecasts remains the community-suggested default ensemble option and a sensible target for our study. 
 
 Other studies have been published evaluating single forecast models in comparison to ensemble performance from the Forecast Hub. In general, these have not focussed on replicating ensemble behaviour but rather optimising the target evaluation metric. 
