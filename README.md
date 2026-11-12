@@ -1,5 +1,7 @@
 # Evaluating an epidemiologically motivated surrogate model of a multi-model ensemble
 
+> **Archived.** No longer maintained; last updated January 2023.
+
 This repository contains the documentation, results, and code of a project evaluating a simplified forecasting model in comparison the European forecasting hub ensemble. See the documentation for further details. 
 
 ## Citation
